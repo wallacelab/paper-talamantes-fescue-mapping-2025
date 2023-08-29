@@ -1,0 +1,11 @@
+prefix=/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/workflow/.snakemake/conda/dbc37f846ec806b2967cf38d9820271d_
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+toolexeclibdir=${libdir}
+includedir=/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/workflow/.snakemake/conda/dbc37f846ec806b2967cf38d9820271d_/include
+
+Name: libffi
+Description: Library supporting Foreign Function Interfaces
+Version: 3.4.2
+Libs: -L${toolexeclibdir} -lffi
+Cflags: -I${includedir}

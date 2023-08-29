@@ -1,0 +1,19 @@
+#
+# Author: Lasse Collin
+#
+# This file has been put into the public domain.
+# You can do whatever you want with this file.
+#
+
+prefix=/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/workflow/.snakemake/conda/dbc37f846ec806b2967cf38d9820271d_
+exec_prefix=/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/workflow/.snakemake/conda/dbc37f846ec806b2967cf38d9820271d_
+libdir=/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/workflow/.snakemake/conda/dbc37f846ec806b2967cf38d9820271d_/lib
+includedir=/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/workflow/.snakemake/conda/dbc37f846ec806b2967cf38d9820271d_/include
+
+Name: liblzma
+Description: General purpose data compression library
+URL: https://tukaani.org/xz/
+Version: 5.2.8
+Cflags: -I${includedir}
+Libs: -L${libdir} -llzma
+Libs.private: -pthread -lpthread

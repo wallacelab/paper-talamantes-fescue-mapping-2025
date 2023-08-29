@@ -1,0 +1,22 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Conda environments: ignored
+Job stats:
+job      count
+-----  -------
+Hello        1
+bello        1
+total        2
+
+Select jobs to execute...
+
+[Tue Aug 29 15:29:02 2023]
+rule Hello:
+    output: hello.txt
+    jobid: 1
+    reason: Missing output files: hello.txt
+    wildcards: prefix=hello
+    resources: tmpdir=/tmp
+

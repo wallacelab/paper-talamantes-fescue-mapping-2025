@@ -1,0 +1,20 @@
+# This file will hold all the rules to 
+# merge the paried reads
+# 1 clean my data by filtering out mitohondria and chloroplast
+# 2 align my data to the genome
+# 3 find snps
+# 4 create a genetic map
+
+
+rule Preprocess:
+    conda:
+        "Conda_Envs/Alignment.yaml"
+    output:
+        "output.txt"
+    shell:
+        "echo ploop > {output}"
+
+rule merge_reads:
+    conda:
+        "Conda_Envs/BBmap.yaml"
+    input:

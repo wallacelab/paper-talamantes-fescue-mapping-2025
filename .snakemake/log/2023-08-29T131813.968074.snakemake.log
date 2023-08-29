@@ -1,0 +1,13 @@
+Building DAG of jobs...
+AmbiguousRuleException:
+Rules world and Hello are ambiguous for the file wild.second.txt.
+Consider starting rule output with a unique prefix, constrain your wildcards, or use the ruleorder directive.
+Wildcards:
+	world: prefix=wild
+	Hello: prefix=wild.second
+Expected input files:
+	world: wild.txt
+	Hello: 
+Expected output files:
+	world: wild.second.txt
+	Hello: wild.second.txt

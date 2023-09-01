@@ -1,20 +1,50 @@
 # This file will hold all the rules to 
-# merge the paried reads
-# 1 clean my data by filtering out mitohondria and chloroplast
-# 2 align my data to the genome
-# 3 find snps
-# 4 create a genetic map
+
+# 1 align my data to the genome
+# 2 find snps
+# 3 create a genetic map
 
 
-rule Preprocess:
-    conda:
-        "Conda_Envs/Alignment.yaml"
-    output:
-        "output.txt"
-    shell:
-        "echo ploop > {output}"
+# Reads were quality checked before this and none have to be removed
 
-rule merge_reads:
-    conda:
-        "Conda_Envs/BBmap.yaml"
+# =========================================================================================================
+#     Load config file
+# =========================================================================================================
+configfile: "config.yaml"
+
+# Global variables
+samples = [os.path.splitext(f)[0] for f in os.listdir("../Data/Practice_Data/Progeny") if f.endswith(".fastq.gz")]
+progpath = config[path][progeny]
+
+rule all:
     input:
+        expand("mapped_reads/{sample}.bam", sample=samples)
+
+#Align genome file
+rule index_genome:
+    params:
+        algo=config["bwa"]["index"]
+    input:
+        genome=config["genome"]
+    output:
+        idx=multiext("{input}", ".amb", ".ann", ".bwt", ".pac", ".sa"),
+    conda:
+        "Conda_Envs/BWA.yaml"
+    shell:
+        "bwa index -a {params.algo} {input}"
+
+rule bwa_map:
+    input:
+        progeny1=lambda wildcards: f"progpath/{wildcards.sample}_R1.fastq.gz",
+        genome=config["genome"]
+    output:
+        "mapped_reads/{progeny}.bam" # causes this file to be deleted after it is used
+    threads:
+        2
+    conda:
+        "Conda_Envs/BWA.yaml"
+    script:
+        "scripts/prog_aligner.sh {input} {threads}"
+
+       # "bwa mem -t {params.threads} {input.reference} {input.fastq1} {input.fastq2} > {output.sam}"
+       # fastq1=lambda wildcards: f"{input_dir}/{wildcards.sample}_R1.fastq",

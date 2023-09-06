@@ -9,16 +9,26 @@ genome: ../Data/Practice_Data/Genome/small_subset_tall_fescue_genome.fa
 #     Directory Paths
 # =================================================================================================
 paths:
-  genomepath: ../Data/Practice_Data/Genome
-  progeny: ../Data/Practice_Data/Progeny
+  genomepath: ../Data/Practice_Data/Genome/
+  progeny: ../Data/Practice_Data/Progeny/
+  parents: ../Data/Practice_Data/Parents/
+  mapped_reads: ../Data/Practice_Data/Mapped_Reads/
+  mapped_reads_parents: ../Data/Practice_Data/Mapped_Reads_Parents/
 
 
+# =================================================================================================
+#     Functions
+# =================================================================================================
+functions:
+  dic_function: /home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/workflow/dic_functions.py
 # =================================================================================================
 #     Progeny lists
 # =================================================================================================
 
 # This is a key that turns the long file names into the numerical names for the progeny
-progeny_key: ../Data/Lists/progeny_key.dic
+lists:
+  progeny_key: ../Data/Lists/progeny_key.txt
+  real_prog_names: ../Data/Lists/real_prog_names.txt
 
 # =================================================================================================
 #     Indexing params

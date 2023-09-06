@@ -1,3 +1,12 @@
+# Author: Darrian Talamantes
+# Affiliation: University of Georgia
+# How to Run: 
+# 1: ensure the rule all has the target output
+# 2: input this code in the terminal
+# snakemake --cores 2 --use-conda
+
+# to run use snakemake --use-conda --cores 2
+
 # This file will hold all the rules to 
 
 # 1 align my data to the genome
@@ -7,19 +16,62 @@
 
 # Reads were quality checked before this and none have to be removed
 
+
+
 # =========================================================================================================
 #     Load config file
 # =========================================================================================================
 configfile: "config.yaml"
 
 # Global variables
-samples = [os.path.splitext(f)[0] for f in os.listdir("../Data/Practice_Data/Progeny") if f.endswith(".fastq.gz")]
-progpath = config[path][progeny]
+progpath = config["paths"]["progeny"]
+parentpath = config["paths"]["parents"]
+mapped_reads = config["paths"]["mapped_reads"]
+mapped_reads_parents = config["paths"]["mapped_reads_parents"]
+progeny_key = config["lists"]["progeny_key"]
+real_prog_names = config["lists"]["real_prog_names"]
+
+# Listing Progeny Files
+(FILES,) = glob_wildcards(progpath + "{file}.fastq.gz")
+(SAMPLES,) = glob_wildcards(progpath + "{sample}R2_001.fastq.gz")
+with open(real_prog_names, "r") as file:
+    newnames = [line.strip() for line in file]
+
+
+# Listing Parent Files
+(PARENTF,) = glob_wildcards(parentpath + "{parent_file}.fq.gz")
+(PARENTS,) = glob_wildcards(parentpath + "{parent_sample}R2_.fq.gz")
+
+# =================================================================================================
+#    functions
+# =================================================================================================
+#imports a dictionary from a file with two columns seperated by a comma.
+dic_function =  config["functions"]["dic_function"]
+
+# =================================================================================================
+#    Rules
+# =================================================================================================
 
 rule all:
     input:
-        expand("mapped_reads/{sample}.bam", sample=samples)
+        bams = expand(mapped_reads + "{sample}.bam", sample=SAMPLES),
+        bams2 = expand(mapped_reads_parents + "{parent_sample}.bam", parent_sample=PARENTS)
 
+# Rename the files
+rule rename: 
+    input:
+        prog_1=progpath + "{sample}R1_001.fastq.gz",
+        prog_2=progpath + "{sample}R2_001.fastq.gz"
+    output:
+        prog1=progpath + "{newname}R1.fastq.gz",
+        prog2=progpath + "{newname}R2.fastq.gz"
+    run:
+        import dic_function
+        prog_dic = dic_function.importdic(progeny_key)
+        dic_function.rename_files(prog_dic, progpath, progpath)
+    
+
+    
 #Align genome file
 rule index_genome:
     params:
@@ -33,18 +85,35 @@ rule index_genome:
     shell:
         "bwa index -a {params.algo} {input}"
 
-rule bwa_map:
+rule bwa_map_prog:
     input:
-        progeny1=lambda wildcards: f"progpath/{wildcards.sample}_R1.fastq.gz",
-        genome=config["genome"]
+        prog1=progpath + "{sample}R1.fastq.gz",
+        prog2=progpath + "{sample}R2.fastq.gz",
+        genome=config["genome"] 
     output:
-        "mapped_reads/{progeny}.bam" # causes this file to be deleted after it is used
+        bams=mapped_reads + "{sample}.bam"
     threads:
         2
     conda:
         "Conda_Envs/BWA.yaml"
-    script:
-        "scripts/prog_aligner.sh {input} {threads}"
+    shell:
+       "bwa mem {input.genome} {input.prog1} {input.prog2} -t {threads} > {output}"
 
-       # "bwa mem -t {params.threads} {input.reference} {input.fastq1} {input.fastq2} > {output.sam}"
-       # fastq1=lambda wildcards: f"{input_dir}/{wildcards.sample}_R1.fastq",
+rule bwa_map_parent:
+    input:
+        parent1=parentpath + "{parent_sample}R1_.fq.gz",
+        parent2=parentpath + "{parent_sample}R2_.fq.gz",
+        genome=config["genome"]
+    output:
+        bams2 = mapped_reads_parents + "{parent_sample}.bam"
+    threads:
+        2
+    conda:
+        "Conda_Envs/BWA.yaml"
+    shell:
+       "bwa mem {input.genome} {input.parent1} {input.parent2} -t {threads} > {output}"
+
+            
+    
+       # conda env export -n BWA > BWA.yaml
+       # snakemake --dag | dot -Tsvg > dag.svg

@@ -3,4 +3,4 @@ Data/
 .snakemake/
 .vscode*
 .vscode/
-
+logs/

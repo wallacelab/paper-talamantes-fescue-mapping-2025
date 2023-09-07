@@ -23,30 +23,46 @@
 # =========================================================================================================
 configfile: "config.yaml"
 
-# Global variables
+# Config importing
 progpath = config["paths"]["progeny"]
 parentpath = config["paths"]["parents"]
 mapped_reads = config["paths"]["mapped_reads"]
 mapped_reads_parents = config["paths"]["mapped_reads_parents"]
 progeny_key = config["lists"]["progeny_key"]
 real_prog_names = config["lists"]["real_prog_names"]
+picard_metrics = config["picard"]["metrics"]
+genome = config["genome"]
+vcfs = config["paths"]["vcfs"]
+vcfs_parents = config["paths"]["vcfs_parents"]
+
+
+# =================================================================================================
+#    Renaming files
+# =================================================================================================
+# This step is more just for my data because my files are named very poorly and this fixes it.
+# I run this before anything so we can easily make lists from the directories. 
+
+import os
+import dic_functions
+prog_dic = dic_functions.importdic(progeny_key)
+for x in real_prog_names:
+    if os.path.isfile(progpath + x):
+        print()
+    else:
+        dic_functions.rename_files(prog_dic, progpath)
+
+
+# =================================================================================================
+#   List Variables
+# =================================================================================================
 
 # Listing Progeny Files
 (FILES,) = glob_wildcards(progpath + "{file}.fastq.gz")
-(SAMPLES,) = glob_wildcards(progpath + "{sample}R2_001.fastq.gz")
-with open(real_prog_names, "r") as file:
-    newnames = [line.strip() for line in file]
-
+(SAMPLES,) = glob_wildcards(progpath + "{sample}R2.fastq.gz")
 
 # Listing Parent Files
 (PARENTF,) = glob_wildcards(parentpath + "{parent_file}.fq.gz")
 (PARENTS,) = glob_wildcards(parentpath + "{parent_sample}R2_.fq.gz")
-
-# =================================================================================================
-#    functions
-# =================================================================================================
-#imports a dictionary from a file with two columns seperated by a comma.
-dic_function =  config["functions"]["dic_function"]
 
 # =================================================================================================
 #    Rules
@@ -54,24 +70,10 @@ dic_function =  config["functions"]["dic_function"]
 
 rule all:
     input:
-        bams = expand(mapped_reads + "{sample}.bam", sample=SAMPLES),
-        bams2 = expand(mapped_reads_parents + "{parent_sample}.bam", parent_sample=PARENTS)
+        expand(mapped_reads_parents + "{parent_sample}dupped.bam", parent_sample=PARENTS),
+        expand(mapped_reads + "{sample}dupped.bam", sample=SAMPLES),
+        expand(vcfs + "{sample}.bcf", sample=SAMPLES)
 
-# Rename the files
-rule rename: 
-    input:
-        prog_1=progpath + "{sample}R1_001.fastq.gz",
-        prog_2=progpath + "{sample}R2_001.fastq.gz"
-    output:
-        prog1=progpath + "{newname}R1.fastq.gz",
-        prog2=progpath + "{newname}R2.fastq.gz"
-    run:
-        import dic_function
-        prog_dic = dic_function.importdic(progeny_key)
-        dic_function.rename_files(prog_dic, progpath, progpath)
-    
-
-    
 #Align genome file
 rule index_genome:
     params:
@@ -84,14 +86,15 @@ rule index_genome:
         "Conda_Envs/BWA.yaml"
     shell:
         "bwa index -a {params.algo} {input}"
-
+        
+# aligns the files to the genome
 rule bwa_map_prog:
     input:
         prog1=progpath + "{sample}R1.fastq.gz",
         prog2=progpath + "{sample}R2.fastq.gz",
         genome=config["genome"] 
     output:
-        bams=mapped_reads + "{sample}.bam"
+        bams=temp(mapped_reads + "{sample}.bam")
     threads:
         2
     conda:
@@ -105,7 +108,7 @@ rule bwa_map_parent:
         parent2=parentpath + "{parent_sample}R2_.fq.gz",
         genome=config["genome"]
     output:
-        bams2 = mapped_reads_parents + "{parent_sample}.bam"
+        bams2 = temp(mapped_reads_parents + "{parent_sample}.bam")
     threads:
         2
     conda:
@@ -113,7 +116,103 @@ rule bwa_map_parent:
     shell:
        "bwa mem {input.genome} {input.parent1} {input.parent2} -t {threads} > {output}"
 
-            
+# Sorts the alignment file 
+rule samtools_sort_prog:
+    input:
+        bams = mapped_reads + "{sample}.bam"   
+    output:
+        sorted = temp(mapped_reads + "{sample}sorted.bam")
+    log:
+        "logs/samtools/{sample}_sorted.log",
+    params:
+        extra= "-m 2G",
+    threads: 8
+    wrapper:
+        "v2.6.0/bio/samtools/sort"
+
+rule samtools_sort_parent:
+    input:
+        bams2 = mapped_reads_parents + "{parent_sample}.bam"
+    output:
+        sorted2 = temp(mapped_reads_parents + "{parent_sample}sorted.bam")
+    log:
+        "logs/samtools/{parent_sample}_sorted.log"
+    params:
+        extra= "-m 16G",
+    threads: 2
+    wrapper:
+        "v2.6.0/bio/samtools/sort"
+
+# marks and removes the duplicates with picard
+rule markduplicates_prog:
+    input:
+        bams = mapped_reads + "{sample}sorted.bam"
+    output:
+        bam = mapped_reads + "{sample}dupped.bam",
+        metrics= picard_metrics + "{sample}_metrics.txt"
+    log:
+        "logs/samtools/{sample}_dupped.log",
+    params:
+        extra="--REMOVE_DUPLICATES true",
+    resources:
+        mem_mb=1024,
+    wrapper:
+        "v2.6.0/bio/picard/markduplicates"
+
+rule markduplicates_parents:
+    input:
+        bams = mapped_reads_parents + "{parent_sample}sorted.bam"
+    output:
+        bam = mapped_reads_parents + "{parent_sample}dupped.bam",
+        metrics = picard_metrics + "{parent_sample}_metrics.txt"
+    log:
+        "logs/samtools/{parent_sample}_dupped.log",
+    params:
+        extra="--REMOVE_DUPLICATES true",
+    resources:
+        mem_mb=1024,
+    wrapper:
+        "v2.6.0/bio/picard/markduplicates"
+
+# Index the genome for sam tools
+rule samtools_index:
+    input:
+        genome
+    output:
+        genome + ".fai",
+    wrapper:
+        "v2.6.0/bio/samtools/faidx"
+
+# This code works for an individual against the genome but I have to do this for every cross
+rule bcftools_mpileup_prog:
+    input:
+        alignments=mapped_reads + "{sample}dupped.bam",
+        ref=genome,
+        index=genome + ".fai",
+    output:
+        pileup= vcfs + "{sample}.bcf",
+    params:
+        uncompressed_bcf=False,
+        extra="--max-depth 100 --min-BQ 10",
+    log:
+        "logs/bcftools_mpileup/{sample}.log",
+    wrapper:
+        "v2.6.0/bio/bcftools/mpileup"
+
+
+
+
+
+#samtools markdup $Inter/${prog}_sorted.bam $Inter/${TrueName}_align_marked_sorted.bam
+
+
+
+#     echo "samtools sort $Inter/$prog.bam -o $Inter/${prog}_sorted.bam" >> $Inter/SamSortCommands.sh
+#     echo "samtools markdup $Inter/${prog}_sorted.bam $Inter/${TrueName}_align_marked_sorted.bam" >> $Inter/SamDupesCommands.sh
+# done
+# cat $Inter/SamSortCommands.sh | parallel --jobs 20 --progress
+# cat $Inter/SamDupesCommands.sh | parallel --jobs 20 --progress
+
     
-       # conda env export -n BWA > BWA.yaml
-       # snakemake --dag | dot -Tsvg > dag.svg
+# conda env export -n BWA > BWA.yaml
+# snakemake --dag | dot -Tsvg > dag.svg

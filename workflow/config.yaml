@@ -2,8 +2,9 @@
 #     Reference Genome
 # =================================================================================================
 
-parents: ../Data/Lists
 genome: ../Data/Practice_Data/Genome/small_subset_tall_fescue_genome.fa
+idx: 
+
 
 # =================================================================================================
 #     Directory Paths
@@ -14,13 +15,17 @@ paths:
   parents: ../Data/Practice_Data/Parents/
   mapped_reads: ../Data/Practice_Data/Mapped_Reads/
   mapped_reads_parents: ../Data/Practice_Data/Mapped_Reads_Parents/
+  vcfs: ../Data/Practice_Data/VCFs/
+  vcfs_parents: ../Data/Practice_Data/VCFs_Parents/
 
 
 # =================================================================================================
 #     Functions
 # =================================================================================================
 functions:
-  dic_function: /home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/workflow/dic_functions.py
+  dic_function: dic_functions.py
+
+
 # =================================================================================================
 #     Progeny lists
 # =================================================================================================
@@ -37,7 +42,13 @@ bwa:
   index: bwtsw
 
 # =================================================================================================
-#     Progeny 
+#     Picard 
+# =================================================================================================
+picard:
+  metrics: ../Data/Metrics/
+
+# =================================================================================================
+#     samtools options 
 # =================================================================================================
 
 

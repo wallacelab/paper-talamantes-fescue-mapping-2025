@@ -70,9 +70,9 @@ for x in real_prog_names:
 
 rule all:
     input:
-        expand(mapped_reads_parents + "{parent_sample}dupped.bam", parent_sample=PARENTS),
         expand(mapped_reads + "{sample}dupped.bam", sample=SAMPLES),
-        expand(vcfs + "{sample}.bcf", sample=SAMPLES)
+        multiext(genome, ".amb", ".ann", ".bwt", ".pac", ".sa"),
+        genome + ".fai"
 
 #Align genome file
 rule index_genome:
@@ -86,93 +86,6 @@ rule index_genome:
         "Conda_Envs/BWA.yaml"
     shell:
         "bwa index -a {params.algo} {input}"
-        
-# aligns the files to the genome
-rule bwa_map_prog:
-    input:
-        prog1=progpath + "{sample}R1.fastq.gz",
-        prog2=progpath + "{sample}R2.fastq.gz",
-        genome=config["genome"] 
-    output:
-        bams=temp(mapped_reads + "{sample}.bam")
-    threads:
-        2
-    conda:
-        "Conda_Envs/BWA.yaml"
-    shell:
-       "bwa mem {input.genome} {input.prog1} {input.prog2} -t {threads} > {output}"
-
-rule bwa_map_parent:
-    input:
-        parent1=parentpath + "{parent_sample}R1_.fq.gz",
-        parent2=parentpath + "{parent_sample}R2_.fq.gz",
-        genome=config["genome"]
-    output:
-        bams2 = temp(mapped_reads_parents + "{parent_sample}.bam")
-    threads:
-        2
-    conda:
-        "Conda_Envs/BWA.yaml"
-    shell:
-       "bwa mem {input.genome} {input.parent1} {input.parent2} -t {threads} > {output}"
-
-# Sorts the alignment file 
-rule samtools_sort_prog:
-    input:
-        bams = mapped_reads + "{sample}.bam"   
-    output:
-        sorted = temp(mapped_reads + "{sample}sorted.bam")
-    log:
-        "logs/samtools/{sample}_sorted.log",
-    params:
-        extra= "-m 2G",
-    threads: 8
-    wrapper:
-        "v2.6.0/bio/samtools/sort"
-
-rule samtools_sort_parent:
-    input:
-        bams2 = mapped_reads_parents + "{parent_sample}.bam"
-    output:
-        sorted2 = temp(mapped_reads_parents + "{parent_sample}sorted.bam")
-    log:
-        "logs/samtools/{parent_sample}_sorted.log"
-    params:
-        extra= "-m 16G",
-    threads: 2
-    wrapper:
-        "v2.6.0/bio/samtools/sort"
-
-# marks and removes the duplicates with picard
-rule markduplicates_prog:
-    input:
-        bams = mapped_reads + "{sample}sorted.bam"
-    output:
-        bam = mapped_reads + "{sample}dupped.bam",
-        metrics= picard_metrics + "{sample}_metrics.txt"
-    log:
-        "logs/samtools/{sample}_dupped.log",
-    params:
-        extra="--REMOVE_DUPLICATES true",
-    resources:
-        mem_mb=1024,
-    wrapper:
-        "v2.6.0/bio/picard/markduplicates"
-
-rule markduplicates_parents:
-    input:
-        bams = mapped_reads_parents + "{parent_sample}sorted.bam"
-    output:
-        bam = mapped_reads_parents + "{parent_sample}dupped.bam",
-        metrics = picard_metrics + "{parent_sample}_metrics.txt"
-    log:
-        "logs/samtools/{parent_sample}_dupped.log",
-    params:
-        extra="--REMOVE_DUPLICATES true",
-    resources:
-        mem_mb=1024,
-    wrapper:
-        "v2.6.0/bio/picard/markduplicates"
 
 # Index the genome for sam tools
 rule samtools_index:
@@ -183,35 +96,12 @@ rule samtools_index:
     wrapper:
         "v2.6.0/bio/samtools/faidx"
 
-# This code works for an individual against the genome but I have to do this for every cross
-rule bcftools_mpileup_prog:
-    input:
-        alignments=mapped_reads + "{sample}dupped.bam",
-        ref=genome,
-        index=genome + ".fai",
-    output:
-        pileup= vcfs + "{sample}.bcf",
-    params:
-        uncompressed_bcf=False,
-        extra="--max-depth 100 --min-BQ 10",
-    log:
-        "logs/bcftools_mpileup/{sample}.log",
-    wrapper:
-        "v2.6.0/bio/bcftools/mpileup"
+# include: "rules/01_align_parents.smk"			# step 1 - Aligning, sorting, removing duplicates from parents
+include: "rules/01_align_progeny.smk"		    # step 1 - Aligning, sorting, removing duplicates from progeny
 
 
 
 
-
-#samtools markdup $Inter/${prog}_sorted.bam $Inter/${TrueName}_align_marked_sorted.bam
-
-
-
-#     echo "samtools sort $Inter/$prog.bam -o $Inter/${prog}_sorted.bam" >> $Inter/SamSortCommands.sh
-#     echo "samtools markdup $Inter/${prog}_sorted.bam $Inter/${TrueName}_align_marked_sorted.bam" >> $Inter/SamDupesCommands.sh
-# done
-# cat $Inter/SamSortCommands.sh | parallel --jobs 20 --progress
-# cat $Inter/SamDupesCommands.sh | parallel --jobs 20 --progress
 
     
 # conda env export -n BWA > BWA.yaml

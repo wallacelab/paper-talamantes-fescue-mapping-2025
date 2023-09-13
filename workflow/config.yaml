@@ -2,7 +2,7 @@
 #     Reference Genome
 # =================================================================================================
 
-genome: ../Data/Practice_Data/Genome/small_subset_tall_fescue_genome.fa
+genome: ../Data/Real_Data/Genome/tall_fescuev0.1.fa
 idx: 
 
 
@@ -10,14 +10,13 @@ idx:
 #     Directory Paths
 # =================================================================================================
 paths:
-  genomepath: ../Data/Practice_Data/Genome/
-  progeny: ../Data/Practice_Data/Progeny/
-  parents: ../Data/Practice_Data/Parents/
-  mapped_reads: ../Data/Practice_Data/Mapped_Reads/
-  mapped_reads_parents: ../Data/Practice_Data/Mapped_Reads_Parents/
-  vcfs: ../Data/Practice_Data/VCFs/
-  vcfs_parents: ../Data/Practice_Data/VCFs_Parents/
-
+  genomepath: ../Data/Real_Data/Genome/
+  progeny: ../Data/Real_Data/Progeny/
+  parents: ../Data/Real_Data/Parents/
+  mapped_reads: ../Data/Real_Data/Mapped_Reads/
+  mapped_reads_parents: ../Data/Real_Data/Mapped_Reads_Parents/
+  vcfs: ../Data/Real_Data/VCFs/
+  vcfs_parents: ../Data/Real_Data/VCFs_Parents/
 
 # =================================================================================================
 #     Functions

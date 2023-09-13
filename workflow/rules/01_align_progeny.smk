@@ -25,7 +25,7 @@ rule samtools_sort_prog:
         "logs/samtools/{sample}_sorted.log",
     params:
         extra= "-m 2G",
-    threads: 8
+    threads: 2
     wrapper:
         "v2.6.0/bio/samtools/sort"
 

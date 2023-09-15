@@ -9,8 +9,8 @@
 #SBATCH --mem=100gb
 #SBATCH --mail-user=drt83172@uga.edu
 #SBATCH --mail-type=END,FAIL
-#SBATCH --output=OutFiles/301.%j.out
-#SBATCH -e OutFiles/301.%j.err
+#SBATCH --output=OutFiles/Variant_Calling.%j.out
+#SBATCH -e OutFiles/Variant_Calling.%j.err
 
 echo "This JobID for this job is ${SLURM_JOB_ID}."
 sleep 20

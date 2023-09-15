@@ -34,7 +34,7 @@ rule markduplicates_parents:
     log:
         "logs/samtools/{parent_sample}_dupped.log",
     params:
-        java_opts="XX:ParallelGCThreads=10"
+        java_opts="XX:ParallelGCThreads=10",
         extra="--REMOVE_DUPLICATES true",
     resources:
         mem_mb=20000,

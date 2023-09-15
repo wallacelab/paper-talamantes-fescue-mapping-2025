@@ -26,6 +26,5 @@ export LANG=en_SG.utf8
 snakemake --reason \
 --use-conda --conda-frontend mamba \
 --latency-wait 20 --verbose --cores 32 \
---rerun-incomplete --rerun-triggers mtime \
 -s snakefile
 

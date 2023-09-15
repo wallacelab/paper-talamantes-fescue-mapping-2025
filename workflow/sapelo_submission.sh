@@ -20,6 +20,8 @@ sacct -j $SLURM_JOB_ID --format=JobID,JobName,AllocCPUS,Elapsed,ExitCode,State,M
 module load Anaconda3/2022.10
 module load snakemake/7.22.0-foss-2022a
 
+source activate snakemake
+
 export LC_ALL=en_SG.utf8
 export LANG=en_SG.utf8
 

@@ -73,7 +73,7 @@ rule all:
         # multiext(genome, ".amb", ".ann", ".bwt", ".pac", ".sa"),
         # genome + ".fai",
         # For some reason you must 
-        expand(mapped_reads + "{parent_sample}dupped.bam", sample=PARENTS)
+        expand(mapped_reads + "{parent_sample}dupped.bam", parent_sample=PARENTS)
 
 
 #Align genome file

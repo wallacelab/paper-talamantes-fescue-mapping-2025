@@ -1,0 +1,9 @@
+partition: batch
+name: Mapping
+mem: 120
+time: 120
+nodes: 1
+cpu: 1 
+tasks: 32
+mail_user: drt83172@uga.edu
+mail_type: END,FAIL

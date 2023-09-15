@@ -70,8 +70,8 @@ for x in real_prog_names:
 
 rule all:
     input:
-        multiext(genome, ".amb", ".ann", ".bwt", ".pac", ".sa"),
-        genome + ".fai",
+        # multiext(genome, ".amb", ".ann", ".bwt", ".pac", ".sa"),
+        # genome + ".fai",
         # For some reason you must 
         expand(mapped_reads + "{sample}dupped.bam", sample=SAMPLES)
 

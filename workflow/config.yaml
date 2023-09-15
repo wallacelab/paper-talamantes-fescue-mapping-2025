@@ -31,8 +31,8 @@ functions:
 
 # This is a key that turns the long file names into the numerical names for the progeny
 lists:
-  progeny_key: ../Data/Lists/progeny_key.txt
-  real_prog_names: ../Data/Lists/real_prog_names.txt
+  progeny_key: ../Data/Real_Data/Lists/progeny_key.txt
+  real_prog_names: ../Data/Real_Data/Lists/real_prog_names.txt
 
 # =================================================================================================
 #     Indexing params

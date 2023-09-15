@@ -1,5 +1,4 @@
 #!/bin/bash
-#HEADER FOR SUBMITTED SCRIPTS
 #SBATCH --job-name=Variant_Calling
 #SBATCH --partition=batch 
 #SBATCH  --nodes=1 
@@ -27,6 +26,5 @@ export LANG=en_SG.utf8
 snakemake --reason \
 --use-conda --conda-frontend mamba \
 --latency-wait 20 --verbose --cores 32 \
---rerun-incomplete \
 -s snakefile
 

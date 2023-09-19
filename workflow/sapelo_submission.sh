@@ -2,7 +2,7 @@
 #SBATCH --job-name=Variant_Calling
 #SBATCH --partition=batch 
 #SBATCH --nodes=1 
-#SBATCH --ntasks=32
+#SBATCH --ntasks=30
 #SBATCH --time=100:00:00
 #SBATCH --export=NONE
 #SBATCH --mem=120G
@@ -17,10 +17,8 @@ echo "Done."
 
 sacct -j $SLURM_JOB_ID --format=JobID,JobName,AllocCPUS,Elapsed,ExitCode,State,MaxRSS,TotalCPU
 
-source activate snakemake
-
 module load Anaconda3/2022.10
-module load snakemake/7.22.0-foss-2022a
+source activate snakemake
 
 export LC_ALL=en_SG.utf8
 export LANG=en_SG.utf8

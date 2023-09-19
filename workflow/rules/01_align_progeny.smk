@@ -47,18 +47,3 @@ rule markduplicates_prog:
     wrapper:
         "v2.6.0/bio/picard/markduplicates"
 
-# # This code works for an individual against the genome but I have to do this for every cross
-# # rule bcftools_mpileup_prog:
-#     input:
-#         alignments=mapped_reads + "{sample}dupped.bam",
-#         ref=genome,
-#         index=genome + ".fai",
-#     output:
-#         pileup= vcfs + "{sample}.bcf",
-#     params:
-#         uncompressed_bcf=False,
-#         extra="--max-depth 100 --min-BQ 10",
-#     log:
-#         "logs/bcftools_mpileup/{sample}.log",
-#     wrapper:
-#         "v2.6.0/bio/bcftools/mpileup"

@@ -37,22 +37,9 @@ rule markduplicates_parents:
         java_opts="XX:ParallelGCThreads=30",
         extra="--REMOVE_DUPLICATES true",
     resources:
-        mem_mb=20000,
-    threads: 10
+        mem_mb=1024,
+    threads: 6
     wrapper:
         "v2.6.0/bio/picard/markduplicates"
 
-# rule bcftools_mpileup_parent:
-#     input:
-#         alignments=mapped_reads_parents + "{parent_sample}dupped.bam",
-#         ref=genome,
-#         index=genome + ".fai",
-#     output:
-#         pileup= vcfs + "{parent_sample}.bcf",
-#     params:
-#         uncompressed_bcf=False,
-#         extra="--max-depth 100 --min-BQ 10",
-#     log:
-#         "logs/bcftools_mpileup/{parent_sample}.log",
-#     wrapper:
-#         "v2.6.0/bio/bcftools/mpileup"
+

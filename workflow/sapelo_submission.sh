@@ -2,10 +2,10 @@
 #SBATCH --job-name=Variant_Calling
 #SBATCH --partition=batch 
 #SBATCH --nodes=1 
-#SBATCH --ntasks=30
-#SBATCH --time=100:00:00
+#SBATCH --ntasks=32
+#SBATCH --time=120:00:00
 #SBATCH --export=NONE
-#SBATCH --mem=120G
+#SBATCH --mem=100G
 #SBATCH --mail-user=drt83172@uga.edu
 #SBATCH --mail-type=END,FAIL
 #SBATCH --output=OutFiles/Variant_Calling.%j.out

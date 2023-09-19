@@ -1,4 +1,4 @@
-name: fescue_heat_rnaseq
+name: snakemake
 channels:
   - bioconda
   - conda-forge

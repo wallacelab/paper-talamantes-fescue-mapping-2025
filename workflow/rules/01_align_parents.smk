@@ -34,11 +34,11 @@ rule markduplicates_parents:
     log:
         "logs/samtools/{parent_sample}_dupped.log",
     params:
-        java_opts="XX:ParallelGCThreads=6",
+        java_opts="XX:ParallelGCThreads=10",
         extra="--REMOVE_DUPLICATES true",
     resources:
-        mem_mb=10000,
-    threads: 6
+        mem_mb=38000,
+    threads: 10
     wrapper:
         "v2.6.0/bio/picard/markduplicates"
 

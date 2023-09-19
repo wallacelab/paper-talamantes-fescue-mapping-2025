@@ -23,17 +23,23 @@
 # =========================================================================================================
 configfile: "config.yaml"
 
-# Config importing
+# Config importing paths to directories 
 progpath = config["paths"]["progeny"]
 parentpath = config["paths"]["parents"]
 mapped_reads = config["paths"]["mapped_reads"]
 mapped_reads_parents = config["paths"]["mapped_reads_parents"]
-progeny_key = config["lists"]["progeny_key"]
-real_prog_names = config["lists"]["real_prog_names"]
-picard_metrics = config["picard"]["metrics"]
-genome = config["genome"]
 vcfs = config["paths"]["vcfs"]
 vcfs_parents = config["paths"]["vcfs_parents"]
+
+#Pointing to list files (have to made before running)
+progeny_key = config["lists"]["progeny_key"]
+real_prog_names = config["lists"]["real_prog_names"]
+bam_list = config["lists"]["bam_list"]
+
+# config importing files
+picard_metrics = config["picard"]["metrics"]
+genome = config["genome"]
+
 
 
 # =================================================================================================

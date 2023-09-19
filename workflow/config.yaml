@@ -33,6 +33,7 @@ functions:
 lists:
   progeny_key: ../Data/Real_Data/Lists/progeny_key.txt
   real_prog_names: ../Data/Real_Data/Lists/real_prog_names.txt
+  bam_list: ../Data/Real_Data/Lists/bam_list.txt
 
 # =================================================================================================
 #     Indexing params

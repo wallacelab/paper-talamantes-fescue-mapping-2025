@@ -37,7 +37,7 @@ rule markduplicates_parents:
         java_opts="XX:ParallelGCThreads=6",
         extra="--REMOVE_DUPLICATES true",
     resources:
-        mem_mb=1024,
+        mem_mb=10000,
     threads: 6
     wrapper:
         "v2.6.0/bio/picard/markduplicates"

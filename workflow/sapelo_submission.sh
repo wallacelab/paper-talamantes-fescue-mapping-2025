@@ -4,7 +4,6 @@
 #SBATCH --nodes=1 
 #SBATCH --ntasks=32
 #SBATCH --time=120:00:00
-#SBATCH --export=NONE
 #SBATCH --mem=120G
 #SBATCH --mail-user=drt83172@uga.edu
 #SBATCH --mail-type=END,FAIL

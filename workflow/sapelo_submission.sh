@@ -1,14 +1,13 @@
 #!/bin/bash
-#SBATCH --job-name=Variant_Calling
-#SBATCH --partition=batch 
-#SBATCH --nodes=1 
-#SBATCH --ntasks=32
-#SBATCH --time=120:00:00
-#SBATCH --mem=110gb
-#SBATCH --mail-user=drt83172@uga.edu
-#SBATCH --mail-type=END,FAIL
+#SBATCH -J Variant_Calling
+#SBATCH -p batch
+#SBATCH --ntasks=10
+#SBATCH --mem 64gb
+#SBATCH -t 48:00:00
 #SBATCH --output=OutFiles/Variant_Calling.%j.out
 #SBATCH -e OutFiles/Variant_Calling.%j.err
+#SBATCH --mail-type=FAIL,END
+#SBATCH --mail-user drt83172@uga.edu
 
 echo "This JobID for this job is ${SLURM_JOB_ID}."
 sleep 20

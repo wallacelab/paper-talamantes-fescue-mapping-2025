@@ -36,8 +36,8 @@ rule markduplicates_parents:
     params:
         extra="--REMOVE_DUPLICATES true",
     resources:
-        mem_mb=13000,
-    threads: 4
+        mem_mb=20000,
+    threads: 5
     wrapper:
         "v2.6.0/bio/picard/markduplicates"
 

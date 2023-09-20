@@ -2,9 +2,9 @@
 #SBATCH --job-name=Variant_Calling
 #SBATCH --partition=batch 
 #SBATCH --nodes=1 
-#SBATCH --ntasks=30
+#SBATCH --ntasks=32
 #SBATCH --time=120:00:00
-#SBATCH --mem=115G
+#SBATCH --mem=110gb
 #SBATCH --mail-user=drt83172@uga.edu
 #SBATCH --mail-type=END,FAIL
 #SBATCH --output=OutFiles/Variant_Calling.%j.out
@@ -22,8 +22,5 @@ source activate snakemake
 export LC_ALL=en_SG.utf8
 export LANG=en_SG.utf8
 
-snakemake --reason \
---use-conda --conda-frontend mamba \
---latency-wait 20 --verbose --cores 32 \
--s snakefile
+snakemake --use-conda --cores 32 -s snakefile
 

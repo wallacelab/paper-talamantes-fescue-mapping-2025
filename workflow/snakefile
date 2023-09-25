@@ -104,9 +104,9 @@ rule samtools_index:
     wrapper:
         "v2.6.0/bio/samtools/faidx"
 
-include: "rules/01_align_parents.smk"			# step 1 - Aligning, sorting, removing duplicates from parents
+# include: "rules/01_align_parents.smk"			# step 1 - Aligning, sorting, removing duplicates from parents
 # include: "rules/01_align_progeny.smk"		    # step 1 - Aligning, sorting, removing duplicates from progeny
-
+include: "02_snp_call"
 
 
 

@@ -1,0 +1,21 @@
+To start adjust the prep.sh script with the correct file names
+
+Next adjust the SLURM_GENERATOR.pl script with your desired parameters
+
+Then run prep.sh with the command...
+sh prep.sh
+
+Ths produces all the batch scripts.
+
+Next set up your run script by running...
+ls *.slurm | xargs -n 1 -I {} echo "sbatch {}" > run.sh
+
+Then submit your jobs with ...
+sh run.sh
+
+
+Order these were ran is 
+SLURM_GENERATOR_BWA.pl
+SLURM_GENERATOR_Sorting_BAMS.pl
+SLURM_GENERATOR_Remove_Dupes.pl
+Slurm_SNP_call.sh

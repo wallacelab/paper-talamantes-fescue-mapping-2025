@@ -1,0 +1,17 @@
+sbatch 301.REF.fasta.slurm
+sbatch 302.REF.fasta.slurm
+sbatch 303.REF.fasta.slurm
+sbatch 304.REF.fasta.slurm
+sbatch 305.REF.fasta.slurm
+sbatch 306.REF.fasta.slurm
+sbatch 307.REF.fasta.slurm
+sbatch 308.REF.fasta.slurm
+sbatch 310.REF.fasta.slurm
+sbatch 312.REF.fasta.slurm
+sbatch 313.REF.fasta.slurm
+sbatch 314.REF.fasta.slurm
+sbatch 315.REF.fasta.slurm
+sbatch 316.REF.fasta.slurm
+sbatch 318.REF.fasta.slurm
+sbatch 319.REF.fasta.slurm
+sbatch 320.REF.fasta.slurm

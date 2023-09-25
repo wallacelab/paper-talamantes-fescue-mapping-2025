@@ -28,13 +28,13 @@ for x in Parent_Combos:
     parent2=parent2.strip()
     filename=parent1+"x"+parent2+".txt"
     f = open(filename,"w")
-    f.write(Parent_dir + parent1 + "\n")
-    f.write(Parent_dir + parent2 + "\n")
+    f.write(Parent_dir + parent1 + dupped + "\n")
+    f.write(Parent_dir + parent2 + dupped + "\n")
     for row in range(row_num):
         p1 = Parents_of_Progeny[row][1]
         p2 = Parents_of_Progeny[row][2]
         if (p1 == parent1 or p1 == parent2) and (p2 == parent1 or p2 == parent2):
-            f.write(Progeny_dir + Parents_of_Progeny[row][0] + "\n")
+            f.write(Progeny_dir + Parents_of_Progeny[row][0] + dupped + "\n")
 
     # Create a file called parent1xparent2.txt
     # append all progeny to that file with parent1 and parent 2

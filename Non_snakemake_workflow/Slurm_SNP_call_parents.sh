@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH -J SNP_CALL_parents
-#SBATCH -p highmem_30d_p
+#SBATCH -p highmem_p
 #SBATCH --ntasks=32
 #SBATCH --mem 800gb
-#SBATCH -t 250:00:00
+#SBATCH -t 160:00:00
 #SBATCH --output=OutFiles/SNP_CALL.%j.out
 #SBATCH -e OutFiles/SNP_CALL.%j.err
 #SBATCH --mail-type=NONE

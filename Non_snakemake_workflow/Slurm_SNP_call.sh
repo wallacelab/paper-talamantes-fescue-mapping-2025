@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH -J SNP_CALL
-#SBATCH -p highmem_p
+#SBATCH -p highmem_30d_p
 #SBATCH --ntasks=32
 #SBATCH --mem 800gb
-#SBATCH -t 160:00:00
+#SBATCH -t 250:00:00
 #SBATCH --output=OutFiles/SNP_CALL.%j.out
 #SBATCH -e OutFiles/SNP_CALL.%j.err
 #SBATCH --mail-type=NONE
@@ -15,4 +15,4 @@ RefGenome="/scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Re
 Bam_Files="/scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Lists/bam_list.txt"
 VCF_loc="/scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/VCF"
 
-bcftools mpileup -f $RefGenome -b $Bam_Files | bcftools call -mv -Ob -o $VCF_loc/all_Variants.bcf
+bcftools mpileup --threads 32 -f $RefGenome -b $Bam_Files | bcftools call --threads 32 -mv -Ob -o $VCF_loc/all_Variants.bcf

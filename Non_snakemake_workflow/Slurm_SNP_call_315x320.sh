@@ -15,4 +15,4 @@ RefGenome="/scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Re
 Bam_Files="/scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Lists/Full_sibs/315x320.txt"
 VCF_loc="/scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/VCF"
 
-bcftools mpileup -f $RefGenome -b $Bam_Files | bcftools call -mv -Ob -o $VCF_loc/315x320_Variants.bcf
+bcftools mpileup --threads 32 -f $RefGenome -b $Bam_Files | bcftools call --threads 32 -mv -Ob -o $VCF_loc/315x320_Variants.bcf

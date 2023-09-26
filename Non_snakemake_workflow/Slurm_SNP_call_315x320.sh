@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J SNP_CALL_315x320
+#SBATCH -J SNP_315x320
 #SBATCH -p batch
 #SBATCH --ntasks=32
 #SBATCH --mem 120gb

@@ -4,8 +4,8 @@
 #SBATCH --ntasks=12
 #SBATCH --mem 80gb
 #SBATCH -t 160:00:00
-#SBATCH --output=OutFiles/SNP_CALL.%j.out
-#SBATCH -e OutFiles/SNP_CALL.%j.err
+#SBATCH --output=OutFiles/SNP_Praogeny.%j.out
+#SBATCH -e OutFiles/SNP_Praogeny.%j.err
 #SBATCH --mail-user=drt83172@uga.edu
 #SBATCH --mail-type=FAIL,END
 

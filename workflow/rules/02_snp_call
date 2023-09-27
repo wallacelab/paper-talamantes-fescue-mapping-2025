@@ -13,4 +13,4 @@ rule bcftools_mpileup_all:
     wrapper:
         "v2.6.0/bio/bcftools/mpileup"
 
-cat bam_list.txt | sed 'g/\.\./\/scratch\/drt83172\/Wallace_lab\/Mapping_and_QTL\/Mapping_and_QTL/s'
+cat bam_list.txt | sed 's/\.\./\/scratch\/drt83172\/Wallace_lab\/Mapping_and_QTL\/Mapping_and_QTL/g'

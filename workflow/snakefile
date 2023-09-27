@@ -79,7 +79,7 @@ rule all:
         # multiext(genome, ".amb", ".ann", ".bwt", ".pac", ".sa"),
         # genome + ".fai",
         # For some reason you must 
-        expand(mapped_reads_parents + "{parent_sample}dupped.bam", parent_sample=PARENTS)
+        expand(mapped_reads + "{sample}sorted.bam", sample=SAMPLES)
 
 
 #Align genome file
@@ -105,8 +105,8 @@ rule samtools_index:
         "v2.6.0/bio/samtools/faidx"
 
 # include: "rules/01_align_parents.smk"			# step 1 - Aligning, sorting, removing duplicates from parents
-# include: "rules/01_align_progeny.smk"		    # step 1 - Aligning, sorting, removing duplicates from progeny
-include: "02_snp_call"
+include: "rules/01_align_progeny.smk"		    # step 1 - Aligning, sorting, removing duplicates from progeny
+# include: "02_snp_call"
 
 
 

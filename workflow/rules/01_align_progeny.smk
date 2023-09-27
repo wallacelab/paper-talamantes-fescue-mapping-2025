@@ -20,7 +20,7 @@ rule samtools_sort_prog:
     input:
         bams = mapped_reads + "{sample}.bam"   
     output:
-        sorted = temp(mapped_reads + "{sample}sorted.bam")
+        sorted = mapped_reads + "{sample}sorted.bam"
     log:
         "logs/samtools/{sample}_sorted.log",
     params:
@@ -32,18 +32,18 @@ rule samtools_sort_prog:
 
 
 # marks and removes the duplicates with picard
-rule markduplicates_prog:
-    input:
-        bams = mapped_reads + "{sample}sorted.bam"
-    output:
-        bam = mapped_reads + "{sample}dupped.bam",
-        metrics= picard_metrics + "{sample}_metrics.txt"
-    log:
-        "logs/samtools/{sample}_dupped.log",
-    params:
-        extra="--REMOVE_DUPLICATES true",
-    resources:
-        mem_mb=1024,
-    wrapper:
-        "v2.6.0/bio/picard/markduplicates"
+# rule markduplicates_prog:
+#     input:
+#         bams = mapped_reads + "{sample}sorted.bam"
+#     output:
+#         bam = mapped_reads + "{sample}dupped.bam",
+#         metrics= picard_metrics + "{sample}_metrics.txt"
+#     log:
+#         "logs/samtools/{sample}_dupped.log",
+#     params:
+#         extra="--REMOVE_DUPLICATES true",
+#     resources:
+#         mem_mb=1024,
+#     wrapper:
+#         "v2.6.0/bio/picard/markduplicates"
 

@@ -14,4 +14,4 @@ print OUTA "#SBATCH --mail-type=FAIL,END";
 print OUTA "\n\n";
 
 print OUTA "\nmodule load SAMtools/1.16.1-GCC-11.3.0\n";
-print OUTA "samtools index --csi /scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Mapped_Reads_Parents/$ARGV[0]dupped.bam\n";
+print OUTA "samtools index -c /scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Mapped_Reads_Parents/$ARGV[0]dupped.bam\n";

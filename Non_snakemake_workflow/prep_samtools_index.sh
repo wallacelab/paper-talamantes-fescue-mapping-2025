@@ -1,0 +1,18 @@
+perl	SLURM_GENERATOR_samtools_idx.pl	301_
+perl	SLURM_GENERATOR_samtools_idx.pl	302_
+perl	SLURM_GENERATOR_samtools_idx.pl	303_
+perl	SLURM_GENERATOR_samtools_idx.pl	304_
+perl	SLURM_GENERATOR_samtools_idx.pl	305_
+perl	SLURM_GENERATOR_samtools_idx.pl	306_
+perl	SLURM_GENERATOR_samtools_idx.pl	307_
+perl	SLURM_GENERATOR_samtools_idx.pl	308_
+perl	SLURM_GENERATOR_samtools_idx.pl	310_
+perl	SLURM_GENERATOR_samtools_idx.pl	312_
+perl	SLURM_GENERATOR_samtools_idx.pl	313_
+perl	SLURM_GENERATOR_samtools_idx.pl	314_
+perl	SLURM_GENERATOR_samtools_idx.pl	315_
+perl	SLURM_GENERATOR_samtools_idx.pl	316_
+perl	SLURM_GENERATOR_samtools_idx.pl	318_
+perl	SLURM_GENERATOR_samtools_idx.pl	319_
+perl	SLURM_GENERATOR_samtools_idx.pl	320_
+

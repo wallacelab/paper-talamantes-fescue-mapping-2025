@@ -1,0 +1,17 @@
+perl	SLURM_GENERATOR_parent_bam_filter.pl	301_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	302_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	303_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	304_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	305_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	306_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	307_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	308_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	310_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	312_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	313_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	314_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	315_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	316_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	318_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	319_
+perl	SLURM_GENERATOR_parent_bam_filter.pl	320_

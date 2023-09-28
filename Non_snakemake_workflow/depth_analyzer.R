@@ -16,5 +16,25 @@ counts <- counts[-c(1,2,3),]
 ggplot(data=counts, aes(x=X1, y=n)) + 
   geom_bar(stat = "identity") +
   xlim(0,100) +
-  ylim(0,20000)
+  ylim(0,20000) +
+  ggtitle("320-5-9 Depth") +
+  xlab("regions") + ylab("count")
+
+## Making a .bed file 
+prereg_loc = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/VCF/pre_regions_file.bed"
+prereg <- read.table(prereg_loc, header = FALSE)
+prereg$V3 <- prereg$V2 - 1
+prereg$V4 <- prereg$V2 + 1
+prereg <- subset(prereg, select = -c(V2))
+write.table(prereg,file = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/VCF/regions_file.bed", sep ="\t", row.names = FALSE, col.names = FALSE)
+
+
+
+
   
+
+
+
+
+
+

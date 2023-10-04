@@ -1,6 +1,7 @@
 library(tidyverse)
 
 # Load in sample
+# This sample is based off a bam file.
 sample_loc = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Mapped_Reads/320-5-9_depth.txt"
 sample <- read.table(sample_loc, header = TRUE)
 
@@ -20,7 +21,8 @@ ggplot(data=counts, aes(x=X1, y=n)) +
   ggtitle("320-5-9 Depth") +
   xlab("regions") + ylab("count")
 
-## Making a .bed file 
+## Making a .bed file
+# This bed file is used to create the parameters in which the bam files of the parents is filtered.
 prereg_loc = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/VCF/pre_regions_file.bed"
 prereg <- read.table(prereg_loc, header = FALSE)
 prereg$V3 <- prereg$V2 - 1

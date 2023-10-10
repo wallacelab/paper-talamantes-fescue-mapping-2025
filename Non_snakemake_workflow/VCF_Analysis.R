@@ -95,10 +95,12 @@ Chrom_counts <- variant_locations %>% count(chrom, sort = TRUE)
 
 
 # graphs
-ggplot(data=Chrom_counts, aes(x=reorder(chrom, -n), y=n)) +
+Chrom_counts2 <- subset(Chrom_counts, n >= 10)
+ggplot(data=Chrom_counts2, aes(x=reorder(chrom, -n), y=n)) +
   geom_bar(colour="grey", fill = "blue", stat = "identity") +
-  xlab("Parental Combination") + ylab("Cross Count") +
-  theme(axis.text.x = element_text(angle = 90, vjust = .5, hjust=1))
+  xlab("Chromosome") + ylab("SNP Count") +
+  theme(axis.text.x = element_text(angle = 90, vjust = .5, hjust=1),
+  panel.background = element_rect(fill = 'white', color = 'grey'))
 
 
 

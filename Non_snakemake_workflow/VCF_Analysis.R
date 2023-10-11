@@ -63,9 +63,6 @@ nodes <- t(cbind(t(pred_parents[,2]), t(pred_parents[,3])))
 nodes <- data.frame(nodes) %>% group_by(nodes) %>%
   summarise(count=n())
 
-
-
- 
 # Graph
 parent_counts2 <- subset(parent_counts, n >= 10)
 ggplot(data=parent_counts2, aes(x=reorder(parent_combo, -n), y=n)) +
@@ -84,7 +81,7 @@ plot(g, vertex.size=10, edge.width=edge.betweenness(g))
 ##########################
 
 #importing data and getting rid of file names
-hap_loc = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Hap_Map/all_maf_5_150_min.hmp.txt"
+hap_loc = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Hap_Map/all_maf_5_1960_min.hmp.txt"
 hap <- read.table(hap_loc, header = FALSE, sep = '\t', skip = 1)
 head(hap)
 
@@ -101,6 +98,23 @@ ggplot(data=Chrom_counts2, aes(x=reorder(chrom, -n), y=n)) +
   xlab("Chromosome") + ylab("SNP Count") +
   theme(axis.text.x = element_text(angle = 90, vjust = .5, hjust=1),
   panel.background = element_rect(fill = 'white', color = 'grey'))
+
+############################
+# Depth by site and individual
+############################
+
+
+data(mtcars)
+dummy_data <- head(mtcars)
+dummy_data_num_only <- subset(dummy_data, select = -c(mpg))
+individuals <- ncol(dummy_data_num_only)
+dummy_data_num_only$sum <- rowSums(dummy_data_num_only, )
+dummy_data_num_only$count.0 <- apply(dummy_data_num_only, 1, function(x) length(which(x=="0")))
+dummy_data_num_only$diviser <- individuals - dummy_data_num_only$count.0
+dummy_data_num_only$Avg.Depth <- (dummy_data_num_only$sum / dummy_data_num_only$diviser)
+
+
+
 
 
 

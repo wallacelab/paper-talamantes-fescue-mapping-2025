@@ -17,6 +17,6 @@ VCF_loc="/scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Real
 bam_commands="/scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Lists/bam_commands.txt"
 # samtools depth --threads 4 -f $Bam_Files $VCF_loc/depths.bcf
 
-parallel --jobs 3 < commands.txt
+parallel --jobs 3 < $bam_commands
 
 

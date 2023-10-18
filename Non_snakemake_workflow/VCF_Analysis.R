@@ -1,9 +1,9 @@
 library(tidyverse)
-install.packages("ggraph")
+install.packages("qqman")
 library(edgebundleR)
 library(igraph)
 library(ggraph)
-
+library(qqman)
 
 # Load in sample
 depth = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/VCF/Variants_all.depth.txt"
@@ -112,6 +112,40 @@ dummy_data_num_only$sum <- rowSums(dummy_data_num_only, )
 dummy_data_num_only$count.0 <- apply(dummy_data_num_only, 1, function(x) length(which(x=="0")))
 dummy_data_num_only$diviser <- individuals - dummy_data_num_only$count.0
 dummy_data_num_only$Avg.Depth <- (dummy_data_num_only$sum / dummy_data_num_only$diviser)
+
+
+
+ggplot(data=dummy_data_num_only, aes(x=Avg.Depth)) + 
+  geom_histogram(colour="blue", fill="red", binwidth = 1) + 
+  xlab("Depth") + ylab("Count") +
+  ggtitle("Depth Counts")  
+
+############################
+# Manhattan plot in R
+############################
+
+mlm_stats_loc="/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Hap_Map/MLM_16Pcs_stats.txt"
+mlm_stats <- read.table(mlm_stats_loc, header = TRUE, sep = '\t')
+
+mlm_stats$Chr<-gsub("PTG","",as.character(mlm_stats$Chr))
+mlm_stats$Chr<-gsub("L","",as.character(mlm_stats$Chr))
+mlm_stats$Chr<- as.numeric(mlm_stats$Chr)
+mlm_stats <- mlm_stats[-c(1), ]
+
+manhattan(mlm_stats, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", 
+          main = "P values of Delta CT", cex = 1, col = c("blue", "red","darkgrey","purple"))
+# suggestiveline = F, genomewideline = F (We can take away lines with this) (1e-5, 5e-8)
+
+# Put a line on graph
+# geom_hline(yintercept = -log10(sig), color = "grey40", linetype = "dashed")
+
+
+
+
+
+
+
+
 
 
 

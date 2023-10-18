@@ -30,6 +30,16 @@ prereg$V4 <- prereg$V2 + 1
 prereg <- subset(prereg, select = -c(V2))
 write.table(prereg,file = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/VCF/regions_file.bed", sep ="\t", row.names = FALSE, col.names = FALSE)
 
+#### Msking bed file for hap map at 5% maf and 65% occurance
+frrr = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Hap_Map/hap_map_regions.txt"
+frrr_pfft <- read.table(frrr, header = TRUE)
+head(frrr_pfft)
+frrr_pfft$minOne <- frrr_pfft$pos - 1
+frrr_pfft$PlusOne <- frrr_pfft$pos + 1
+frrr_pfft <- subset(frrr_pfft, select = -c(pos))
+
+write.table(frrr_pfft, file = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Non_snakemake_workflow/hap_map_regions2.txt", col.names = NA,
+            qmethod = "double")
 
 
 

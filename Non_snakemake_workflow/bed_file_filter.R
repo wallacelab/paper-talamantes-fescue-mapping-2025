@@ -23,8 +23,10 @@ ggplot(data=counts, aes(x=X1, y=n)) +
 
 ## Making a .bed file
 # This bed file is used to create the parameters in which the bam files of the parents is filtered.
-prereg_loc = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/VCF/pre_regions_file.bed"
+prereg_loc = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Hap_Map/hap_map_regions.txt"
 prereg <- read.table(prereg_loc, header = FALSE)
+prereg <- prereg[-1, ]
+prereg$V2 <- as.numeric(prereg$V2)
 prereg$V3 <- prereg$V2 - 1
 prereg$V4 <- prereg$V2 + 1
 prereg <- subset(prereg, select = -c(V2))

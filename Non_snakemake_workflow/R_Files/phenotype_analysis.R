@@ -2,75 +2,379 @@
 # Import libraries
 library(tidyverse)
 library(multcompView)
+library(gvlma)
+library(mbQTL)
+library(ggpubr)
+
+###############################################################################
+# CT Data filtering and adding
+###############################################################################
+# Adding in the data sets
+
+# This first set of data is all the data corresponding to the first set of standards
+all_2x2_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/all_2x2_Red_Blue.csv"
+all_g3p4_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/all_g3p4_correspond_to_Red_Blue_Standards.csv"
+# This set of data corresponds to the second set of standards and a few redoes. Will be added towrds end
+all_2x2_2_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/1041-end-redoes_2x2.csv"
+all_g3p4_2_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/1041-end-redoes_g3p4.csv"  
+# This set of data is for parents and cross 305x320, will be added twords end
+all_315x320_2x2_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Preliminary_Project_Data/315x320_2x2.txt"
+all_315x320_g3p4_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Preliminary_Project_Data/315x320_G3P4.txt"
+
+all_2x2_1 <- read.csv(all_2x2_loc, header = TRUE, strip.white=TRUE)
+all_g3p4_1 <- read.csv(all_g3p4_loc, header = TRUE, strip.white=TRUE)
+all_2x2_2 <- read.csv(all_2x2_2_loc, header = TRUE, strip.white=TRUE)
+all_g3p4_2 <- read.csv(all_g3p4_2_loc, header = TRUE, strip.white=TRUE)
+all_315x320_2x2 <- read.csv(all_315x320_2x2_loc, header = TRUE, strip.white=TRUE)
+all_315x320_g3p4 <- read.csv(all_315x320_g3p4_loc, header = TRUE, strip.white=TRUE)
+
+all_2x2_1$Standard <- "First_combo"
+all_2x2_2$Standard <- "Second_combo"
+all_g3p4_1$Standard <- "First_combo"
+all_g3p4_2$Standard <- "Second_combo"
+all_315x320_2x2$Standard <- "Pre_combo"
+all_315x320_g3p4$Standard <- "Pre_combo"
+
+all_2x2_samples <- rbind(all_2x2_1, all_2x2_2, all_315x320_2x2)
+all_g3p4_samples <- rbind(all_g3p4_1, all_g3p4_2, all_315x320_g3p4)
+
+########### 
+# Functions
+###########
+# This function takes the data set I combined using cat, all_2x2 is an example
+# It will filter out NA's, 0's, standards
+# It spits out a table of means for all samples that passed filtering. 
+Data_Filtering <- function(Data){
+  Data$Cp <- as.numeric(Data$Cp)
+  Data[Data == ''] <- NA
+  # filtering data 2x2
+  for (x in nrow(Data):1){
+    if (is.na(Data[x,3])){
+      Data <- Data[-x,]
+    }
+    else if (is.na(Data[x,2])){
+      Data <- Data[-x,]
+    }
+    else if (Data[x,2]=="0"){
+      Data <- Data[-x,]
+    }
+    else if (Data[x,1]=="Pos"){
+      Data <- Data[-x,]
+    }
+    else if (str_detect(Data[x,3], "std") | Data[x,3] == 0 | Data[x,3] == "water"){
+      Data <- Data[-x,]
+    }
+  }
+  Data_Mean <-
+    Data %>%
+    group_by(Data_Set,Treatment) %>%
+    summarise(MeanCP = mean(Cp))
+  return(Data_Mean)
+}
+
+# This pair of functions allows you to put in a CP value and it will output an adjusted CP value that takes efficiency into consideration
+# Step 1 Calculate line for a single set of standards
+# Step 2 Calculate efficiency for standards
+# Step 2.5 Calculate the outliars and remove them
+# Step 3 Use efficiency to find adjusted CP value
+CpAdjuster <- 
+  function(model, Data){
+    Data$adjCP <- 0
+    slope <- model$coefficients[2]
+    E = -1+10^(-1/slope)
+    
+    for (i in 1:nrow(Data)){
+      ogCP <- Data[i,3]
+      ratio =  (2^ogCP) / (2*E)^ogCP # Finding ratio of expected vs actual
+      adjuster = log(ratio, base = 2) # Finding amount needed to adjust CP videa
+      adjCP = round(ogCP - adjuster, 3) #finalizes CP adjustment
+      Data$adjCP[i] <- adjCP
+    }
+    Data$Efficiency <- E
+    return(Data)
+  }
+
+
+
+# This next function works with 2 data sets. Mean standards and mean data. 
+# It will use the standards to calculate efficiency and use that to spit out the data with adjusted CP values
+# This function uses another function called "CpAdjuster"
+# THis function also removes outliars who are out of standard range or 3x std away from mean
+CpAdjusterP2 <- function(Mean_Standards, Mean_Data, Data_Sets){
+  Data_Sets <- as.matrix(Data_Sets)
+  All_Data = list()
+  for (i in 1:nrow(Data_Sets)){
+    
+    Set <- Data_Sets[i]
+    Current_Standard <- subset(Mean_Standards, Data_Set == Set)
+    Current_Data <- subset(Mean_Data, Data_Set == Set)
+    
+    #Removing outliars
+    meanCP <- mean(Current_Data$MeanCP)
+    SdCP <- sd(Current_Data$MeanCP)
+    cutoff1 <- meanCP + 3*SdCP
+    cutoff2 <- meanCP - 3*SdCP
+    cutoffmin <- min(Current_Standard$MeanCP)
+    cutoffmax <- max(Current_Standard$MeanCP)
+    Before <- nrow(Current_Data)
+    Current_Data <- subset(Current_Data, MeanCP < cutoff1 & MeanCP > cutoff2 & MeanCP > cutoffmin & MeanCP < cutoffmax)
+    after <- nrow(Current_Data)
+    
+    print(paste0(Set, " Dropped ", Before-after))
+    
+    modelSet <- lm(Current_Standard$MeanCP ~ Current_Standard$LogCopyNumber)
+    y_intercept <- modelSet$coefficients[1]
+    slope <- modelSet$coefficients[2]
+    summary(modelSet)
+    Current_Data$LogCopyNumber <- round(((Current_Data$MeanCP)-y_intercept)/slope, digits = 3)
+    Current_Data$CopyNumber <- 10^Current_Data$LogCopyNumber # Reverse the log
+    
+    All_DataC <- CpAdjuster(modelSet, Current_Data) # Need this to remove outliars too
+    All_Data[[i]] <-  All_DataC
+  }
+  All_Data <- bind_rows(All_Data)
+  return(All_Data)
+}
+
+# seperating the standards and getting the means of them, calculating ng of DNA
+# function takes full data set and seperates standards to find their means
+# The function also calculates the copy number and log copy number
+FindStandardMeans <- function(stdData, length){
+  stdData$Cp <- as.numeric(stdData$Cp)
+  stdData$Concentration <- as.numeric(stdData$Concentration)
+  for (x in nrow(stdData):1){
+    if (stdData[x,2]=="" | stdData[x,2]=="0" | nchar(stdData[x,3])!=4){
+      stdData <- stdData[-x,]}
+  }
+  Standard_Means <-
+    stdData %>%
+    group_by(Data_Set,Treatment) %>%
+    summarise(MeanCP = mean(Cp), NgDNA = mean(Concentration)*5) # we add 5 ul of sample
+  Standard_Means$CopyNumber <- (Standard_Means$NgDNA * 6.02214076*10^23/ (length * 650 * 10^9))
+  # NgDNA*1 mole / length * 1 mole of base pairs in ng
+  Standard_Means$LogCopyNumber <- log10(Standard_Means$CopyNumber)
+  return(Standard_Means)
+}
+
+## Removing Redone samples
+redoes_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/Sample_Redo_List.csv"
+redoes <- read.csv(redoes_loc, header = FALSE)
+redoner<- function(redoes,sampledata){
+  for (x in nrow(redoes):1){
+    for (y in nrow(sampledata):1){
+      if(redoes[x,] == sampledata[y,3]){
+        if(sampledata[y,7] != "1281-1325-R"){
+          sampledata <- sampledata[-y,]
+        }
+      }  
+    }
+  }
+  return(sampledata)
+}
+
+
+############
+# End of functions
+############
+all_2x2_samples <- redoner(redoes,all_2x2_samples)
+all_g3p4_samples <- redoner(redoes,all_g3p4_samples)
+
+# Removing specific redone samples
+all_2x2_samples <- all_2x2_samples[!(all_2x2_samples$Treatment == "303-1-41" & all_2x2_samples$Data_Set == "81-160" ),]
+
+all_2x2_samples$Concentration <- as.numeric(all_2x2_samples$Concentration)
+all_g3p4_samples$Concentration <- as.numeric(all_g3p4_samples$Concentration)
+
+# Adding in Standard combination data
+standard_group <- subset(all_2x2_samples, select = c("Data_Set","Standard"))
+standard_group <- standard_group[!duplicated(standard_group), ]
+standard_group <- standard_group[!(is.na(standard_group$Data_Set) | standard_group$Data_Set==""), ]
+
+# Filtering and adjusting cp values fo the rest of the data
+# takes out obviously bad samples, 0's, missing, ect.
+Data_g3p4_Means_all <- Data_Filtering(all_g3p4_samples) # method filters data and leaves only samples
+Data_2x2_Means_all <- Data_Filtering(all_2x2_samples)
+
+# Method seperates standards from data,  to get their mean and adds copy number and log copy number
+std_rest_g3p4_means <- FindStandardMeans(all_g3p4_samples,230)
+# Needed to double filter 2x2 for some reason
+for (x in nrow(all_2x2_samples):1){
+  if (all_2x2_samples[x,2]=="" | all_2x2_samples[x,2]=="0" | nchar(all_2x2_samples[x,3])!=4){
+    all_2x2_samples <- all_2x2_samples[-x,]
+  }
+}
+std_rest_2x2_means <- FindStandardMeans(all_2x2_samples,118)
+
+# method adjusts the CP value based on efficiency
+# Also filters out samples that are 3x away from std, too low, too high, ect. 
+Data_Sets <- unique(std_rest_g3p4_means$Data_Set) #Creating list of data sets for next method
+
+Data_g3p4_AdjCP_all <- CpAdjusterP2(std_rest_g3p4_means, Data_g3p4_Means_all,Data_Sets) 
+Data_2x2_AdjCP_all <- CpAdjusterP2(std_rest_2x2_means, Data_2x2_Means_all,Data_Sets) 
+
+
+################ Combining data and getting the delta CT values  ###############
+
+#Combining data set and naming columns
+all_Data <- merge(Data_2x2_AdjCP_all,Data_g3p4_AdjCP_all, by.x = c("Treatment", "Data_Set"), by.y = c("Treatment", "Data_Set"))
+Columns <- colnames(all_Data)
+Columns <- gsub("\\.y$", ".Fescue", Columns)
+Columns <- gsub("\\.x$", ".Epichloe", Columns)
+colnames(all_Data) <- Columns 
+all_Data$adjCP.Fescue <- as.numeric(all_Data$adjCP.Fescue)
+all_Data$adjCP.Epichloe <- as.numeric(all_Data$adjCP.Epichloe)
+
+# Dela CT is Fescue - EPichloe (adjusted)
+all_Data$Delta_CT <- all_Data$adjCP.Fescue - all_Data$adjCP.Epichloe
+
+# Delta Ratio is Fescue / Epichloe (adjusted)
+all_Data$Fes_to_Epi_Ratio <- all_Data$adjCP.Fescue / all_Data$adjCP.Epichloe
+
+# Introducing Standard Combination Data
+all_Data <- merge(all_Data,standard_group, by.x = c("Data_Set"), by.y =c("Data_Set"))
+# Introducing Maternal Parent Data
+all_Data[c('Maternal_Parent', 'DeleteMe')] <- str_split_fixed(all_Data$Treatment, '-', 2)
+all_Data <- all_Data[ , !names(all_Data) %in% 
+                        c("DeleteMe" )]
+
+# Using OG Data 
+colnames(all_Data)[colnames(all_Data) == "MeanCP.Fescue"] ="OG_CP_Fescue"
+colnames(all_Data)[colnames(all_Data) == "MeanCP.Epichloe"] ="OG_CP_Epichloe"
+all_Data$Delta_CT_OG <- all_Data$OG_CP_Fescue - all_Data$OG_CP_Epichloe
+
+# Making phenotype data to export
+Data_to_export <- subset(all_Data, select = c("Treatment", "Delta_CT", "Data_Set", "Standard", "Maternal_Parent", "Delta_CT_OG"))
+write.table(Data_to_export, file = '/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Phenotype_Data_Delta_CT.txt', sep = '\t', row.names=FALSE)
+
+# Checking the amount of progeny each parent has
+parents_one_row_loc = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Lists/all_used_parents_one_row.csv"
+parents_one_row <- read.csv(parents_one_row_loc, header = FALSE, strip.white=TRUE)
+parents_one_row %>% count(V1, sort = TRUE)
+
+######
+# Quick graph checks to make sure data is correct
+######
+
+#HIstograms with different coloring based on different groupings
+plot1 <- ggplot(all_Data, aes(x=Delta_CT, color=Data_Set)) + 
+  geom_histogram(binwidth=.2, fill = "white")
+
+ggplot(all_Data, aes(x=Delta_CT, color=Maternal_Parent)) + 
+  geom_histogram(binwidth=.2, fill = "white")
+
+#Using the OG CP values (not efficiency adjusted)
+plot2 <- ggplot(all_Data, aes(x=Delta_CT_OG, color=Data_Set)) + 
+  geom_histogram(binwidth=.2, fill = "white")
+
+ggarrange(plot2, plot1, ncol = 1, nrow = 2)
+
+################################################################################
+# Adding in the Alkaloid data
+################################################################################
 
 #Loading in data
-alklaoid_loc="/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Alkaloid_Data.csv"
-CT_Values_loc = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Phenotype_Data_Delta_CT.txt"
+alklaoid_loc="/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Alkaloid_Data_Combined.csv"
 alklaoid <- read.csv(alklaoid_loc, header = TRUE, strip.white=TRUE)
-CT_Values <- read.table(CT_Values_loc, header = TRUE, strip.white=TRUE)
 
 # Giving data parents
 alklaoid[c('Maternal_Parent', 'DeleteMe')] <- str_split_fixed(alklaoid$ID, '-', 2)
 alklaoid <- subset(alklaoid, select = -c(DeleteMe))
 
-#Merging the data
-colnames(CT_Values)[colnames(CT_Values) == "Treatment"] ="ID"
-phenotype_Data <- merge(CT_Values, alklaoid, by.x = c("ID"), by.y = c("ID"))
-colnames(phenotype_Data)[colnames(phenotype_Data) == "Plate"] ="Alkaloid_Plate"
-phenotype_Data <- subset(phenotype_Data, select = -c(Maternal_Parent.y))
-phenotype_Data$Maternal_Parent.x <- as.character(phenotype_Data$Maternal_Parent.x)
+# Removing outliars based on plate they were done on 
+# Outliars removed are any samples 3x std away from the mean by each set. 
+Data_Sets <- as.matrix(unique(alklaoid$Plate))
+column_names <- colnames(alklaoid)
+All_Data <- data.frame(matrix(ncol = length(column_names)))
+colnames(All_Data) <- column_names
 
+for (i in 1:nrow(Data_Sets)){
+  
+  Set <- Data_Sets[i]
+  Current_Data <- subset(alklaoid, Plate == Set)
+  
+  #Removing outliars
+  meanalki <- mean(Current_Data$ng.g)
+  Sdalki <- sd(Current_Data$ng.g)
+  cutoff1 <- meanalki + 3*Sdalki
+  cutoff2 <- meanalki - 3*Sdalki
+  Before <- nrow(Current_Data)
+  Current_Data <- subset(Current_Data, ng.g < cutoff1 & ng.g > cutoff2)
+  after <- nrow(Current_Data)
+  
+  print(paste0(Set, " Dropped ", Before-after))
+  All_Data <- bind_rows(All_Data, Current_Data)
+  }
+alklaoid_filtered <- All_Data
+alklaoid_filtered <- na.omit(alklaoid_filtered)
+alklaoid_filtered_parents <- alklaoid_filtered
+alklaoid_filtered <- alklaoid_filtered[-c(1307:1323), ]
 
+alklaoid_filtered$Plate <- as.character(alklaoid_filtered$Plate)  
+
+# Quick alkaloid data graph
+ggplot(alklaoid_filtered, aes(x=ng.g, fill=Plate)) + 
+  geom_histogram(binwidth=1000, color = "black")
+
+ggplot(alklaoid_filtered, aes(x=ng.g, fill=Maternal_Parent)) + 
+  geom_histogram(binwidth=1000, color = "black")  
 
 
 # Making letters for groups
 # Making letters for box plot alkaloids
-anovaA <- aov(ng.g ~ Maternal_Parent.x, data = phenotype_Data)
+anovaA <- aov(ng.g ~ Maternal_Parent, data = alklaoid_filtered)
 summary(anovaA)
 tukeyA <- TukeyHSD(anovaA)
 print(tukeyA)
-TkA <- group_by(phenotype_Data, Maternal_Parent.x) %>%
+TkA <- group_by(alklaoid_filtered, Maternal_Parent) %>%
   summarise(mean=mean(ng.g), quant = quantile(ng.g, probs = .75)) %>%
   arrange(desc(mean))
 cld <- multcompLetters4(anovaA, tukeyA) #forgot why we do this
 print(cld)
-cld <- as.data.frame.list(cld$Maternal_Parent.x)
+cld <- as.data.frame.list(cld$Maternal_Parent)
 TkA$cld <- cld$Letters
 print(TkA)
 
-# Making letters for box plot biomass
-anovaD <- aov(Delta_CT ~ Maternal_Parent.x, data = phenotype_Data)
-summary(anovaD)
-tukeyD <- TukeyHSD(anovaD)
-print(tukeyD)
-TkD <- group_by(phenotype_Data, Maternal_Parent.x) %>%
-  summarise(mean=mean(Delta_CT), quant = quantile(Delta_CT, probs = .75)) %>%
-  arrange(desc(mean))
-cld <- multcompLetters4(anovaD, tukeyD) #forgot why we do this
-print(cld)
-cld <- as.data.frame.list(cld$Maternal_Parent.x)
-TkD$cld <- cld$Letters
-print(TkD)
-
 # Boxplots Alkaloids
-ggplot(phenotype_Data, aes(x=Maternal_Parent.x, y=ng.g, fill = Maternal_Parent.x, group=Maternal_Parent.x)) + 
+ggplot(alklaoid_filtered, aes(x=Maternal_Parent, y=ng.g, fill = Maternal_Parent, group=Maternal_Parent)) + 
   geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4) +
   theme_bw() +
   xlab("Plant Lines") +
   ylab("Alkaloid") +
   scale_fill_discrete(name = "Plant Lines") +
-  geom_text(data = TkA, aes(label = cld, x = Maternal_Parent.x, y = quant), 
+  geom_text(data = TkA, aes(label = cld, x = Maternal_Parent, y = quant), 
             vjust = 2.5 , size = 5)
 
-# Boxplots biomass
-ggplot(phenotype_Data, aes(x=Maternal_Parent.x, y=Delta_CT, fill = Maternal_Parent.x, group=Maternal_Parent.x)) + 
-  geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4) +
-  theme_bw() +
-  xlab("Plant Lines") +
-  ylab("Alkaloid") +
-  scale_fill_discrete(name = "Plant Lines") +
-  geom_text(data = TkD, aes(label = cld, x = Maternal_Parent.x, y = quant),
-            vjust = 1 , size = 5)
+
+################################################################################
+# Merging all data together with MetaData
+################################################################################
+# Merging the data alkaloid and CT data together
+CT_Values <- subset(all_Data, select = c(Treatment, Data_Set, Delta_CT, Delta_CT_OG, Fes_to_Epi_Ratio, Standard, Maternal_Parent))
+colnames(CT_Values)[colnames(CT_Values) == "Treatment"] ="ID"
+phenotype_Data <- merge(CT_Values, alklaoid, by.x = c("ID", "Maternal_Parent"), by.y = c("ID", "Maternal_Parent"))
+colnames(phenotype_Data)[colnames(phenotype_Data) == "Plate"] ="Alkaloid_Plate"
+phenotype_Data$Maternal_Parent <- as.character(phenotype_Data$Maternal_Parent)
+
+# adding the metadata and merging it with the phenotype data
+extraction_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Meta_Data/Extraction_info.csv"
+harvest_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Meta_Data/Harvest_Info.csv"
+extraction <- read.csv(extraction_loc, header = TRUE, strip.white=TRUE)
+harvest <- read.csv(harvest_loc, header = TRUE, strip.white=TRUE)
+
+metadata <- merge(extraction, harvest, by.x = c("ID"), by.y = c("ID"))
+phenotype_Data <- merge(phenotype_Data, metadata, by.x = c("ID"), by.y = c("ID"))
+
+
+# Saving the data to make a phenotype file
+file_to_save <- subset(phenotype_Data, select = c("ID", "Delta_CT", "ng.g"))
+colnames(file_to_save)[colnames(file_to_save) == "ng.g"] ="Alkaloid"
+file_to_save$Alkaloid <- round(file_to_save$Alkaloid, 3)
+write.table(file_to_save, file = "phenotype_data.txt", row.names = FALSE)
+
+
+
+
+
 
 
 

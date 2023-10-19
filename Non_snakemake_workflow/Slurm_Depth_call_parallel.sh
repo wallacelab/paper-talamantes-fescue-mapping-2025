@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J SNP_Depth_P
 #SBATCH -p batch
-#SBATCH --ntasks=20
+#SBATCH --ntasks=4
 #SBATCH --mem 100gb
 #SBATCH -t 160:00:00
 #SBATCH --output=OutFiles/SNP_Depth_P.%j.out
@@ -16,7 +16,7 @@ Bam_Files="/scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Re
 VCF_loc="/scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/VCF"
 bam_commands="/scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Lists/bam_commands.txt"
 regions="/scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Lists/regions_file.bed"
-samtools depth --threads 20 -b $regions -f $Bam_Files -o $VCF_loc/depths.bcf
+samtools depth -b $regions -f $Bam_Files -o $VCF_loc/depths.bcf
 
 #parallel --jobs 3 < $bam_commands
 

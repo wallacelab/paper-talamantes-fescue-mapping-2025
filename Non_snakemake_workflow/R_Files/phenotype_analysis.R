@@ -5,6 +5,7 @@ library(multcompView)
 library(gvlma)
 library(mbQTL)
 library(ggpubr)
+library(car)
 
 ###############################################################################
 # CT Data filtering and adding
@@ -18,8 +19,8 @@ all_g3p4_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Data
 all_2x2_2_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/1041-end-redoes_2x2.csv"
 all_g3p4_2_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/1041-end-redoes_g3p4.csv"  
 # This set of data is for parents and cross 305x320, will be added twords end
-all_315x320_2x2_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Preliminary_Project_Data/315x320_2x2.txt"
-all_315x320_g3p4_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Preliminary_Project_Data/315x320_G3P4.txt"
+all_315x320_2x2_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Raw_Data/CT_Values/315x320_2x2.csv"
+all_315x320_g3p4_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Raw_Data/CT_Values/315x320_G3P4.csv"
 
 all_2x2_1 <- read.csv(all_2x2_loc, header = TRUE, strip.white=TRUE)
 all_g3p4_1 <- read.csv(all_g3p4_loc, header = TRUE, strip.white=TRUE)
@@ -172,7 +173,6 @@ redoner<- function(redoes,sampledata){
   return(sampledata)
 }
 
-
 ############
 # End of functions
 ############
@@ -190,7 +190,7 @@ standard_group <- subset(all_2x2_samples, select = c("Data_Set","Standard"))
 standard_group <- standard_group[!duplicated(standard_group), ]
 standard_group <- standard_group[!(is.na(standard_group$Data_Set) | standard_group$Data_Set==""), ]
 
-# Filtering and adjusting cp values fo the rest of the data
+# Filtering and getting means of all CP values
 # takes out obviously bad samples, 0's, missing, ect.
 Data_g3p4_Means_all <- Data_Filtering(all_g3p4_samples) # method filters data and leaves only samples
 Data_2x2_Means_all <- Data_Filtering(all_2x2_samples)
@@ -198,12 +198,13 @@ Data_2x2_Means_all <- Data_Filtering(all_2x2_samples)
 # Method seperates standards from data,  to get their mean and adds copy number and log copy number
 std_rest_g3p4_means <- FindStandardMeans(all_g3p4_samples,230)
 # Needed to double filter 2x2 for some reason
-for (x in nrow(all_2x2_samples):1){
-  if (all_2x2_samples[x,2]=="" | all_2x2_samples[x,2]=="0" | nchar(all_2x2_samples[x,3])!=4){
-    all_2x2_samples <- all_2x2_samples[-x,]
+all_2x2_samples2 <- all_2x2_samples
+for (x in nrow(all_2x2_samples2):1){
+  if (all_2x2_samples2[x,2]=="" | all_2x2_samples2[x,2]=="0" | nchar(all_2x2_samples2[x,3])!=4){
+    all_2x2_samples2 <- all_2x2_samples2[-x,]
   }
 }
-std_rest_2x2_means <- FindStandardMeans(all_2x2_samples,118)
+std_rest_2x2_means <- FindStandardMeans(all_2x2_samples2,118)
 
 # method adjusts the CP value based on efficiency
 # Also filters out samples that are 3x away from std, too low, too high, ect. 
@@ -351,7 +352,8 @@ ggplot(alklaoid_filtered, aes(x=Maternal_Parent, y=ng.g, fill = Maternal_Parent,
 # Merging the data alkaloid and CT data together
 CT_Values <- subset(all_Data, select = c(Treatment, Data_Set, Delta_CT, Delta_CT_OG, Fes_to_Epi_Ratio, Standard, Maternal_Parent))
 colnames(CT_Values)[colnames(CT_Values) == "Treatment"] ="ID"
-phenotype_Data <- merge(CT_Values, alklaoid, by.x = c("ID", "Maternal_Parent"), by.y = c("ID", "Maternal_Parent"))
+phenotype_Data <- merge(CT_Values, alklaoid, by.x = c("ID", "Maternal_Parent"), by.y = c("ID", "Maternal_Parent" ) ,all = TRUE)
+
 colnames(phenotype_Data)[colnames(phenotype_Data) == "Plate"] ="Alkaloid_Plate"
 phenotype_Data$Maternal_Parent <- as.character(phenotype_Data$Maternal_Parent)
 
@@ -361,15 +363,70 @@ harvest_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QT
 extraction <- read.csv(extraction_loc, header = TRUE, strip.white=TRUE)
 harvest <- read.csv(harvest_loc, header = TRUE, strip.white=TRUE)
 
-metadata <- merge(extraction, harvest, by.x = c("ID"), by.y = c("ID"))
-phenotype_Data <- merge(phenotype_Data, metadata, by.x = c("ID"), by.y = c("ID"))
-
+metadata <- merge(extraction, harvest, by.x = c("ID"), by.y = c("ID"), all = TRUE)
+phenotype_Data <- merge(phenotype_Data, metadata, by = c("ID"))
+phenotype_Data$Alkaloid_Plate <- as.character(phenotype_Data$Alkaloid_Plate)
 
 # Saving the data to make a phenotype file
-file_to_save <- subset(phenotype_Data, select = c("ID", "Delta_CT", "ng.g"))
-colnames(file_to_save)[colnames(file_to_save) == "ng.g"] ="Alkaloid"
-file_to_save$Alkaloid <- round(file_to_save$Alkaloid, 3)
-write.table(file_to_save, file = "phenotype_data.txt", row.names = FALSE)
+phenotype_Data$ng.g <- round(phenotype_Data$ng.g, 3)
+write.table(phenotype_Data, file = "phenotype_data.txt", row.names = FALSE)
+
+################################################################################
+# Gathering Residual Data
+################################################################################
+# getting rid of out liar data 
+#plots will show us which data pints to turn into NAs
+plot(phenotype_Data$Delta_CT_OG, col = as.factor(phenotype_Data$Extraction_Date))
+plot(phenotype_Data$Delta_CT, col = as.factor(phenotype_Data$Extraction_Date))
+plot(phenotype_Data$ng.g, col = as.factor(phenotype_Data$Extraction_Date))
+
+# Removing other specific duplicates and outliars
+phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "306-3-8"] <- NA
+phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "320-5-26"] <- NA
+phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "314" & phenotype_Data$Data_Set != "315x320"), ]
+phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Data_Set == "315x320"),]
+phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Extraction_Date == "03/16/23"),]
+
+# This is to get the residuals of maternal parent while taking everything out that affects CT values
+filtered_CT_model <- aov(Delta_CT ~ Harvest_Date + Standard + Extraction_Date + Extractor+ Data_Set, data = phenotype_Data)
+summary(filtered_CT_model) # The filtered data 
+
+raw_CT_model <- aov(Delta_CT_OG ~ Harvest_Date + Standard + Extraction_Date + Extractor+ Data_Set, data = phenotype_Data)
+summary(raw_CT_model)
+
+
+
+
+alkaloid_model <- lm(ng.g ~ Harvest_Date + Extractor + Extraction_Date + Alkaloid_Plate, data = phenotype_Data)
+summary(alkaloid_model)
+
+# extreacting all the residual data and combining it together 
+Delta_CT_Data <- phenotype_Data[!is.na(phenotype_Data$Delta_CT), ]
+Delta_CT_OG_Data <- phenotype_Data[!is.na(phenotype_Data$Delta_CT_OG), ]
+Alkaloid_Data <- phenotype_Data[!is.na(phenotype_Data$ng.g), ]
+
+filtered_CT_model <- lm(Delta_CT ~ Harvest_Date + Standard + Extraction_Date + Extractor + Data_Set, data = Delta_CT_Data)
+raw_CT_model <- lm(Delta_CT_OG ~ Harvest_Date + Standard + Extraction_Date + Extractor + Data_Set, data = Delta_CT_OG_Data)
+alkaloid_model <- lm(ng.g ~ Harvest_Date  + Alkaloid_Plate, data = Alkaloid_Data)
+
+data1 <- data.frame(Delta_CT_Data$ID, filtered_CT_model$residuals)
+data2 <- data.frame(Delta_CT_OG_Data$ID, raw_CT_model$residuals)
+data3 <- data.frame(Alkaloid_Data$ID, alkaloid_model$residuals)
+
+names(data1)[names(data1) == "Delta_CT_Data.ID"] <- "ID"
+names(data2)[names(data2) == "Delta_CT_OG_Data.ID"] <- "ID"
+names(data3)[names(data3) == "Alkaloid_Data.ID"] <- "ID"
+
+residual_data <- merge(data1, data2, by = "ID", all = TRUE)
+residual_data <- merge(residual_data, data3, by = "ID", all = TRUE)
+
+# This data set is your final phenotype data
+######################
+residual_data
+###################### 
+plot(residual_data$filtered_CT_model.residuals)
+plot(residual_data$raw_CT_model.residuals)
+plot(residual_data$alkaloid_model.residuals)
 
 
 
@@ -378,3 +435,81 @@ write.table(file_to_save, file = "phenotype_data.txt", row.names = FALSE)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+################################################################################
+# no filtering analysis
+################################################################################
+#load in CT data 
+ct_data_raw <- merge(Data_g3p4_Means_all,Data_2x2_Means_all, by.x = c("Treatment", "Data_Set"), by.y = c("Treatment", "Data_Set"))
+names(ct_data_raw)[names(ct_data_raw) == "MeanCP.x"] <- "CP_Fescue"
+names(ct_data_raw)[names(ct_data_raw) == "MeanCP.y"] <- "CP_Epichloe"
+names(ct_data_raw)[names(ct_data_raw) == "Treatment"] <- "ID"
+ct_data_raw[c('Maternal_Parent', 'DeleteMe')] <- str_split_fixed(ct_data_raw$ID, '-', 2)
+ct_data_raw <- subset(ct_data_raw, select = -c(DeleteMe))
+ct_data_raw$DeltaCT_Raw <- ct_data_raw$CP_Fescue - ct_data_raw$CP_Epichloe
+
+# loading in alkaloid data
+alklaoid_raw <- read.csv(alklaoid_loc, header = TRUE, strip.white=TRUE)
+alklaoid_raw[c('Maternal_Parent', 'DeleteMe')] <- str_split_fixed(alklaoid_raw$ID, '-', 2)
+alklaoid_raw <- subset(alklaoid_raw, select = -c(DeleteMe))
+alklaoid_raw$Plate <- as.character(alklaoid_raw$Plate)
+names(alklaoid_raw)[names(alklaoid_raw) == "Plate"] <- "Alkaloid_Plate"
+
+# Merge all data together 
+phenotype_Data_raw <- merge(ct_data_raw, alklaoid_raw, by.x = c("ID", "Maternal_Parent"), by.y = c("ID", "Maternal_Parent") ,all = TRUE)
+phenotype_Data_raw <- merge(phenotype_Data_raw, metadata, by.x = c("ID"), by.y = c("ID") ,all = TRUE)
+phenotype_Data_raw <- merge(phenotype_Data_raw,standard_group, by.x = c("Data_Set"), by.y =c("Data_Set"), all =  TRUE)
+
+
+# Plots comparing raw to unraw (no outliar removal and no efficiency adjustements)
+rawscatter <- ggplot(phenotype_Data_raw, aes(x = DeltaCT_Raw, y = ng.g, color = Maternal_Parent)) +
+  geom_point()
+cleanscatter <- ggplot(phenotype_Data, aes(x = Delta_CT, y = ng.g, color = Maternal_Parent)) +
+  geom_point()
+
+ggarrange(rawscatter,
+          cleanscatter,
+          nrow = 2,
+          ncol = 1)
+
+# Extracting residuals and putting them all together
+Delta_CT_Data_raw <- phenotype_Data_raw[!is.na(phenotype_Data_raw$DeltaCT_Raw), ]
+Alkaloid_Data_raw <- phenotype_Data_raw[!is.na(phenotype_Data_raw$ng.g), ]
+
+CT_model_raw <- lm(DeltaCT_Raw ~ Harvest_Date + Standard + Extraction_Date + Extractor + Data_Set, data = Delta_CT_Data_raw)
+alkaloid_model_raw <- lm(ng.g ~ Harvest_Date  + Alkaloid_Plate, data = Alkaloid_Data_raw)
+
+data4 <- data.frame(Delta_CT_Data_raw$ID, CT_model_raw$residuals)
+data5 <- data.frame(Alkaloid_Data_raw$ID, alkaloid_model_raw$residuals)
+
+nrow(Alkaloid_Data_raw)
+length(alkaloid_model_raw$residuals)
+
+names(data4)[names(data4) == "Delta_CT_Data_raw.ID"] <- "ID"
+names(data5)[names(data5) == "Alkaloid_Data_raw.ID"] <- "ID"
+
+residual_data_raw <- merge(data4, data5, by = "ID", all = TRUE)
+
+################################################################################
+# making graphs to compare residual raw vs residual filterd
+################################################################################
+
+setdiff(residual_data$ID, residual_data_raw$ID)
+nrow(residual_data)
+nrow(residual_data_raw)
+residual_data$ID[duplicated(residual_data$ID) | duplicated(residual_data$ID, fromLast = TRUE)]

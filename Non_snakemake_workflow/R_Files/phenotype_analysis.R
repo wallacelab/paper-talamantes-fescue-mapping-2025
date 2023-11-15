@@ -369,7 +369,7 @@ phenotype_Data$Alkaloid_Plate <- as.character(phenotype_Data$Alkaloid_Plate)
 
 # Saving the data to make a phenotype file
 phenotype_Data$ng.g <- round(phenotype_Data$ng.g, 3)
-write.table(phenotype_Data, file = "phenotype_data.txt", row.names = FALSE)
+write.table(phenotype_Data, file = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/All_Data_Filtered/phenotype_data.txt", row.names = FALSE)
 
 ################################################################################
 # Gathering Residual Data
@@ -381,6 +381,8 @@ plot(phenotype_Data$Delta_CT, col = as.factor(phenotype_Data$Extraction_Date))
 plot(phenotype_Data$ng.g, col = as.factor(phenotype_Data$Extraction_Date))
 
 # Removing other specific duplicates and outliars
+phenotype_Data$Delta_CT[phenotype_Data$ID == "306-3-8"] <- NA
+phenotype_Data$Delta_CT[phenotype_Data$ID == "320-5-26"] <- NA
 phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "306-3-8"] <- NA
 phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "320-5-26"] <- NA
 phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "314" & phenotype_Data$Data_Set != "315x320"), ]
@@ -508,8 +510,207 @@ residual_data_raw <- merge(data4, data5, by = "ID", all = TRUE)
 ################################################################################
 # making graphs to compare residual raw vs residual filterd
 ################################################################################
+metadata <- subset(phenotype_Data, select = c("ID", "Maternal_Parent", "Alkaloid_Plate", "Extraction_Date", "Extractor", "Data_Set", "Standard", "Harvest_Date") )
+residual_data_M <- merge(residual_data, metadata, by="ID")
+residual_data_raw_M <- merge(residual_data_raw, metadata, by="ID")
 
-setdiff(residual_data$ID, residual_data_raw$ID)
-nrow(residual_data)
-nrow(residual_data_raw)
-residual_data$ID[duplicated(residual_data$ID) | duplicated(residual_data$ID, fromLast = TRUE)]
+# Scatter plot of delta CT residuals
+CT_Data <- ggplot(residual_data_M, aes(x=ID, y=filtered_CT_model.residuals)) +
+  geom_point() +
+  ylim(-5,5) +
+  theme(axis.text.x = element_blank()) +
+  labs(title = "Efficiency filtered CT values",
+       x = "ID",
+       y = "Delta CT")
+
+CT_Data_raw <- ggplot(residual_data_raw_M, aes(x=ID, y=CT_model_raw.residuals)) +
+  geom_point() +
+  ylim(-5,5) +
+  theme(axis.text.x = element_blank()) +
+  labs(title = "Raw Data",
+       x = "ID",
+       y = "Delta CT")
+ggarrange(CT_Data, CT_Data_raw, ncol = 1, nrow = 2)
+
+# Histogram plot of delta CT residuals
+plot1 <- ggplot(residual_data_M, aes(x=filtered_CT_model.residuals)) +
+  geom_histogram(bins = 60, fill = "blue", color = "black") +
+  ylim(0,250) +
+  xlim(-8,8) +
+  labs(title = "Efficiency filtered CT values",
+       x = "Delta CT Residuals",
+       y = "Frequency")
+plot2 <- ggplot(residual_data_M, aes(x=raw_CT_model.residuals)) +
+  geom_histogram(bins = 60, fill = "green", color = "black") +
+  ylim(0,250) +
+  xlim(-8,8) +
+  labs(title = "filtered raw CT values",
+       x = "Delta CT Residuals",
+       y = "Frequency")
+plot3 <- ggplot(residual_data_raw_M, aes(x=CT_model_raw.residuals)) +
+  geom_histogram(bins = 60, fill = "red", color = "black") +
+  ylim(0,250) +
+  xlim(-8,8) +
+  labs(title = "Unfiltered raw CT values",
+       x = "Delta CT Residuals",
+       y = "Frequency")
+ggarrange(plot1, plot2, plot3, ncol = 1, nrow = 3)
+
+# Histogram plot of alkaloid residuals
+plot2 <- ggplot(residual_data, aes(x=alkaloid_model.residuals)) +
+  geom_histogram(bins = 60, fill = "blue", color = "black") +
+  labs(title = "Filtered alkaloid values",
+       x = "ng per gram",
+       y = "Frequency")
+plot3 <- ggplot(residual_data_raw, aes(x=alkaloid_model_raw.residuals)) +
+  geom_histogram(bins = 60, fill = "red", color = "black") +
+  labs(title = "Unfiltered raw alkaloid values",
+       x = "ng per gram",
+       y = "Frequency")
+ggarrange(plot2, plot3, ncol = 1, nrow = 2)
+
+# Scatter plot to see if we have groupings of stuff
+plot5 <- ggplot(residual_data_M, aes(x=Data_Set, y=filtered_CT_model.residuals, color=Data_Set)) +
+  geom_point() +
+  theme(axis.text.x = element_blank()) +
+  labs(title = "Efficiency Filtered Delta CT Values",
+       x = "ID",
+       y = "Delta CT")
+plot6 <- ggplot(residual_data_M, aes(x=Data_Set, y=raw_CT_model.residuals, color=Data_Set)) +
+  geom_point() +
+  theme(axis.text.x = element_blank()) +
+  labs(title = "Filtered Raw Delta CT Values",
+       x = "ID",
+       y = "Delta CT")
+plot7 <- ggplot(residual_data_raw_M, aes(x=Data_Set, y=CT_model_raw.residuals, color=Data_Set)) +
+  geom_point() +
+  labs(title = "Unfiltered Delta CT Values",
+       x = "ID",
+       y = "Delta CT")
+ggarrange(plot5, plot6, plot7, ncol = 1, nrow = 3)
+
+# scatterplot plot of alkaloid residuals
+plot7 <- ggplot(residual_data_M, aes(x=Alkaloid_Plate, y=alkaloid_model.residuals, color=Alkaloid_Plate)) +
+  geom_point() +
+  labs(title = "Filtered Alkaloid Values",
+       x = "ID",
+       y = "ng/g")
+plot8 <- ggplot(residual_data_raw_M, aes(x=Alkaloid_Plate, y=alkaloid_model_raw.residuals, color=Alkaloid_Plate)) +
+  geom_point() +
+  labs(title = "Unfiltered Alkaloid Values",
+       x = "ID",
+       y = "ng/g")
+ggarrange(plot7, plot8, ncol = 1, nrow = 2)
+
+################################################################################
+# Making graphs more usefull for presentations, with residuals
+################################################################################
+write.table(residual_data_M, file = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/All_Data_Filtered/residual_data.txt", row.names = FALSE)
+
+# is the residual data linearly related
+plot(residual_data$filtered_CT_model.residuals, residual_data$alkaloid_model.residuals) # fuck no
+
+# Make the above graph just better
+model <- lm(filtered_CT_model.residuals ~ alkaloid_model.residuals, data = residual_data_M)
+# Extract the R-squared value
+rsquared <- summary(model)$r.squared
+# Create a scatter plot
+ggplot(residual_data_M, aes(x = alkaloid_model.residuals, y = filtered_CT_model.residuals, color = Maternal_Parent)) +
+  geom_point() +
+  annotate("text", x = -12000, y = 2.4, label = paste("R-squared =", round(rsquared, 3))) +
+  theme_bw() +
+  labs(title = "Scatter Plot with R-squared Value",
+       x = "Alkaloid Residuals",
+       y = "Delta CT Residuals")
+## THis next plot looks at the non residual data
+# Make the above graph just better
+model <- lm(Delta_CT ~ ng.g, data = phenotype_Data)
+# Extract the R-squared value
+rsquared <- summary(model)$r.squared
+# Create a scatter plot
+ggplot(phenotype_Data, aes(x = ng.g, y = Delta_CT)) +
+  geom_point() +
+  annotate("text", x = 35000, y = 5, label = paste("R-squared =", round(rsquared, 3))) +
+  labs(title = "Scatter Plot with R-squared Value",
+       x = "Alkaloid Residuals",
+       y = "Delta CT Residuals")
+
+# Showing us getting rid of terrible batch effects.
+#Using the OG CP values (not efficiency adjusted)
+plot1 <- ggplot(all_Data, aes(x=Delta_CT, color=Data_Set)) + 
+  geom_histogram(binwidth=.2, fill = "white")
+plot2 <- ggplot(residual_data_M, aes(x=filtered_CT_model.residuals, color=Data_Set)) + 
+  geom_histogram(binwidth=.2, fill = "white") +
+  xlab("Delta CT Residuals")
+ggarrange(plot1, plot2, ncol = 1, nrow = 2)
+
+# Showing Box plots by maternal parent
+residual_data_M$Maternal_Parent <- as.factor(residual_data_M$Maternal_Parent)
+removeems <- c("311","318","319")
+residual_data_M_2 <- subset(residual_data_M, !(Maternal_Parent %in% removeems))
+# Getting the letters for the plots
+anova <- aov(alkaloid_model.residuals ~ Maternal_Parent, data = residual_data_M_2)
+summary(anova)
+tukey <- TukeyHSD(anova)
+print(tukey)
+Tk <- group_by(residual_data_M_2, Maternal_Parent) %>%
+  summarise(mean=mean(alkaloid_model.residuals), quant = quantile(alkaloid_model.residuals, probs = .75, na.rm = TRUE)) %>%
+  arrange(desc(mean))
+cld <- multcompLetters4(anova, tukey) #forgot why we do this
+print(cld)
+cld <- as.data.frame.list(cld$Maternal_Parent)
+Tk$cld <- cld$Letters
+print(Tk)
+
+
+### Making Boxplot ###
+
+ggplot(residual_data_M_2, aes(x=Maternal_Parent, y=alkaloid_model.residuals, fill = Maternal_Parent, group=Maternal_Parent)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4) +
+  theme_bw() +
+  xlab("Plant Lines") +
+  ylab("Alkaloid Residuals") +
+  scale_fill_discrete(name = "Plant Lines") + 
+  geom_text(data = Tk, aes(label = cld, x = Maternal_Parent, y = quant), 
+            vjust = -1.3, hjust = 1.1, size = 5)
+
+# Getting the letters for the plots
+anova <- aov(filtered_CT_model.residuals ~ Maternal_Parent, data = residual_data_M_2)
+summary(anova)
+tukey <- TukeyHSD(anova)
+print(tukey)
+Tk <- group_by(residual_data_M_2, Maternal_Parent) %>%
+  summarise(mean=mean(filtered_CT_model.residuals), quant = quantile(filtered_CT_model.residuals, probs = .75, na.rm = TRUE)) %>%
+  arrange(desc(mean))
+cld <- multcompLetters4(anova, tukey) #forgot why we do this
+print(cld)
+cld <- as.data.frame.list(cld$Maternal_Parent)
+Tk$cld <- cld$Letters
+print(Tk)
+ggplot(residual_data_M_2, aes(x=Maternal_Parent, y=filtered_CT_model.residuals, fill = Maternal_Parent, group=Maternal_Parent)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4) +
+  theme_bw() +
+  xlab("Plant Lines") +
+  ylab("Delta CT residuals") +
+  scale_fill_discrete(name = "Plant Lines") +
+  geom_text(data = Tk, aes(label = cld, x = Maternal_Parent, y = quant), 
+            vjust = -1.3, hjust = 1.1, size = 5)
+
+
+
+gvlma(alkaloid_model)
+gvlma(alkaloid_model_raw)
+
+
+
+
+
+
+
+
+
+
+
+
+
+

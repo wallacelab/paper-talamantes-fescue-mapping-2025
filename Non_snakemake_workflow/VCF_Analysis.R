@@ -5,6 +5,8 @@ library(igraph)
 library(ggraph)
 library(qqman)
 
+# This makes manhattan plots
+
 # Load in sample
 depth = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/VCF/Variants_all.depth.txt"
 depth <- read.table(depth, header = FALSE)
@@ -124,7 +126,7 @@ ggplot(data=dummy_data_num_only, aes(x=Avg.Depth)) +
 # Manhattan plot in R
 ############################
 
-mlm_stats_loc="/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Hap_Map/MLM_16Pcs_stats.txt"
+mlm_stats_loc="/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Hap_Map/Linear_Models/MLM_16Pcs_stats.txt"
 mlm_stats <- read.table(mlm_stats_loc, header = TRUE, sep = '\t')
 
 mlm_stats$Chr<-gsub("PTG","",as.character(mlm_stats$Chr))
@@ -139,12 +141,27 @@ manhattan(mlm_stats, chr = "Chr", bp = "Pos", p = "p", snp = "Marker",
 # Put a line on graph
 # geom_hline(yintercept = -log10(sig), color = "grey40", linetype = "dashed")
 
+### The 16 pc GLM with 50 permutations
+GLM_16_PCs_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Hap_Map/Linear_Models/GLM_16PC_50_Perm_Stats.txt"
+GLM_16_PCs <- read.csv(GLM_16_PCs_loc, header = TRUE, strip.white=TRUE, sep = '\t')
+GLM_16_PCs$Chr<-gsub("PTG","",as.character(GLM_16_PCs$Chr))
+GLM_16_PCs$Chr<-gsub("L","",as.character(GLM_16_PCs$Chr))
+GLM_16_PCs$Chr<- as.numeric(GLM_16_PCs$Chr)
+GLM_16_PCs <- GLM_16_PCs[-c(1), ]
+manhattan(GLM_16_PCs, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", 
+          main = "P values of Delta CT", cex = 1, col = c("blue", "red","darkgrey","purple"))
 
-
-
-
-
-
+### The 16 pc GLM with 1 permutations residule data
+GLM_16_PCs_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Hap_Map/Linear_Models/GLM_16PCs_1_perm_residules.txt"
+GLM_16_PCs <- read.csv(GLM_16_PCs_loc, header = TRUE, strip.white=TRUE, sep = '\t')
+# GLM_16_PCs <- GLM_16_PCs[GLM_16_PCs$Trait == "filtered_CT_model.residuals", ]
+GLM_16_PCs <- GLM_16_PCs[GLM_16_PCs$Trait == "alkaloid_model.residuals", ]
+GLM_16_PCs$Chr<-gsub("PTG","",as.character(GLM_16_PCs$Chr))
+GLM_16_PCs$Chr<-gsub("L","",as.character(GLM_16_PCs$Chr))
+GLM_16_PCs$Chr<- as.numeric(GLM_16_PCs$Chr)
+GLM_16_PCs <- GLM_16_PCs[-c(1), ]
+manhattan(GLM_16_PCs, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", ylim = c(0, 4.2), 
+          main = "P values of Alkaloid Data", cex = 1, col = c("blue", "red","darkgrey","purple")) 
 
 
 

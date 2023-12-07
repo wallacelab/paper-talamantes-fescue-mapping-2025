@@ -16,19 +16,137 @@ import os
 def main():
     # vaeiables 
     data_folder = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/VCF/haplotypes/Haplotype_Eval_Data"
+    og_vcf_loc = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/VCF/all_maf_05_min_65_no_indels_not_multiallelic_315x320.vcf"
+    full_vcf_loc = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/VCF/all_maf_05_min_65_no_indels_not_multiallelic.vcf"
+    # Creating variables
     window_size = 15
     step = 3
+
+    # Loading in files
     # args.vcf is the vcf file
     # args.parent is a file of predicted parents
     args = parse_args()
     vcf_file = VCF_importer(args.vcf)
-    parent_file = csv_importer(args.parent)
+    parent_file = csv_importer(args.parent) 
+    og_vcf = VCF_importer(og_vcf_loc)
+    full_vcf = VCF_importer(full_vcf_loc)
     # haplotype_percents(vcf_file, parent_file, data_folder, window_size, step)
     # haplotype_percents_parents(vcf_file, parent_file, data_folder, window_size, step)
-    allelfrequncie(vcf_file,data_folder)
+    # allelfrequncie(vcf_file,data_folder)
+    # vcf_vs_beagle(og_vcf, vcf_file, data_folder)
+    find_geno_depth(full_vcf, data_folder)
+
+# This takes the depth feild and divides it by number of progeny without missing data.
+def find_geno_depth(full_vcf, data_folder):
+    results_array = np.zeros((len(full_vcf), 2), dtype='<U30')
+    full_vcf['POS'] = full_vcf['POS'].astype(str)
+    full_vcf['ID'] = pd.concat([full_vcf['CHROM'], full_vcf['POS']], axis=1).apply(lambda row: ''.join(row), axis=1)
+    for row in range(0, len(full_vcf)):
+        ID = full_vcf.iloc[row,2]
+        results_array[row,0] = ID
+        # Extracting the depth from VCF file
+        infoline = full_vcf.iloc[row, 7]
+        infoline = infoline.split(";")
+        dpfeild = infoline[0]
+        dpfeild = int(dpfeild[3:])
+        not_nullcount = 0
+        
+        for col in range(9,len(full_vcf.columns)):
+            genotype = full_vcf.iloc[row,col]
+            genotype = genotype[:3]
+            if (genotype!="./."):
+                # print(dpfeild, genotype)
+                not_nullcount = not_nullcount + 1
+        results_array[row,1] = dpfeild/not_nullcount
+    file_name = "genotype_depth.csv"    
+    file_name = os.path.join(data_folder, file_name)
+    numeric_indices = np.char.isnumeric(results_array)
+    # Convert the numeric values to float
+    results_array[numeric_indices] = results_array[numeric_indices].astype(float)
+    # Save the array with appropriate format specifier
+    np.savetxt('output.txt', results_array, fmt='%s')
+    np.savetxt(file_name, results_array, delimiter=",", fmt='%s')
+
+def pseudo_testcross_detector(full_vcf, data_folder):
+    print("Hi")
 
 
+# this function will compare the output of beagle to its regular vcf counterpart to see how much it changes.
+def vcf_vs_beagle(og_vcf, beagle_vcf, data_folder):
+    # Creating unique identifiers
+    og_vcf['POS'] = og_vcf['POS'].astype(str)
+    og_vcf['ID'] = pd.concat([og_vcf['CHROM'], og_vcf['POS']], axis=1).apply(lambda row: ''.join(row), axis=1)
+    beagle_vcf['POS'] = beagle_vcf['POS'].astype(str)
+    beagle_vcf['ID'] = pd.concat([beagle_vcf['CHROM'], beagle_vcf['POS']], axis=1).apply(lambda row: ''.join(row), axis=1)
+    identifier = beagle_vcf[["ID"]]
+    og_vcf2 = pd.merge(og_vcf, identifier, on='ID', how='inner')
+    
+    print(og_vcf2.head())
+    print(og_vcf2.shape)
+    print(beagle_vcf.shape)
+    results_array = np.zeros((len(beagle_vcf), 6))
+    results_array = results_array.astype(object)
 
+    # sets up a for loop to go through both files
+    for row  in range(0, len(beagle_vcf)):
+        same = 0
+        Homo2Het = 0 
+        Het2Homo = 0
+        Het2Het = 0
+        filled = 0
+        for col in range(9,len(beagle_vcf.columns)):
+            bealge = beagle_vcf.iloc[row,col]
+            og = og_vcf2.iloc[row,col]
+            og = og[:3]
+            og = og.replace("/","|")
+            print(og," ", bealge)
+
+            # Checking if 
+            ogID = og_vcf2.iloc[row,2]
+            beagleID = beagle_vcf.iloc[row,2]
+
+            # This massive loop checks if the IDs are the same then places it in the results table
+            # It then checks for 3 different outcomes and adds one to them wherever it hits
+            if (ogID == beagleID):
+                if (bealge == og):
+                    print("Its the same", same)
+                    same = same + 1
+                    results_array[row,1] = same
+
+                elif og == ".|."  and bealge != ".|.":
+                    print("Thats a 0", filled)
+                    filled = filled + 1
+                    results_array[row,2] = filled
+
+                elif (og == "1|1" or og == "0|0") and (bealge == "1|0" or bealge == "0|1"):
+                    print("Thats homo!", Homo2Het)
+                    Homo2Het = Homo2Het + 1
+                    results_array[row,3] = Homo2Het
+
+                elif (og == "0|1" or og == "1|0") and (bealge == "1|1" or bealge == "0|0"):
+                    print("Thats homo!", Het2Homo)
+                    Het2Homo = Het2Homo + 1
+                    results_array[row,4] = Het2Homo 
+
+                elif (og == "0|1" and bealge == "1|0" ):
+                    print("Thats hetero!", Het2Het)
+                    Het2Het = Het2Het + 1
+                    results_array[row,5] = Het2Het
+
+                elif (og == "1|0" and bealge == "0|1" ):
+                    print("Thats hetero!", Het2Het)
+                    Het2Het = Het2Het + 1
+                    results_array[row,5] = Het2Het
+                else:
+                    y =+ 1
+
+    resultsdf = pd.DataFrame(results_array, columns =['ID','Same', 'Filled', 'Homo2Het', 'Het2Homo', 'Het2Het'])
+    file_name = "beagle_vs_vcf.csv"
+    file_name = os.path.join(data_folder, file_name)
+    resultsdf.to_csv(file_name)
+
+
+ 
 
 
 # This creates a file with percent similarity for each sliding window to each progeny to parental haplotype and saves the data.

@@ -19,3 +19,4 @@ SLURM_GENERATOR_BWA.pl
 SLURM_GENERATOR_Sorting_BAMS.pl
 SLURM_GENERATOR_Remove_Dupes.pl
 Slurm_SNP_call.sh
+SNP_Filering.sh

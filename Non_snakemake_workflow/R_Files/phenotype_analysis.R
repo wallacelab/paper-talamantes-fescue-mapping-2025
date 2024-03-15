@@ -317,7 +317,8 @@ ggplot(alklaoid_filtered, aes(x=ng.g, fill=Plate)) +
   geom_histogram(binwidth=1000, color = "black")
 
 ggplot(alklaoid_filtered, aes(x=ng.g, fill=Maternal_Parent)) + 
-  geom_histogram(binwidth=1000, color = "black")  
+  geom_histogram(binwidth=1000, color = "black")  +
+  ggtitle("Alkaloid Data Outliars Removed")
 
 
 # Making letters for groups

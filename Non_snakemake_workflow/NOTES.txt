@@ -20,3 +20,15 @@ SLURM_GENERATOR_Sorting_BAMS.pl
 SLURM_GENERATOR_Remove_Dupes.pl
 Slurm_SNP_call.sh
 SNP_Filering.sh
+
+
+
+
+For running biparental families:
+
+1. call snps using -b that points to the location of a vcf file of the family of interest
+2. filter the resulting bcf file using vcf tools
+3. use filtered vcf file with beagle
+
+
+

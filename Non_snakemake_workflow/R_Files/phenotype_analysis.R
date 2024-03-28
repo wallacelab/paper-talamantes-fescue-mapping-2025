@@ -1,4 +1,5 @@
-# Objective: This code will explore the phenotype data, specifically the alklaoid data
+# Objective: This code will take the CT data and make it into delta ct data. It will then import
+# the rest of the phenotype data and create residual data. 
 # Import libraries
 library(tidyverse)
 library(multcompView)

@@ -177,7 +177,18 @@ manhattan(testcross_stats, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", yli
 
 
 
-
+### 312x314 analysis
+testcross_stats_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Hap_Map/Linear_Models/MLM_312x314_65_min_5_maf_stats.txt"
+testcross_stats_loc="/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Hap_Map/Linear_Models/GLM_9_PC_Only_test_cross.txt"
+testcross_stats <- read.table(testcross_stats_loc, header = TRUE, sep = '\t')
+testcross_stats$Chr<-gsub("PTG","",as.character(testcross_stats$Chr))
+testcross_stats$Chr<-gsub("L","",as.character(testcross_stats$Chr))
+testcross_stats$Chr<- as.numeric(testcross_stats$Chr)
+testcross_stats <- testcross_stats[-c(1), ]
+# testcross_stats <- testcross_stats[testcross_stats$Trait == "filtered_CT_model.residuals", ]
+testcross_stats <- testcross_stats[testcross_stats$Trait == "alkaloid_model.residuals", ]
+manhattan(testcross_stats, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", ylim = c(0, 5),
+          main = "P values of alkaloid residuals of 314x312", cex = 1, col = c("blue", "red","darkgrey","purple"))
 
 
 

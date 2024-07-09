@@ -21,7 +21,8 @@ merged_df$Status[is.na(merged_df$Status)] <- "dead"
 write.table(merged_df, file = save_loc, sep = "\t", row.names = FALSE)
 
 # Extract a certain cross
-only314x310 <- merged_df[merged_df$Status == "Alive" & (merged_df$Maternal_Parent %in% c("314", "310")) & (merged_df$Father %in% c("314", "310")), ]
+single_cross <- merged_df[merged_df$Status == "Alive" & (merged_df$Maternal_Parent %in% c("319", "320")) & (merged_df$Father %in% c("319", "320")), ]
+write.csv(single_cross, "/home/drt06/Downloads/Plants2Keep/320x319")
 
 
 ### Visualize the best crosses
@@ -30,7 +31,7 @@ final_List <- subset(final_List, Status != "dead")
 # final_List <- subset(final_List, Concentration != "#N/A")
 final_List$Combo <- paste(final_List$Maternal_Parent, final_List$Father, sep = "-")
 cross_count <- data.frame(table(final_List$Combo))
-cross_count_subseted <- cross_count[cross_count$Freq >= 15, ]
+cross_count_subseted <- cross_count[cross_count$Freq >= 10, ]
 
 ggplot(cross_count_subseted,aes( x = reorder(Var1, -Freq), y = Freq)) +
   geom_bar(stat = "identity", fill = "blue") +

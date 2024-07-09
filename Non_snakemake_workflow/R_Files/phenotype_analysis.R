@@ -546,7 +546,7 @@ plot2 <- ggplot(residual_data_M, aes(x=raw_CT_model.residuals)) +
   geom_histogram(bins = 60, fill = "green", color = "black") +
   ylim(0,250) +
   xlim(-8,8) +
-  labs(title = "filtered raw CT values",
+  labs(title = "Outliar filtered raw CT values",
        x = "Delta CT Residuals",
        y = "Frequency")
 plot3 <- ggplot(residual_data_raw_M, aes(x=CT_model_raw.residuals)) +
@@ -581,7 +581,7 @@ plot5 <- ggplot(residual_data_M, aes(x=Data_Set, y=filtered_CT_model.residuals, 
 plot6 <- ggplot(residual_data_M, aes(x=Data_Set, y=raw_CT_model.residuals, color=Data_Set)) +
   geom_point() +
   theme(axis.text.x = element_blank()) +
-  labs(title = "Filtered Raw Delta CT Values",
+  labs(title = "Outliar Filtered Raw Delta CT Values",
        x = "ID",
        y = "Delta CT")
 plot7 <- ggplot(residual_data_raw_M, aes(x=Data_Set, y=CT_model_raw.residuals, color=Data_Set)) +
@@ -704,13 +704,61 @@ gvlma(alkaloid_model)
 gvlma(alkaloid_model_raw)
 
 
+################################################################################
+# Adding the 2024 phenotype data
+################################################################################
+# Loading in the 2024 metadata
+mini_medata_2024_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/2024_Data/Meta_Data_2024.csv"
+mini_medata_2024 <- read.csv(mini_medata_2024_loc, header = TRUE, strip.white=TRUE)
+
+Father_data_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Meta_Data/Mother_Father_Data.csv"
+Father_data <- read.csv(Father_data_loc, header = TRUE, strip.white=TRUE)
+
+metadata_2024 <- merge(mini_medata_2024, Father_data, by.x = c("ID"), by.y = c("ID"), all = FALSE)
+
+# Loading in the biomass data
+all_2x2_2024_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/2024_Data/all_2x2_2024.csv"
+all_g3p4_2024_loc <-  "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/2024_Data/all_g3p4_2024.csv"
+
+all_2x2_2024 <- read.csv(all_2x2_2024_loc, header = TRUE, strip.white=TRUE)
+all_g3p4_2024 <- read.csv(all_g3p4_2024_loc, header = TRUE, strip.white=TRUE)
+
+# Preparing the 2024 biomass data
+
+all_2x2_2024$Concentration <- as.numeric(all_2x2_2024$Concentration)
+all_g3p4_2024$Concentration <- as.numeric(all_g3p4_2024$Concentration)
+
+all_2x2_2024_means <- Data_Filtering(all_2x2_2024) # method filters data and leaves only samples
+all_g3p4_2024_means <- Data_Filtering(all_g3p4_2024)
+
+# Method seperates standards from data,  to get their mean and adds copy number and log copy number
+std_2x2_2024_means <- FindStandardMeans(all_2x2_2024,118)
+std_g3p4_2024_means <- FindStandardMeans(all_g3p4_2024,230) 
+
+# method adjusts the CP value based on efficiency
+# Also filters out samples that are 3x away from std, too low, too high, ect. 
+Data_Sets_2024 <- unique(std_g3p4_2024_means$Data_Set) #Creating list of data sets for next method
+
+Data_2x2_2024_AdjCP <- CpAdjusterP2(std_2x2_2024_means, all_2x2_2024_means,Data_Sets_2024) 
+Data_g3p4_2024_AdjCP <- CpAdjusterP2(std_g3p4_2024_means, all_g3p4_2024_means,Data_Sets_2024) 
+
+#### The data set above contains raw data and efficiency adjusted data. ####
+#### Part of the process in creating these filters out outliars. ####
+
+#### making delta CT values ####
 
 
+#Combining data set and naming columns
+all_Data_2024 <- merge(Data_2x2_2024_AdjCP,Data_g3p4_2024_AdjCP, by.x = c("Treatment", "Data_Set"), by.y = c("Treatment", "Data_Set"))
+Columns <- colnames(all_Data_2024)
+Columns <- gsub("\\.y$", ".Fescue", Columns)
+Columns <- gsub("\\.x$", ".Epichloe", Columns)
+colnames(all_Data_2024) <- Columns 
+all_Data_2024$adjCP.Fescue <- as.numeric(all_Data_2024$adjCP.Fescue)
+all_Data_2024$adjCP.Epichloe <- as.numeric(all_Data_2024$adjCP.Epichloe)
 
-
-
-
-
+# Dela CT is Fescue - EPichloe (adjusted)
+all_Data_2024$Delta_CT <- all_Data_2024$adjCP.Fescue - all_Data_2024$adjCP.Epichloe
 
 
 

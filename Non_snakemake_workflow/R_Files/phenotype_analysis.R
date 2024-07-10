@@ -174,6 +174,15 @@ redoner<- function(redoes,sampledata){
   return(sampledata)
 }
 
+# Small function to get r squared cause i do it so much
+getrsqured <- function(dataset, column1, column2){
+  
+  model <- lm(formula(paste(column1, "~", column2)), data = dataset)
+  r_squared <- summary(model)$r.squared
+  return(r_squared)
+  
+}
+
 ############
 # End of functions
 ############
@@ -758,7 +767,109 @@ all_Data_2024$adjCP.Fescue <- as.numeric(all_Data_2024$adjCP.Fescue)
 all_Data_2024$adjCP.Epichloe <- as.numeric(all_Data_2024$adjCP.Epichloe)
 
 # Dela CT is Fescue - EPichloe (adjusted)
-all_Data_2024$Delta_CT <- all_Data_2024$adjCP.Fescue - all_Data_2024$adjCP.Epichloe
+all_Data_2024$Delta_CT_adj <- all_Data_2024$adjCP.Fescue - all_Data_2024$adjCP.Epichloe
+all_Data_2024$Delta_CT_OG <- all_Data_2024$MeanCP.Fescue - all_Data_2024$MeanCP.Epichloe
+
+# all_data_2024 now contains the proper biomass data
+#### adding the alkaloid data ####
+alkaloid_2024_loc <- "/home/drt06/Documents/Tall_fescue/Alkaloid_Data/2024_samples/alkaloids_2024_Rready.csv"
+alkaloid_2024 <- read.csv(alkaloid_2024_loc, header = TRUE, strip.white=TRUE)
+colnames(alkaloid_2024)[colnames(alkaloid_2024) == "ID"] <- "Treatment"
+
+all_Data_2024 <- merge(all_Data_2024,alkaloid_2024,by = c("Treatment"))
+
+# adding the meta data
+colnames(metadata_2024)[colnames(metadata_2024) == "ID"] <- "Treatment"
+all_Data_2024 <- merge(all_Data_2024,metadata_2024,by = c("Treatment"))
+
+all_Data_2024$Mother <- as.character(all_Data_2024$Mother)
+all_Data_2024$Father <- as.character(all_Data_2024$Father)
+
+
+#all_Data_2024 is the final data set. We can take this and do analysis on it.
+# CP values, efficiency adjusted cp values and alkaloid values
+
+################################################################################
+# exploring relationship betweeon 2024 pehnotypes
+################################################################################
+
+# Find r squred between ct values and alkaloid values 2024 
+model_AlkxCTadj <- lm(ng.g ~ Delta_CT_adj, data = all_Data_2024)
+summary_model_AlkxCTadj <- summary(model_AlkxCTadj)
+r_squared_AlkxCTadj_2024 <- summary_model_AlkxCTadj$r.squared
+
+model_AlkxCTOG <- lm(ng.g ~ Delta_CT_OG, data = all_Data_2024)
+summary_model_AlkxCTOG <- summary(model_AlkxCTOG)
+r_squared_AlkxCTOG_2024 <- summary_model_AlkxCTOG$r.squared
+
+ggplot(all_Data_2024, aes(x = Delta_CT_adj, y = ng.g)) +
+  geom_point(aes(color = Mother)) +
+  annotate("text", x = min(all_Data_2024$Delta_CT_adj), y = max(all_Data_2024$ng.g) - 10000, label = paste("R-squared =", round(r_squared_AlkxCTadj_2024, 3)), size = 5, hjust = 0) + 
+  labs(title = "Scatter Plot DeltaCT efficiency adj vs Alkaloid ng/g 2024",
+       x = "Delta CT Efficiency Adjusted",
+       y = "ng/g") +
+  theme_bw()
+
+ggplot(all_Data_2024, aes(x = Delta_CT_OG, y = ng.g)) +
+  geom_point(aes(color = Data_Set)) +
+  annotate("text", x = min(all_Data_2024$Delta_CT_OG), y = max(all_Data_2024$ng.g) - 10000, label = paste("R-squared =", round(r_squared_AlkxCTOG_2024, 3)), size = 5, hjust = 0) + 
+  labs(title = "Scatter Plot DeltaCT efficiency adj vs Alkaloid ng/g 2024",
+       x = "Delta CT Efficiency Adjusted",
+       y = "ng/g") +
+  theme_bw()
+
+################################################################################
+# combining 2023 data and 2024 data
+################################################################################
+# phenotype data is what has the important data with metadata
+phenotype_Data$Year <- "2023"
+colnames(phenotype_Data)[colnames(phenotype_Data) == "ID"] <- "Treatment"
+colnames(phenotype_Data)[colnames(phenotype_Data) == "Delta_CT"] <- "Delta_CT_adj"
+all_Data_2024$Year <- "2024"
+
+all_Data_2023_sub <- phenotype_Data[, c("Treatment", "Data_Set","Delta_CT_adj", "Delta_CT_OG", "ng.g", "Alkaloid_Plate", "Year", "Extraction_Date", "Extractor", "Harvest_Date")]
+all_Data_2024_sub <- all_Data_2024[,c("Treatment", "Data_Set","Delta_CT_adj", "Delta_CT_OG", "ng.g", "Alkaloid_Plate", "Year", "Extraction_Date", "Extractor", "Harvest_Date")]
+
+all_data_2023_2024 <- merge(all_Data_2023_sub,all_Data_2024_sub, by = "Treatment")
+Columns <- colnames(all_data_2023_2024)
+Columns <- gsub("\\.x$", ".2023", Columns)
+Columns <- gsub("\\.y$", ".2024", Columns)
+colnames(all_data_2023_2024) <- Columns 
+
+################################################################################
+# Graph relations between 2023 and 2024
+################################################################################
+r_CT_23x24 <- getrsqured(dataset = all_data_2023_2024, "Delta_CT_adj.2023", "Delta_CT_adj.2024")
+r_Alk_23x24 <- getrsqured(dataset = all_data_2023_2024, "ng.g.2023", "ng.g.2024")
+
+
+ggplot(all_data_2023_2024, aes(x = Delta_CT_adj.2023, y = Delta_CT_adj.2024)) +
+  geom_point() +
+  annotate("text", x = -12, y = -12, label = paste("R-squared =", round(r_CT_23x24, 3)), size = 5, hjust = 0) + 
+  labs(title = "Scatter Plot DeltaCT efficiency adj 2023 vs 2024",
+       x = "Delta CT Efficiency Adjusted",
+       y = "ng/g") +
+  theme_bw()
+
+ggplot(all_data_2023_2024, aes(x = ng.g.2023, y = ng.g.2024)) +
+  geom_point() +
+  annotate("text", x = 10000, y = 10000, label = paste("R-squared =", round(r_Alk_23x24, 3)), size = 5, hjust = 0) + 
+  labs(title = "Scatter Plot DeltaCT efficiency adj 2023 vs 2024",
+       x = "Delta CT Efficiency Adjusted",
+       y = "ng/g") +
+  theme_bw()
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

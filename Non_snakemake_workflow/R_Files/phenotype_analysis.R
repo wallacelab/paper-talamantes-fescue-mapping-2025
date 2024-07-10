@@ -803,7 +803,7 @@ summary_model_AlkxCTOG <- summary(model_AlkxCTOG)
 r_squared_AlkxCTOG_2024 <- summary_model_AlkxCTOG$r.squared
 
 ggplot(all_Data_2024, aes(x = Delta_CT_adj, y = ng.g)) +
-  geom_point(aes(color = Mother)) +
+  geom_point(aes(color = Data_Set)) +
   annotate("text", x = min(all_Data_2024$Delta_CT_adj), y = max(all_Data_2024$ng.g) - 10000, label = paste("R-squared =", round(r_squared_AlkxCTadj_2024, 3)), size = 5, hjust = 0) + 
   labs(title = "Scatter Plot DeltaCT efficiency adj vs Alkaloid ng/g 2024",
        x = "Delta CT Efficiency Adjusted",
@@ -813,8 +813,8 @@ ggplot(all_Data_2024, aes(x = Delta_CT_adj, y = ng.g)) +
 ggplot(all_Data_2024, aes(x = Delta_CT_OG, y = ng.g)) +
   geom_point(aes(color = Data_Set)) +
   annotate("text", x = min(all_Data_2024$Delta_CT_OG), y = max(all_Data_2024$ng.g) - 10000, label = paste("R-squared =", round(r_squared_AlkxCTOG_2024, 3)), size = 5, hjust = 0) + 
-  labs(title = "Scatter Plot DeltaCT efficiency adj vs Alkaloid ng/g 2024",
-       x = "Delta CT Efficiency Adjusted",
+  labs(title = "Scatter Plot DeltaCT OG vs Alkaloid ng/g 2024",
+       x = "Delta CT OG Adjusted",
        y = "ng/g") +
   theme_bw()
 
@@ -840,6 +840,7 @@ colnames(all_data_2023_2024) <- Columns
 # Graph relations between 2023 and 2024
 ################################################################################
 r_CT_23x24 <- getrsqured(dataset = all_data_2023_2024, "Delta_CT_adj.2023", "Delta_CT_adj.2024")
+r_CTOG_23x24 <- getrsqured(dataset = all_data_2023_2024, "Delta_CT_OG.2023", "Delta_CT_OG.2024")
 r_Alk_23x24 <- getrsqured(dataset = all_data_2023_2024, "ng.g.2023", "ng.g.2024")
 
 
@@ -847,16 +848,24 @@ ggplot(all_data_2023_2024, aes(x = Delta_CT_adj.2023, y = Delta_CT_adj.2024)) +
   geom_point() +
   annotate("text", x = -12, y = -12, label = paste("R-squared =", round(r_CT_23x24, 3)), size = 5, hjust = 0) + 
   labs(title = "Scatter Plot DeltaCT efficiency adj 2023 vs 2024",
-       x = "Delta CT Efficiency Adjusted",
-       y = "ng/g") +
+       x = "Delta CT Efficiency Adjusted 2023",
+       y = "Delta CT Efficiency Adjusted 2024") +
+  theme_bw()
+
+ggplot(all_data_2023_2024, aes(x = Delta_CT_OG.2023, y = Delta_CT_OG.2024)) +
+  geom_point() +
+  annotate("text", x = -6, y = -6, label = paste("R-squared =", round(r_CTOG_23x24, 3)), size = 5, hjust = 0) + 
+  labs(title = "Scatter Plot DeltaCT OG 2023 vs 2024",
+       x = "Delta CT OG 2023",
+       y = "Delta CT OG 2024") +
   theme_bw()
 
 ggplot(all_data_2023_2024, aes(x = ng.g.2023, y = ng.g.2024)) +
   geom_point() +
   annotate("text", x = 10000, y = 10000, label = paste("R-squared =", round(r_Alk_23x24, 3)), size = 5, hjust = 0) + 
-  labs(title = "Scatter Plot DeltaCT efficiency adj 2023 vs 2024",
-       x = "Delta CT Efficiency Adjusted",
-       y = "ng/g") +
+  labs(title = "Alkaloid amounts 2023 vs 2024",
+       x = "ng/g 2023",
+       y = "ng/g 2024") +
   theme_bw()
 
 

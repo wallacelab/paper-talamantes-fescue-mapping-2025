@@ -2,7 +2,7 @@
 library(ggplot2)
 
 # Loading in data
-final_List_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/All_Data_Filtered/residual_data_father_included_2.txt"
+final_List_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/All_Data_Filtered/residual_data_father_included_2.txt"
 
 
 

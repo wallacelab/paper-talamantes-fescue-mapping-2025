@@ -14,14 +14,14 @@ library(car)
 # Adding in the data sets
 
 # This first set of data is all the data corresponding to the first set of standards
-all_2x2_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/all_2x2_Red_Blue.csv"
-all_g3p4_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/all_g3p4_correspond_to_Red_Blue_Standards.csv"
+all_2x2_loc <- "/home/darrian/Desktop/UGA/QPCR_Data_Wrangler/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/all_2x2_Red_Blue.csv"
+all_g3p4_loc <- "/home/darrian/Desktop/UGA/QPCR_Data_Wrangler/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/all_g3p4_correspond_to_Red_Blue_Standards.csv"
 # This set of data corresponds to the second set of standards and a few redoes. Will be added towrds end
-all_2x2_2_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/1041-end-redoes_2x2.csv"
-all_g3p4_2_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/1041-end-redoes_g3p4.csv"  
+all_2x2_2_loc <- "/home/darrian/Desktop/UGA/QPCR_Data_Wrangler/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/1041-end-redoes_2x2.csv"
+all_g3p4_2_loc <- "/home/darrian/Desktop/UGA/QPCR_Data_Wrangler/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/1041-end-redoes_g3p4.csv"  
 # This set of data is for parents and cross 305x320, will be added twords end
-all_315x320_2x2_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Raw_Data/CT_Values/315x320_2x2.csv"
-all_315x320_g3p4_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Raw_Data/CT_Values/315x320_G3P4.csv"
+all_315x320_2x2_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Raw_Data/CT_Values/315x320_2x2.csv"
+all_315x320_g3p4_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Raw_Data/CT_Values/315x320_G3P4.csv"
 
 all_2x2_1 <- read.csv(all_2x2_loc, header = TRUE, strip.white=TRUE)
 all_g3p4_1 <- read.csv(all_g3p4_loc, header = TRUE, strip.white=TRUE)
@@ -159,7 +159,7 @@ FindStandardMeans <- function(stdData, length){
 }
 
 ## Removing Redone samples
-redoes_loc <- "/home/drt06/Documents/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/Sample_Redo_List.csv"
+redoes_loc <- "/home/darrian/Desktop/UGA/QPCR_Data_Wrangler/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/Sample_Redo_List.csv"
 redoes <- read.csv(redoes_loc, header = FALSE)
 redoner<- function(redoes,sampledata){
   for (x in nrow(redoes):1){
@@ -255,10 +255,10 @@ all_Data$Delta_CT_OG <- all_Data$OG_CP_Fescue - all_Data$OG_CP_Epichloe
 
 # Making phenotype data to export
 Data_to_export <- subset(all_Data, select = c("Treatment", "Delta_CT", "Data_Set", "Standard", "Maternal_Parent", "Delta_CT_OG"))
-write.table(Data_to_export, file = '/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Phenotype_Data_Delta_CT.txt', sep = '\t', row.names=FALSE)
+write.table(Data_to_export, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Phenotype_Data_Delta_CT.txt', sep = '\t', row.names=FALSE)
 
 # Checking the amount of progeny each parent has
-parents_one_row_loc = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Lists/all_used_parents_one_row.csv"
+parents_one_row_loc = "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/all_used_parents_one_row.csv"
 parents_one_row <- read.csv(parents_one_row_loc, header = FALSE, strip.white=TRUE)
 parents_one_row %>% count(V1, sort = TRUE)
 
@@ -284,7 +284,7 @@ ggarrange(plot2, plot1, ncol = 1, nrow = 2)
 ################################################################################
 
 #Loading in data
-alklaoid_loc="/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Alkaloid_Data_Combined.csv"
+alklaoid_loc="/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Alkaloid_Data_Combined.csv"
 alklaoid <- read.csv(alklaoid_loc, header = TRUE, strip.white=TRUE)
 
 # Giving data parents
@@ -369,8 +369,8 @@ colnames(phenotype_Data)[colnames(phenotype_Data) == "Plate"] ="Alkaloid_Plate"
 phenotype_Data$Maternal_Parent <- as.character(phenotype_Data$Maternal_Parent)
 
 # adding the metadata and merging it with the phenotype data
-extraction_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Meta_Data/Extraction_info.csv"
-harvest_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Meta_Data/Harvest_Info.csv"
+extraction_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Meta_Data/Extraction_info.csv"
+harvest_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Meta_Data/Harvest_Info.csv"
 extraction <- read.csv(extraction_loc, header = TRUE, strip.white=TRUE)
 harvest <- read.csv(harvest_loc, header = TRUE, strip.white=TRUE)
 
@@ -380,7 +380,7 @@ phenotype_Data$Alkaloid_Plate <- as.character(phenotype_Data$Alkaloid_Plate)
 
 # Saving the data to make a phenotype file
 phenotype_Data$ng.g <- round(phenotype_Data$ng.g, 3)
-write.table(phenotype_Data, file = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/All_Data_Filtered/phenotype_data.txt", row.names = FALSE)
+write.table(phenotype_Data, file = "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/All_Data_Filtered/phenotype_data.txt", row.names = FALSE)
 
 ################################################################################
 # Gathering Residual Data
@@ -616,7 +616,7 @@ ggarrange(plot7, plot8, ncol = 1, nrow = 2)
 ################################################################################
 # Making graphs more usefull for presentations, with residuals
 ################################################################################
-write.table(residual_data_M, file = "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/All_Data_Filtered/residual_data.txt", row.names = FALSE)
+write.table(residual_data_M, file = "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/All_Data_Filtered/residual_data.txt", row.names = FALSE)
 
 # is the residual data linearly related
 plot(residual_data$filtered_CT_model.residuals, residual_data$alkaloid_model.residuals) # fuck no
@@ -717,17 +717,17 @@ gvlma(alkaloid_model_raw)
 # Adding the 2024 phenotype data
 ################################################################################
 # Loading in the 2024 metadata
-mini_medata_2024_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/2024_Data/Meta_Data_2024.csv"
+mini_medata_2024_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Meta_Data_2024.csv"
 mini_medata_2024 <- read.csv(mini_medata_2024_loc, header = TRUE, strip.white=TRUE)
 
-Father_data_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/Meta_Data/Mother_Father_Data.csv"
+Father_data_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Meta_Data/Mother_Father_Data.csv"
 Father_data <- read.csv(Father_data_loc, header = TRUE, strip.white=TRUE)
 
 metadata_2024 <- merge(mini_medata_2024, Father_data, by.x = c("ID"), by.y = c("ID"), all = FALSE)
 
 # Loading in the biomass data
-all_2x2_2024_loc <- "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/2024_Data/all_2x2_2024.csv"
-all_g3p4_2024_loc <-  "/home/drt06/Documents/Tall_fescue/Mapping_and_QTL/Mapping_and_QTL/Data/Real_Data/Phenotype_Data/2024_Data/all_g3p4_2024.csv"
+all_2x2_2024_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/all_2x2_2024.csv"
+all_g3p4_2024_loc <-  "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/all_g3p4_2024.csv"
 
 all_2x2_2024 <- read.csv(all_2x2_2024_loc, header = TRUE, strip.white=TRUE)
 all_g3p4_2024 <- read.csv(all_g3p4_2024_loc, header = TRUE, strip.white=TRUE)
@@ -772,7 +772,7 @@ all_Data_2024$Delta_CT_OG <- all_Data_2024$MeanCP.Fescue - all_Data_2024$MeanCP.
 
 # all_data_2024 now contains the proper biomass data
 #### adding the alkaloid data ####
-alkaloid_2024_loc <- "/home/drt06/Documents/Tall_fescue/Alkaloid_Data/2024_samples/alkaloids_2024_Rready.csv"
+alkaloid_2024_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/alkaloids_2024_Rready.csv"
 alkaloid_2024 <- read.csv(alkaloid_2024_loc, header = TRUE, strip.white=TRUE)
 colnames(alkaloid_2024)[colnames(alkaloid_2024) == "ID"] <- "Treatment"
 

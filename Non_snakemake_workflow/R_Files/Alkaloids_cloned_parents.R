@@ -52,6 +52,11 @@ ggplot(parent_alkaloid, aes(x = V4, y = V5, color = Replication_Status)) +
   labs(title = "Alkaloid Levels in Parent Replicates", 
        x = "Parents", 
        y = "ng/g ergot alkaloids") +
-  theme_minimal() 
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(size = 25),  # Adjust x-axis text size
+    axis.text.y = element_text(size = 25),   # Adjust y-axis text size
+    plot.title = element_text(hjust = 0.5)
+  )
 
 

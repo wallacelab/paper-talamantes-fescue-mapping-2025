@@ -723,7 +723,7 @@ mini_medata_2024 <- read.csv(mini_medata_2024_loc, header = TRUE, strip.white=TR
 Father_data_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Meta_Data/Mother_Father_Data.csv"
 Father_data <- read.csv(Father_data_loc, header = TRUE, strip.white=TRUE)
 
-metadata_2024 <- merge(mini_medata_2024, Father_data, by.x = c("ID"), by.y = c("ID"), all = FALSE)
+metadata_2024 <- merge(mini_medata_2024, Father_data, by.x = c("ID"), by.y = c("ID"), all = TRUE)
 
 # Loading in the biomass data
 all_2x2_2024_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/all_2x2_2024.csv"
@@ -780,11 +780,13 @@ all_Data_2024 <- merge(all_Data_2024,alkaloid_2024,by = c("Treatment"))
 
 # adding the meta data
 colnames(metadata_2024)[colnames(metadata_2024) == "ID"] <- "Treatment"
-all_Data_2024 <- merge(all_Data_2024,metadata_2024,by = c("Treatment"))
+all_Data_2024 <- merge(all_Data_2024, metadata_2024, by = "Treatment", all.x = TRUE, all.y = TRUE)
+all_Data_2024 <- subset(all_Data_2024, !is.na(ng.g) & !is.na(Delta_CT_adj))
 
 all_Data_2024$Mother <- as.character(all_Data_2024$Mother)
 all_Data_2024$Father <- as.character(all_Data_2024$Father)
 
+write.csv(all_Data_2024, "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv", row.names = FALSE)
 
 #all_Data_2024 is the final data set. We can take this and do analysis on it.
 # CP values, efficiency adjusted cp values and alkaloid values
@@ -870,13 +872,42 @@ ggplot(all_data_2023_2024, aes(x = ng.g.2023, y = ng.g.2024)) +
 
 
 
+################################################################################
+## Combining 2023 and 2024 data
+################################################################################
+# The two data sets you need are all_Data_2024 and phenotype_Data_2023
+phenotype_Data <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/All_Data_Filtered/phenotype_data.txt", header = TRUE)
+phenotype_Data$Delta_CT[phenotype_Data$ID == "306-3-8"] <- NA
+phenotype_Data$Delta_CT[phenotype_Data$ID == "320-5-26"] <- NA
+phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "306-3-8"] <- NA
+phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "320-5-26"] <- NA
+phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "314" & phenotype_Data$Data_Set != "315x320"), ]
+phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Data_Set == "315x320"),]
+phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Extraction_Date == "03/16/23"),]
 
 
+all_Data_2024 <- read.csv("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv", header = TRUE)
+# Delta_CT is actually the adjusted value
+phenotype_Data <- phenotype_Data %>%
+  rename(Delta_CT_adj = Delta_CT)
+all_Data_2024 <- all_Data_2024 %>%
+  rename(ID = Treatment)
+
+# Get only 2024 data ready for tassel (preliminary analysis)
+colnames(all_Data_2024)
+tassel_2024_data <- all_Data_2024[, c("ID", "Delta_CT_adj", "Delta_CT_OG", "ng.g")]
+write.table(tassel_2024_data, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/tassel_2024_data.txt', sep = '\t', row.names=FALSE)
 
 
+# Get all data ready for Blup analysis 
+# Data must be 1 column per factor, we only use the new vcf file, make a column for year of sampple  
 
+# Rename 2023 data to have 2023 in the name
+# Rename 2024 data to have 2024 in the name
+# Subsett data to just phenotypes
 
-
+colnames(phenotype_Data) <- ifelse(colnames(phenotype_Data) == "ID", "ID", paste0(colnames(phenotype_Data), "_2023"))
+colnames(all_Data_2024) <- ifelse(colnames(all_Data_2024) == "ID", "ID", paste0(colnames(all_Data_2024), "_2024"))
 
 
 

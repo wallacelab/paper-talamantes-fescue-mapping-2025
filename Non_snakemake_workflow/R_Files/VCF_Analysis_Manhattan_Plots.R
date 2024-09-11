@@ -1,5 +1,4 @@
 library(tidyverse)
-install.packages("qqman")
 library(edgebundleR)
 library(igraph)
 library(ggraph)
@@ -193,7 +192,15 @@ manhattan(testcross_stats, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", yli
 
 
 
-
+### Manhattan Plot of all 2024 data + outgroup parents
+MLM_2024_all_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/MLM_stats_MCR50.txt"
+MLM_2024_all <- read.table(MLM_2024_all_loc, header = TRUE, sep = '\t')
+MLM_2024_all$Chr<-gsub("SCAFFOLD_","",as.character(MLM_2024_all$Chr))
+MLM_2024_all$Chr<- as.numeric(MLM_2024_all$Chr)
+MLM_2024_all <- MLM_2024_all[MLM_2024_all$Trait == "ng.g", ]
+MLM_2024_all <- MLM_2024_all[-c(1), ]
+manhattan(MLM_2024_all, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", ylim = c(0, 5),
+          main = "P values of alkaloid 2024 Data", cex = 1, col = c("blue", "red","darkgrey","purple"))
 
 
 

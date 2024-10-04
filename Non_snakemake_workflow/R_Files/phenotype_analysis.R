@@ -885,7 +885,6 @@ phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "314" & phenotype_Data$D
 phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Data_Set == "315x320"),]
 phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Extraction_Date == "03/16/23"),]
 
-
 all_Data_2024 <- read.csv("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv", header = TRUE)
 # Delta_CT is actually the adjusted value
 phenotype_Data <- phenotype_Data %>%
@@ -908,6 +907,40 @@ write.table(tassel_2024_data, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapp
 
 colnames(phenotype_Data) <- ifelse(colnames(phenotype_Data) == "ID", "ID", paste0(colnames(phenotype_Data), "_2023"))
 colnames(all_Data_2024) <- ifelse(colnames(all_Data_2024) == "ID", "ID", paste0(colnames(all_Data_2024), "_2024"))
+
+
+################################################################################
+###### Making graphs to explore the pehnotypic data
+################################################################################
+tassel_2024_data <- read.table(file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/tassel_2024_data.txt', sep = '\t', header = TRUE)
+parents_2024 <- all_Data_2024[, c("Treatment", "Mother", "Father")]
+parents_2024 <- parents_2024 %>% rename(ID = Treatment)
+merged_2024 <- merge(tassel_2024_data, parents_2024, by = "ID")
+merged_2024$Parent_Combination <- apply(merged_2024[, c("Mother", "Father")], 1, function(x) paste(sort(x), collapse = " x "))
+
+
+head(merged_2024)
+
+
+
+ggplot(merged_2024, aes(x = Delta_CT_adj, fill = Parent_Combination)) +
+  geom_histogram(position = "stack", binwidth = .5, color = "black") +
+  labs(title = "Histogram of Delta_CT_adj Colored by Parent Combination", x = "Delta_CT_adj Values", y = "Count") +
+  theme_minimal()
+
+ggplot(merged_2024, aes(x = ng.g, fill = Parent_Combination)) +
+  geom_histogram(position = "stack", binwidth = 5000, color = "black") +
+  labs(title = "Histogram of Alkaloids Colored by Parent Combination", x = "Delta_CT_adj Values", y = "Count") +
+  theme_minimal()
+
+
+
+
+
+
+
+
+
 
 
 

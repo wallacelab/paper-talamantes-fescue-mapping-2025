@@ -12,15 +12,46 @@ echo "filtering MAF at $MAF"
 echo "filtering missing at $missing"
 echo "filtering depth at $depth" 
 
+bcftools view -s ^`cat $list_314x312 | tr '\n' ',' | sed 's/,$//'` $vcf_file -o /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x312.vcf
+bcftools view -s ^`cat $list_314x310 | tr '\n' ',' | sed 's/,$//'` $vcf_file -o /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x310.vcf
+
+
 
 # bcftools view -S $list_314x312 $vcf_file -o /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x312.vcf
 vcftools --vcf /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x312.vcf --maf 0.15 --max-missing 0.5 --minDP 8 --recode --out /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x312_filtered
 
+vcftools --vcf /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x310.vcf --maf 0.15 --max-missing 0.5 --minDP 8 --recode --out /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x310_filtered
+
+
 # rm /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x312.vcf
+# rm /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x310.vcf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+################ Below is kinda useless tbh ########################################
 
 
 # echo "bcftools view -i INFO/AF[0] > $Major && INFO/DP > $depth && F_MISSING && INFO/NS >= $missing /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x312.vcf -o /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x312_filtered.vcf"
 # bcftools view -i "INFO/AF[0] <= $Major && INFO/DP >= $depth && F_MISSING && INFO/NS >= $missing" /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x312.vcf -o /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x312_filtered.vcf
+
+
 ########## Examples of filtering with bcftools
 # To filter by depth we have 87 samples in cross 312x314. For avg depth of 10 we would use 870
 # -i 'INFO/DP > 870'

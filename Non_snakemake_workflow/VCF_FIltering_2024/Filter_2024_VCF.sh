@@ -32,12 +32,36 @@ vcftools --vcf /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/al
 echo "starting $vcf_mcr50"
 vcftools --vcf $vcf_mcr50 --maf 0.15 --max-missing 0.5 --minDP 8 --recode --out /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/MCR50_Extra_filtered
 
+echo "starting $vcf_file"
+vcftools --vcf $vcf_file --maf 0.15 --max-missing 0.5 --minDP 8 --recode --out /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_filtered
+
 rm /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x310.vcf
 rm /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x312.vcf
 
 
 
+#######
+# Getting all the files needed for vcf file stat analysis
+#######
 
+# Depth files
+vcftools --vcf /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_filtered.recode.vcf --site-depth --out /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/all_snps_filtered_site_depth
+
+vcftools --gzvcf /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/Tall.fescue.MCR50.snps.vcf.gz --site-depth --out /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/MCR50_site_depth
+
+# Genotype Depth file
+vcftools --vcf /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_filtered.recode.vcf --geno-depth --out /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/all_snps_filtered_depth
+
+vcftools --gzvcf /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/Tall.fescue.MCR50.snps.vcf.gz --geno-depth --out /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/MCR50_depth
+
+
+######
+# Below is me running the R program that makes summary stats for my VCF files
+######
+
+./1c_PlotGenoSummary.r -d /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/all_snps_filtered_site_depth.ldepth -g /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/all_snps_filtered_depth.gdepth -t /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/all_snps_filtered_TaxaSummary.txt -s /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/all_snps_filtered_SiteSummary.txt -o /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/all_snps_filtered.png
+
+./1c_PlotGenoSummary.r -d /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/MCR50_site_depth.ldepth -g /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/MCR50_depth.gdepth -t /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/MCR50_TaxaSummary.txt -s /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/MCR50_SiteSummary.txt -o /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/files_for_site_analysis/MCR50_stats.png
 
 
 

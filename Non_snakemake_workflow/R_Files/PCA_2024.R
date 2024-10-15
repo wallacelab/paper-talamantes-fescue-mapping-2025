@@ -150,6 +150,9 @@ grid.arrange(
   # Step 2: Extract the genotype matrix (individuals as columns)
  genotype_matrix <- extract.gt(vcf_314x310_filtered, as.numeric = TRUE)
  genotype_df <- as.data.frame(t(genotype_matrix))
+ dist(genotype_df)
+ 
+ 
  distance_matrix <- vegdist(genotype_matrix, method = "euclidean", na.rm = TRUE)
  pcoa_result <- pcoa(distance_matrix)
  
@@ -245,8 +248,8 @@ grid.arrange(
 PCA_MCR50_Tassel_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/PCA_MCR50.txt"
 PCA_MCR50_Tassel <- read.csv(PCA_MCR50_Tassel_loc, header = FALSE, strip.white=TRUE, skip = 2)
 
-PCA_MCR50_Tassel_filtered_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/PCA_MCR50_fitlered.txt"
-PCA_MCR50_Tassel_filtered <- read.csv(PCA_MCR50_Tassel_filtered_loc, header = FALSE, strip.white=TRUE, skip = 2)
+all_snps_filtered_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/PCA_all_Filtered.txt"
+all_snps_filtered <- read.csv(all_snps_filtered_loc, header = FALSE, strip.white=TRUE, skip = 2)
 
 PCA_MCR50_314x312_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/PCA_MCR50_314x312.txt"
 PCA_MCR50_314x312 <- read.csv(PCA_MCR50_314x312_loc, header = FALSE, strip.white=TRUE, skip = 2)
@@ -254,6 +257,8 @@ PCA_MCR50_314x312 <- read.csv(PCA_MCR50_314x312_loc, header = FALSE, strip.white
 PCA_filtered_314x312_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/PCA_all_314x312.txt"
 PCA_filtered_314x312 <- read.csv(PCA_filtered_314x312_loc, header = FALSE, strip.white=TRUE, skip = 2)
 
+PCA_all_filtered_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/PCA_all_Filtered.txt"
+PCA_all_filtered <- read.csv(PCA_all_filtered_loc, header = FALSE, strip.white=TRUE, skip = 2)
 
 
 PCA_tassel_data <- function(Tassel_PCA, title){
@@ -266,7 +271,7 @@ PCA_tassel_data <- function(Tassel_PCA, title){
   # Making ggplot with data
   TasselPlot <- ggplot(Tassel_PCA, aes(x = PC1, y = PC2, color = Cross)) +
     geom_point() +
-    labs(title = "Tassel MCR50 PCA not filtered") +
+    labs(title = title) +
     theme_bw() +
     theme(plot.title = element_text(hjust = 0.5)) +
     geom_text_repel(data = subset(as.data.frame(Tassel_PCA), Tassel_PCA$Cross == "parent"),
@@ -277,8 +282,27 @@ PCA_tassel_data <- function(Tassel_PCA, title){
   return(TasselPlot)
 }
 
-PCA_tassel_data(PCA_MCR50_Tassel)
-PCA_tassel_data(PCA_MCR50_Tassel_filtered)
-PCA_tassel_data(PCA_MCR50_314x312)
-PCA_tassel_data(PCA_filtered_314x312)
+
+
+PCA_tassel_data(PCA_MCR50_Tassel, "MCR50 Tassel")
+PCA_tassel_data(PCA_all_filtered, "DRT Filtered All SNPs")
+
+PCA_tassel_data(PCA_MCR50_314x312, "MCR50 314x312")
+PCA_tassel_data(PCA_filtered_314x312, "DRT Filtered 314x312")
+
+
+PCA_MCR50_Tassel <- PCA_MCR50_Tassel[, -((ncol(PCA_MCR50_Tassel)-4):ncol(PCA_MCR50_Tassel))]
+colnames(PCA_MCR50_Tassel) <- PCA_MCR50_Tassel[1, ]
+PCA_MCR50_Tassel <- PCA_MCR50_Tassel[-1, ]
+
+
+# Rgl package scatter plot 3d
+# Colorize them by the maternal parent since that is the one we know well. 
+# Get metrics on filtered data sets, like % missing, MAF, avg depth, how many SNPs, heterogeneity
+
+
+
+
+
+
 

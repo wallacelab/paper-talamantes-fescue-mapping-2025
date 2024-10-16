@@ -1,0 +1,21 @@
+
+VCFtools - 0.1.16
+(C) Adam Auton and Anthony Marcketta 2009
+
+Parameters as interpreted:
+	--vcf /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_314x310_filtered.recode.vcf
+	--missing-indv
+	--out missing_data_report
+
+Warning: Expected at least 2 parts in INFO entry: ID=DP,Number=1,Type=Integer,Description="combined read depth across samples, includes REF, ALT, and OTHER counts">
+Warning: Expected at least 2 parts in INFO entry: ID=DP,Number=1,Type=Integer,Description="combined read depth across samples, includes REF, ALT, and OTHER counts">
+Warning: Expected at least 2 parts in INFO entry: ID=DP,Number=1,Type=Integer,Description="combined read depth across samples, includes REF, ALT, and OTHER counts">
+Warning: Expected at least 2 parts in INFO entry: ID=AF,Number=A,Type=Float,Description="REF, ALT, and OTHER allele frequencies">
+Warning: Expected at least 2 parts in INFO entry: ID=AF,Number=A,Type=Float,Description="REF, ALT, and OTHER allele frequencies">
+Warning: Expected at least 2 parts in FORMAT entry: ID=DP,Number=1,Type=Integer,Description="read depth at this position for this sample, includes REF, ALT, and OTHER counts">
+Warning: Expected at least 2 parts in FORMAT entry: ID=DP,Number=1,Type=Integer,Description="read depth at this position for this sample, includes REF, ALT, and OTHER counts">
+Warning: Expected at least 2 parts in FORMAT entry: ID=DP,Number=1,Type=Integer,Description="read depth at this position for this sample, includes REF, ALT, and OTHER counts">
+After filtering, kept 46 out of 46 Individuals
+Outputting Individual Missingness
+After filtering, kept 14722 out of a possible 14722 Sites
+Run Time = 0.00 seconds

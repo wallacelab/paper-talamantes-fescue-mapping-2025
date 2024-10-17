@@ -3,6 +3,7 @@ library(edgebundleR)
 library(igraph)
 library(ggraph)
 library(qqman)
+library(patchwork)
 
 # This makes manhattan plots
 
@@ -201,6 +202,49 @@ MLM_2024_all <- MLM_2024_all[MLM_2024_all$Trait == "ng.g", ]
 MLM_2024_all <- MLM_2024_all[-c(1), ]
 manhattan(MLM_2024_all, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", ylim = c(0, 5),
           main = "P values of alkaloid 2024 Data", cex = 1, col = c("blue", "red","darkgrey","purple"))
+
+
+
+
+### Manhattan Plot of all 2024 data DRT filtered Delta Alkaloids ****MLM wieghted*****
+MLM_DRT_Filters_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/MLM_DRT_FIlters.txt"
+MLM_DRT_Filters <- read.table(MLM_DRT_Filters_loc, header = TRUE, sep = '\t')
+MLM_DRT_Filters$Chr<-gsub("SCAFFOLD_","",as.character(MLM_DRT_Filters$Chr))
+MLM_DRT_Filters$Chr<- as.numeric(MLM_DRT_Filters$Chr)
+MLM_DRT_Filters <- MLM_DRT_Filters[MLM_DRT_Filters$Trait == "ng.g", ]
+MLM_DRT_Filters <- MLM_DRT_Filters[-c(1), ]
+Alkaloid <- manhattan(MLM_DRT_Filters, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", 
+                      ylim = c(0, 5), main = "MLM on Alkaloids",
+                      col = c("blue", "red", "darkgrey", "purple"))
+
+
+### Manhattan Plot of all 2024 data DRT filtered Delta CT OG ****MLM wieghted****
+MLM_DRT_Filters_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/MLM_DRT_FIlters.txt"
+MLM_DRT_Filters <- read.table(MLM_DRT_Filters_loc, header = TRUE, sep = '\t')
+MLM_DRT_Filters$Chr<-gsub("SCAFFOLD_","",as.character(MLM_DRT_Filters$Chr))
+MLM_DRT_Filters$Chr<- as.numeric(MLM_DRT_Filters$Chr)
+MLM_DRT_Filters <- MLM_DRT_Filters[MLM_DRT_Filters$Trait == "Delta_CT_OG", ]
+MLM_DRT_Filters <- MLM_DRT_Filters[-c(1), ]
+Delta_OG <- manhattan(MLM_DRT_Filters, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", 
+                      ylim = c(0, 5), main = "MLM on Delta CT", 
+                      col = c("blue", "red", "darkgrey", "purple"))
+
+### Manhattan Plot of all 2024 data DRT filtered Delta CT Adj ****MLM wieghted****
+MLM_DRT_Filters_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/MLM_DRT_FIlters.txt"
+MLM_DRT_Filters <- read.table(MLM_DRT_Filters_loc, header = TRUE, sep = '\t')
+MLM_DRT_Filters$Chr<-gsub("SCAFFOLD_","",as.character(MLM_DRT_Filters$Chr))
+MLM_DRT_Filters$Chr<- as.numeric(MLM_DRT_Filters$Chr)
+MLM_DRT_Filters <- MLM_DRT_Filters[MLM_DRT_Filters$Trait == "Delta_CT_adj", ]
+MLM_DRT_Filters <- MLM_DRT_Filters[-c(1), ]
+Delta_Adj <- manhattan(MLM_DRT_Filters, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", 
+                       ylim = c(0, 5), main = "MLM on Delta CT Efficiency Adjusted",
+                       col = c("blue", "red", "darkgrey", "purple"))
+
+
+
+
+
+
 
 
 

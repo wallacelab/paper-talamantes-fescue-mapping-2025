@@ -248,9 +248,6 @@ grid.arrange(
 PCA_MCR50_Tassel_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/PCA_MCR50.txt"
 PCA_MCR50_Tassel <- read.csv(PCA_MCR50_Tassel_loc, header = FALSE, strip.white=TRUE, skip = 2)
 
-all_snps_filtered_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/PCA_all_Filtered.txt"
-all_snps_filtered <- read.csv(all_snps_filtered_loc, header = FALSE, strip.white=TRUE, skip = 2)
-
 PCA_MCR50_314x312_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/PCA_MCR50_314x312.txt"
 PCA_MCR50_314x312 <- read.csv(PCA_MCR50_314x312_loc, header = FALSE, strip.white=TRUE, skip = 2)
 
@@ -260,22 +257,39 @@ PCA_filtered_314x312 <- read.csv(PCA_filtered_314x312_loc, header = FALSE, strip
 PCA_all_filtered_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/PCA_all_Filtered.txt"
 PCA_all_filtered <- read.csv(PCA_all_filtered_loc, header = FALSE, strip.white=TRUE, skip = 2)
 
+phenotypes_2024_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv"
+phenotypes_2024 <- read.csv(phenotypes_2024_loc, header = TRUE, strip.white=TRUE)
 
-PCA_tassel_data <- function(Tassel_PCA, title){
+#########
+# Fixing phenotypes
+#########
+phenotypes_2024 <- phenotypes_2024 %>% rename(ID = Treatment)
+phenotypes_2024$ID <- gsub("-", "_", phenotypes_2024$ID)
+phenotypes_2024$Mother <- ifelse(is.na(phenotypes_2024$Mother) | phenotypes_2024$Mother == "", "parent", phenotypes_2024$Mother)
+phenotypes_2024$Father <- ifelse(is.na(phenotypes_2024$Father) | phenotypes_2024$Father == "", "parent", phenotypes_2024$Father)
+parent_list <- subset(phenotypes_2024, select = c(ID, Mother, Father))
+
+###############
+# Function for tassel data
+###############
+PCA_tassel_data <- function(Tassel_PCA, title, Color){
   Tassel_PCA <- Tassel_PCA[, -((ncol(Tassel_PCA)-4):ncol(Tassel_PCA))]
   colnames(Tassel_PCA) <- Tassel_PCA[1, ]
   Tassel_PCA <- Tassel_PCA[-1, ]
   Tassel_PCA$PC1 <- as.numeric(as.character(Tassel_PCA$PC1))
   Tassel_PCA$PC2 <- as.numeric(as.character(Tassel_PCA$PC2))
+  colnames(Tassel_PCA)[colnames(Tassel_PCA) == "Taxa"] <- "ID"
+  Tassel_PCA <- merge(Tassel_PCA, parent_list, by = "ID")
+  
   
   # Making ggplot with data
-  TasselPlot <- ggplot(Tassel_PCA, aes(x = PC1, y = PC2, color = Cross)) +
+  TasselPlot <- ggplot(Tassel_PCA, aes_string(x = "PC1", y = "PC2", color = Color)) +
     geom_point() +
     labs(title = title) +
     theme_bw() +
     theme(plot.title = element_text(hjust = 0.5)) +
     geom_text_repel(data = subset(as.data.frame(Tassel_PCA), Tassel_PCA$Cross == "parent"),
-                    aes(label = Taxa),
+                    aes(label = ID),
                     max.overlaps = Inf,   
                     nudge_x = 0.1, 
                     nudge_y = 0.1)
@@ -284,16 +298,54 @@ PCA_tassel_data <- function(Tassel_PCA, title){
 
 
 
-PCA_tassel_data(PCA_MCR50_Tassel, "MCR50 Tassel")
-PCA_tassel_data(PCA_all_filtered, "DRT Filtered All SNPs")
+plot_MCR50 <- PCA_tassel_data(PCA_MCR50_Tassel, "MCR50", "Cross")
+plot_All_filtered <- PCA_tassel_data(PCA_all_filtered, "DRT Filtered All SNPs", "Cross")
 
-PCA_tassel_data(PCA_MCR50_314x312, "MCR50 314x312")
-PCA_tassel_data(PCA_filtered_314x312, "DRT Filtered 314x312")
+plot_MCR50_314x312 <- PCA_tassel_data(PCA_MCR50_314x312, "MCR50 314x312", "Cross")
+plot_All_filtered_314x312 <- PCA_tassel_data(PCA_filtered_314x312, "DRT Filtered 314x312", "Cross")
+
+# Arrange the grid 
+
+MCR50_all <- grid.arrange(
+  arrangeGrob(plot_MCR50, plot_MCR50_314x312, ncol = 2),
+  left = textGrob("MCR50 Data", rot = 90, gp = gpar(fontsize = 20))
+)
 
 
-PCA_MCR50_Tassel <- PCA_MCR50_Tassel[, -((ncol(PCA_MCR50_Tassel)-4):ncol(PCA_MCR50_Tassel))]
-colnames(PCA_MCR50_Tassel) <- PCA_MCR50_Tassel[1, ]
-PCA_MCR50_Tassel <- PCA_MCR50_Tassel[-1, ]
+DRT_filtered <- grid.arrange(
+  arrangeGrob(plot_All_filtered, plot_All_filtered_314x312, ncol = 2),
+  left = textGrob("Darrian Filters", rot = 90, gp = gpar(fontsize = 20))
+)
+
+grid.arrange(
+  arrangeGrob(MCR50_all, DRT_filtered, ncol = 1),
+  nrow = 1
+)
+
+# Making graphs that are colored by maternal or paternal parent.
+
+PCA_tassel_data(PCA_filtered_314x312, "DRT Filtered 314x312", "Mother")
+
+PCA_tassel_data(PCA_MCR50_Tassel, "MCR50 Data", "Mother")
+PCA_tassel_data(PCA_MCR50_Tassel, "MCR50 Data", "Father")
+
+FatherPCA <-PCA_tassel_data(PCA_all_filtered, "DRT Filtered Colored by Father", "Father")
+MotherPCA <- PCA_tassel_data(PCA_all_filtered, "DRT Filtered Colored by Mother", "Mother")
+
+
+grid.arrange(
+  arrangeGrob(FatherPCA, MotherPCA, ncol = 2),
+  nrow = 1
+)
+
+
+
+
+
+
+# PCA_MCR50_Tassel <- PCA_MCR50_Tassel[, -((ncol(PCA_MCR50_Tassel)-4):ncol(PCA_MCR50_Tassel))]
+# colnames(PCA_MCR50_Tassel) <- PCA_MCR50_Tassel[1, ]
+# PCA_MCR50_Tassel <- PCA_MCR50_Tassel[-1, ]
 
 
 # Rgl package scatter plot 3d

@@ -908,6 +908,63 @@ write.table(tassel_2024_data, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapp
 colnames(phenotype_Data) <- ifelse(colnames(phenotype_Data) == "ID", "ID", paste0(colnames(phenotype_Data), "_2023"))
 colnames(all_Data_2024) <- ifelse(colnames(all_Data_2024) == "ID", "ID", paste0(colnames(all_Data_2024), "_2024"))
 
+#Making combined 2023 2024 phenotype data to export
+allpehnotype_data_export_23 <- subset(phenotype_Data, select = c(ID,Delta_CT_adj_2023,Delta_CT_OG_2023,ng.g_2023))
+allpehnotype_data_export_24 <- subset(all_Data_2024, select = c(ID,Delta_CT_adj_2024,Delta_CT_OG_2024,ng.g_2024))
+phenotypes23_24 <- merge(allpehnotype_data_export_23,allpehnotype_data_export_24, by = "ID")
+
+average_columns <- function(data, columns, new_column_name) {
+  # Apply the logic across the specified columns
+  data[[new_column_name]] <- apply(data[, columns], 1, function(x) {
+    if (all(is.na(x))) {
+      return(NA)
+    } else {
+      return(mean(x, na.rm = TRUE))
+    }
+  })
+  
+  return(data)
+}
+
+phenotypes23_24 <- average_columns(phenotypes23_24, c("Delta_CT_adj_2023", "Delta_CT_adj_2024"),"Delta_CT_adj_avg")
+phenotypes23_24 <- average_columns(phenotypes23_24, c("Delta_CT_OG_2023", "Delta_CT_OG_2024"),"Delta_CT_OG_avg")
+phenotypes23_24 <- average_columns(phenotypes23_24, c("ng.g_2023", "ng.g_2024"),"ng.g_avg")
+head(phenotypes23_24)
+pheotype_avraged <- subset(phenotypes23_24, select = c("ID", "Delta_CT_adj_avg", "Delta_CT_OG_avg", "ng.g_avg"))
+
+
+write.table(pheotype_avraged, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Phenotypes_avg.txt', sep = '\t', row.names=FALSE)
+
+# Remove out liars
+remove_outliers <- function(df, threshold = 4) {
+  # Loop through each column (except the ID column)
+  for (col in colnames(df)[-1]) {  # Exclude the first column (ID)
+    # Calculate mean and standard deviation for each column
+    column_mean <- mean(df[[col]], na.rm = TRUE)
+    column_sd <- sd(df[[col]], na.rm = TRUE)
+    
+    # Define upper and lower limits
+    upper_limit <- column_mean + (threshold * column_sd)
+    lower_limit <- column_mean - (threshold * column_sd)
+    
+    # Replace only outliers with NA, keep others
+    df[[col]] <- ifelse(df[[col]] < lower_limit | df[[col]] > upper_limit, NA, df[[col]])
+  }
+  
+  return(df)
+}
+phenotype_avaraged_2 <- remove_outliers(pheotype_avraged, threshold = 3)
+
+
+
+##########################################
+# Graphs to explore the 2023 vs 2024 data 
+#########################################
+
+
+
+
+
 
 ################################################################################
 ###### Making graphs to explore the pehnotypic data
@@ -917,7 +974,6 @@ parents_2024 <- all_Data_2024[, c("Treatment", "Mother", "Father")]
 parents_2024 <- parents_2024 %>% rename(ID = Treatment)
 merged_2024 <- merge(tassel_2024_data, parents_2024, by = "ID")
 merged_2024$Parent_Combination <- apply(merged_2024[, c("Mother", "Father")], 1, function(x) paste(sort(x), collapse = " x "))
-
 
 head(merged_2024)
 

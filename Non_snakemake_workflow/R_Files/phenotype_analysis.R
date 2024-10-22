@@ -984,7 +984,7 @@ head(phenotypes23_24,15)
 lm_model_alk <- lm(ng.g ~ Year, data = phenotypes23_24, na.action = na.exclude)
 phenotypes23_24$Alkaloids_Res <- resid(lm_model_alk)
 
-lm_model_CT_OG <- lm(Delta_CT_adj ~ Data_Set + Year, data = phenotypes23_24, na.action = na.exclude)
+lm_model_CT_OG <- lm(Delta_CT_OG ~ Data_Set + Year, data = phenotypes23_24, na.action = na.exclude)
 phenotypes23_24$Delta_CT_OG_Res <- resid(lm_model_CT_OG)
 
 lm_model_CT_adj <- lm(Delta_CT_adj ~ Data_Set + Year, data = phenotypes23_24, na.action = na.exclude)

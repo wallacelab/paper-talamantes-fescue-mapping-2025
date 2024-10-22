@@ -29,55 +29,7 @@ colnames(blup_Data)[1] <- "ID"
 # Save the Blup data to get it ready for tassel
 write.table(blup_Data, file = "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Blups.txt", sep = "\t", row.names = FALSE, quote = FALSE)
 
-# Calculting variance 
-drops <- c("var1","var2","sdcor") 
-
-varComp <- as.data.frame(VarCorr(model_biomass,comp="vcov"))
-varComp<-varComp[ , !(names(varComp) %in% drops)]
-varComp$Trait<-"biomass"
-DataVarComp <- rbind(DataVarComp,varComp)
-
-varComp <- as.data.frame(VarCorr(model_alkaloid,comp="vcov"))
-varComp<-varComp[ , !(names(varComp) %in% drops)]
-varComp$Trait<-"alkaloids"
-
-#add columns to existing dataframe
-DataVarComp <- rbind(DataVarComp,varComp)
-
-################################################################################
-# Trying to get heritability with VCF in R
-################################################################################
-
-install.packages("vcfR")
-install.packages("sommer")
-
-library(vcfR)
-library(lme4)
-library(sommer) 
-
-vcf_file <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/Tall.fescue.MCR50.snps.vcf"  # Update with your VCF file path
-vcf_data <- read.vcfR(vcf_file)
-head(vcf_data)
-
-# Formating genotype data properly 
-genotypes <- extract.gt(vcf_data)
-genotype_df <- as.data.frame(genotypes)
-head(genotype_df)
-
-
-# Combine phenotype and genotype data based on IDs (make sure the IDs match)
-combined_data <- merge(blup_Data, genotype_df, by.x = "ID", by.y = "row.names")
-# Check combined data
-head(combined_data)
-
-
-
-
-# Heritability model with BLUPs for the trait
-model_heritability <- lmer(Alkaloid_Blup ~ (1 | ID), data = blup_Data)
-# Summarize the model
-summary(model_heritability)
-
+# Calculating blups for my data does not really work. You kinda need multiple samples to calculate Blups
 
 
 

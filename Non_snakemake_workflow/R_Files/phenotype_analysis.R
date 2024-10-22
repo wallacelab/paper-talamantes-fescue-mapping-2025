@@ -7,6 +7,7 @@ library(gvlma)
 library(mbQTL)
 library(ggpubr)
 library(car)
+library(reshape2)
 
 ###############################################################################
 # CT Data filtering and adding
@@ -935,25 +936,87 @@ pheotype_avraged <- subset(phenotypes23_24, select = c("ID", "Delta_CT_adj_avg",
 
 write.table(pheotype_avraged, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Phenotypes_avg.txt', sep = '\t', row.names=FALSE)
 
-# Remove out liars
-remove_outliers <- function(df, threshold = 4) {
-  # Loop through each column (except the ID column)
-  for (col in colnames(df)[-1]) {  # Exclude the first column (ID)
-    # Calculate mean and standard deviation for each column
-    column_mean <- mean(df[[col]], na.rm = TRUE)
-    column_sd <- sd(df[[col]], na.rm = TRUE)
-    
-    # Define upper and lower limits
-    upper_limit <- column_mean + (threshold * column_sd)
-    lower_limit <- column_mean - (threshold * column_sd)
-    
-    # Replace only outliers with NA, keep others
-    df[[col]] <- ifelse(df[[col]] < lower_limit | df[[col]] > upper_limit, NA, df[[col]])
-  }
-  
-  return(df)
-}
-phenotype_avaraged_2 <- remove_outliers(pheotype_avraged, threshold = 3)
+##############################################
+# Making  data with batch effects removed 10/22/24
+##############################################
+# Loading in the data
+# The two data sets you need are all_Data_2024 and phenotype_Data_2023
+phenotype_Data <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/All_Data_Filtered/phenotype_data.txt", header = TRUE)
+phenotype_Data$Delta_CT[phenotype_Data$ID == "306-3-8"] <- NA
+phenotype_Data$Delta_CT[phenotype_Data$ID == "320-5-26"] <- NA
+phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "306-3-8"] <- NA
+phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "320-5-26"] <- NA
+phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "314" & phenotype_Data$Data_Set != "315x320"), ]
+phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Data_Set == "315x320"),]
+phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Extraction_Date == "03/16/23"),]
+
+all_Data_2024 <- read.csv("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv", header = TRUE)
+
+# Fixing naming conventions
+phenotype_Data <- phenotype_Data %>%
+  rename(Delta_CT_adj = Delta_CT)
+all_Data_2024 <- all_Data_2024 %>%
+  rename(ID = Treatment)
+
+# Removing data thats not star cross
+list_314x310 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/Parental_Lists/310x314_list.txt")  
+list_314x312 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/Parental_Lists/312x314_list.txt")
+new_rows <- data.frame(V1 = c(301, 302, 303, 304, 305, 306, 307, 308, 310, 312, 313, 314, 315, 316, 318, 319, 320))
+list_star <- rbind(list_314x310, list_314x312, new_rows)
+list_star$V1 <- sub("_dupped.bam", "", list_star$V1)
+phenotype_Data <- phenotype_Data[phenotype_Data$ID %in% list_star$V1, ]
+
+# Subsetting the data into separate chunks
+allpehnotype_data_export_23 <- subset(phenotype_Data, select = c(ID,Delta_CT_adj,Delta_CT_OG,ng.g,Data_Set))
+allpehnotype_data_export_23$Year <- "2023"
+allpehnotype_data_export_24 <- subset(all_Data_2024, select = c(ID,Delta_CT_adj,Delta_CT_OG,ng.g,Data_Set))
+allpehnotype_data_export_24$Year <- "2024"
+
+head(allpehnotype_data_export_23)
+head(allpehnotype_data_export_24)
+
+#Recombining the data into one large table
+phenotypes23_24 <- rbind(allpehnotype_data_export_23,allpehnotype_data_export_24)
+phenotypes23_24$ID <- gsub("-", "_", phenotypes23_24$ID)
+head(phenotypes23_24,15)
+
+#Removing batch effects and leaving only residuals.
+lm_model_alk <- lm(ng.g ~ Year, data = phenotypes23_24, na.action = na.exclude)
+phenotypes23_24$Alkaloids_Res <- resid(lm_model_alk)
+
+lm_model_CT_OG <- lm(Delta_CT_adj ~ Data_Set + Year, data = phenotypes23_24, na.action = na.exclude)
+phenotypes23_24$Delta_CT_OG_Res <- resid(lm_model_CT_OG)
+
+lm_model_CT_adj <- lm(Delta_CT_adj ~ Data_Set + Year, data = phenotypes23_24, na.action = na.exclude)
+phenotypes23_24$Delta_CT_adj_Res <- resid(lm_model_CT_adj)
+
+head(phenotypes23_24,15)
+
+# Now that we have residuals we have to get avarages and export the data
+Alkaloid_residuals_avaraged <- phenotypes23_24 %>%
+  group_by(ID) %>%
+  summarise(Alkaloids_Res_avg = mean(Alkaloids_Res, na.rm = TRUE)) %>%
+  filter(!is.na(Alkaloids_Res_avg))
+
+DeltaCT_adj_residuals_avaraged <- phenotypes23_24 %>%
+  group_by(ID) %>%
+  summarise(DeltaCT_adj_Res_avg = mean(Delta_CT_adj_Res, na.rm = TRUE)) %>%
+  filter(!is.na(DeltaCT_adj_Res_avg))
+
+DeltaCT_OG_residuals_avaraged <- phenotypes23_24 %>%
+  group_by(ID) %>%
+  summarise(DeltaCT_OG_Res_avg = mean(Delta_CT_OG_Res, na.rm = TRUE)) %>%
+  filter(!is.na(DeltaCT_OG_Res_avg))
+
+Residual_data_avg <- merge(Alkaloid_residuals_avaraged, 
+                     DeltaCT_adj_residuals_avaraged, 
+                     by = "ID")
+
+Residual_data_avg <- merge(Residual_data_avg, 
+                     DeltaCT_OG_residuals_avaraged, 
+                     by = "ID")
+
+write.table(Residual_data_avg, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_data_avg.txt', sep = '\t', row.names=FALSE)
 
 
 
@@ -970,6 +1033,7 @@ phenotype_avaraged_2 <- remove_outliers(pheotype_avraged, threshold = 3)
 ###### Making graphs to explore the pehnotypic data
 ################################################################################
 tassel_2024_data <- read.table(file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/tassel_2024_data.txt', sep = '\t', header = TRUE)
+all_Data_2024 <- read.csv("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv", header = TRUE)
 parents_2024 <- all_Data_2024[, c("Treatment", "Mother", "Father")]
 parents_2024 <- parents_2024 %>% rename(ID = Treatment)
 merged_2024 <- merge(tassel_2024_data, parents_2024, by = "ID")

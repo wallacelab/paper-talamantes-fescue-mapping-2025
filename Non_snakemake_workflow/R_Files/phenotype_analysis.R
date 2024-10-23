@@ -8,6 +8,7 @@ library(mbQTL)
 library(ggpubr)
 library(car)
 library(reshape2)
+library(gridExtra)
 
 ###############################################################################
 # CT Data filtering and adding
@@ -1017,6 +1018,25 @@ Residual_data_avg <- merge(Residual_data_avg,
                      by = "ID")
 
 write.table(Residual_data_avg, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_data_avg.txt', sep = '\t', row.names=FALSE)
+
+# Graphs to look at the avraged residual data
+p1 <- ggplot(Residual_data_avg, aes(x = Alkaloids_Res_avg)) + 
+  geom_histogram(binwidth = 1000, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Values for Residuals of Alkaloids", x = "Value", y = "Frequency") +
+  theme_bw()
+
+p2 <- ggplot(Residual_data_avg, aes(x = DeltaCT_adj_Res_avg)) + 
+  geom_histogram(binwidth = .25, fill = "yellow", color = "black", alpha = 0.7) +
+  labs(title = "Values for Residuals of Delta CT OG", x = "Value", y = "Frequency") +
+  theme_bw()
+
+p3 <- ggplot(Residual_data_avg, aes(x = DeltaCT_OG_Res_avg)) + 
+  geom_histogram(binwidth = .25, fill = "yellow", color = "black", alpha = 0.7) +
+  labs(title = "Values for Residuals of Delta CT OG", x = "Value", y = "Frequency") +
+  theme_bw()
+
+grid.arrange(p1, p2, p3, ncol = 2, nrow = 2)
+
 
 
 

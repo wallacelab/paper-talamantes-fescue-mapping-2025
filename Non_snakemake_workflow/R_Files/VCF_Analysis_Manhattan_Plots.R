@@ -241,10 +241,78 @@ Delta_Adj <- manhattan(MLM_DRT_Filters, chr = "Chr", bp = "Pos", p = "p", snp = 
                        col = c("blue", "red", "darkgrey", "purple"))
 
 
+### Manhattan Plot of DRT filtered genotypes with 2024 and 2023 residuals avraged Delta CT adj****
+MLM_DRT_Filters_residuals_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/MLM_DRT_filters_Phenotype_residuals_avaraged.txt"
+MLM_DRT_Filters_residuals <- read.table(MLM_DRT_Filters_residuals_loc, header = TRUE, sep = '\t')
+MLM_DRT_Filters_residuals$Chr<-gsub("SCAFFOLD_","",as.character(MLM_DRT_Filters_residuals$Chr))
+MLM_DRT_Filters_residuals$Chr<- as.numeric(MLM_DRT_Filters_residuals$Chr)
+MLM_DRT_Filters_residuals <- MLM_DRT_Filters_residuals[MLM_DRT_Filters_residuals$Trait == "DeltaCT_adj_Res_avg", ]
+MLM_DRT_Filters_residuals <- MLM_DRT_Filters_residuals[-c(1), ]
+# BOnferonii line
+alpha <- 0.05
+num_tests <- nrow(MLM_DRT_Filters_residuals)  # Number of SNPs or tests
+bonferroni_threshold <- alpha / num_tests
+# Making FDR threshold
+MLM_DRT_Filters_residuals$padj <- p.adjust(MLM_DRT_Filters_residuals$p, method = "BH")
+FDR_threshold <- max(MLM_DRT_Filters_residuals$p[MLM_DRT_Filters_residuals$padj <= alpha], na.rm = TRUE)
+if (!is.numeric(FDR_threshold) || is.na(FDR_threshold) || FDR_threshold == -Inf) {
+  FDR_threshold <- 1e-5
+}
+print(FDR_threshold)
+Delta_Adj <- manhattan(MLM_DRT_Filters_residuals, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", 
+                       ylim = c(0, 6), main = "MLM on Delta CT Efficiency Adjusted Residuals Avaraged From 2023 and 2024",
+                       genomewideline = -log10(bonferroni_threshold),
+                       suggestiveline = -log10(FDR_threshold),
+                       col = c("blue", "red", "darkgrey", "purple"))
 
 
+### Manhattan Plot of DRT filtered genotypes with 2024 and 2023 residuals averaged delta CT OG****
+MLM_DRT_Filters_residuals_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/MLM_DRT_filters_Phenotype_residuals_avaraged.txt"
+MLM_DRT_Filters_residuals <- read.table(MLM_DRT_Filters_residuals_loc, header = TRUE, sep = '\t')
+MLM_DRT_Filters_residuals$Chr<-gsub("SCAFFOLD_","",as.character(MLM_DRT_Filters_residuals$Chr))
+MLM_DRT_Filters_residuals$Chr<- as.numeric(MLM_DRT_Filters_residuals$Chr)
+MLM_DRT_Filters_residuals <- MLM_DRT_Filters_residuals[MLM_DRT_Filters_residuals$Trait == "DeltaCT_OG_Res_avg", ]
+MLM_DRT_Filters_residuals <- MLM_DRT_Filters_residuals[-c(1), ]
+# BOnferonii line
+alpha <- 0.05
+num_tests <- nrow(MLM_DRT_Filters_residuals)  # Number of SNPs or tests
+bonferroni_threshold <- alpha / num_tests
+# Making FDR threshold
+MLM_DRT_Filters_residuals$padj <- p.adjust(MLM_DRT_Filters_residuals$p, method = "BH")
+FDR_threshold <- max(MLM_DRT_Filters_residuals$p[MLM_DRT_Filters_residuals$padj <= alpha], na.rm = TRUE)
+if (!is.numeric(FDR_threshold) || is.na(FDR_threshold) || FDR_threshold == -Inf) {
+  FDR_threshold <- 1e-5
+}
+print(FDR_threshold)
+Delta_OG <- manhattan(MLM_DRT_Filters_residuals, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", 
+                       ylim = c(0, 6), main = "MLM on Delta CT Residuals Avaraged From 2023 and 2024",
+                       genomewideline = -log10(bonferroni_threshold),
+                       suggestiveline = -log10(FDR_threshold),
+                       col = c("blue", "red", "darkgrey", "purple"))
 
-
+### Manhattan Plot of DRT filtered genotypes with 2024 and 2023 residuals averaged Alkaloids****
+MLM_DRT_Filters_residuals_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/MLM_DRT_filters_Phenotype_residuals_avaraged.txt"
+MLM_DRT_Filters_residuals <- read.table(MLM_DRT_Filters_residuals_loc, header = TRUE, sep = '\t')
+MLM_DRT_Filters_residuals$Chr<-gsub("SCAFFOLD_","",as.character(MLM_DRT_Filters_residuals$Chr))
+MLM_DRT_Filters_residuals$Chr<- as.numeric(MLM_DRT_Filters_residuals$Chr)
+MLM_DRT_Filters_residuals <- MLM_DRT_Filters_residuals[MLM_DRT_Filters_residuals$Trait == "Alkaloids_Res_avg", ]
+MLM_DRT_Filters_residuals <- MLM_DRT_Filters_residuals[-c(1), ]
+# BOnferonii line
+alpha <- 0.05
+num_tests <- nrow(MLM_DRT_Filters_residuals)  # Number of SNPs or tests
+bonferroni_threshold <- alpha / num_tests
+# Making FDR threshold
+MLM_DRT_Filters_residuals$padj <- p.adjust(MLM_DRT_Filters_residuals$p, method = "BH")
+FDR_threshold <- max(MLM_DRT_Filters_residuals$p[MLM_DRT_Filters_residuals$padj <= alpha], na.rm = TRUE)
+if (!is.numeric(FDR_threshold) || is.na(FDR_threshold) || FDR_threshold == -Inf) {
+  FDR_threshold <- 1e-5
+}
+print(FDR_threshold)
+Alkaloids <- manhattan(MLM_DRT_Filters_residuals, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", 
+                       ylim = c(0, 6), main = "MLM on Alkaloid Level Residuals Avaraged From 2023 and 2024",
+                       genomewideline = -log10(bonferroni_threshold),
+                       suggestiveline = -log10(FDR_threshold),
+                       col = c("blue", "red", "darkgrey", "purple"))
 
 
 

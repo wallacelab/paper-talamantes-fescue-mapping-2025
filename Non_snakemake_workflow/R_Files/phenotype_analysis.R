@@ -956,6 +956,7 @@ all_Data_2024 <- read.csv("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL
 # Fixing naming conventions
 phenotype_Data <- phenotype_Data %>%
   rename(Delta_CT_adj = Delta_CT)
+phenotype_Data_2023 <- phenotype_Data
 all_Data_2024 <- all_Data_2024 %>%
   rename(ID = Treatment)
 
@@ -1027,7 +1028,7 @@ p1 <- ggplot(Residual_data_avg, aes(x = Alkaloids_Res_avg)) +
 
 p2 <- ggplot(Residual_data_avg, aes(x = DeltaCT_adj_Res_avg)) + 
   geom_histogram(binwidth = .25, fill = "yellow", color = "black", alpha = 0.7) +
-  labs(title = "Values for Residuals of Delta CT OG", x = "Value", y = "Frequency") +
+  labs(title = "Values for Residuals of Delta CT adj", x = "Value", y = "Frequency") +
   theme_bw()
 
 p3 <- ggplot(Residual_data_avg, aes(x = DeltaCT_OG_Res_avg)) + 
@@ -1037,7 +1038,50 @@ p3 <- ggplot(Residual_data_avg, aes(x = DeltaCT_OG_Res_avg)) +
 
 grid.arrange(p1, p2, p3, ncol = 2, nrow = 2)
 
+phenotype_residuals_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_data_avg_tassel_outliars_Removed.csv", skip = 2, header = TRUE )  
 
+
+# Graphs to look at the avraged residual data
+p1 <- ggplot(phenotype_residuals_outliars_rm, aes(x = Alkaloids_Res_avg)) + 
+  geom_histogram(binwidth = 1000, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Values for Residuals of Alkaloids \n Outliars Removed", x = "Value", y = "Frequency") +
+  theme_bw()
+
+p2 <- ggplot(phenotype_residuals_outliars_rm, aes(x = DeltaCT_adj_Res_avg)) + 
+  geom_histogram(binwidth = .25, fill = "yellow", color = "black", alpha = 0.7) +
+  labs(title = "Values for Residuals of Delta CT adj \n Outliars Removed", x = "Value", y = "Frequency") +
+  theme_bw()
+
+p3 <- ggplot(phenotype_residuals_outliars_rm, aes(x = DeltaCT_OG_Res_avg)) + 
+  geom_histogram(binwidth = .25, fill = "yellow", color = "black", alpha = 0.7) +
+  labs(title = "Values for Residuals of Delta CT OG \n Outliars Removed", x = "Value", y = "Frequency") +
+  theme_bw()
+
+grid.arrange(p1, p2, p3, ncol = 2, nrow = 2)
+
+###
+### Subsetting data for other heritability
+###
+
+phenotypes23_24 <- rbind(allpehnotype_data_export_23,allpehnotype_data_export_24)
+phenotypes23_24$ID <- gsub("-", "_", phenotypes23_24$ID)
+head(phenotypes23_24,15)
+
+# Here we have to subset the data in 8 different ways.
+
+#Removing batch effects and leaving only residuals.
+
+#I suggest making this into a function that we can use many times.
+lm_model_alk <- lm(ng.g ~ Year, data = phenotypes23_24, na.action = na.exclude)
+phenotypes23_24$Alkaloids_Res <- resid(lm_model_alk)
+
+lm_model_CT_OG <- lm(Delta_CT_OG ~ Data_Set + Year, data = phenotypes23_24, na.action = na.exclude)
+phenotypes23_24$Delta_CT_OG_Res <- resid(lm_model_CT_OG)
+
+lm_model_CT_adj <- lm(Delta_CT_adj ~ Data_Set + Year, data = phenotypes23_24, na.action = na.exclude)
+phenotypes23_24$Delta_CT_adj_Res <- resid(lm_model_CT_adj)
+
+head(phenotypes23_24,15)
 
 
 ##########################################

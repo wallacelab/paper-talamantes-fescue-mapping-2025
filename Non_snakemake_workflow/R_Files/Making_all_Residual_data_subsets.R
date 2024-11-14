@@ -189,14 +189,68 @@ Pheno_Graph <- function(Residual_data, title){
   
   return(residual_plot)
 }
-
+############################## End Function ####################################
 # Exploring residual data for outliars
 Pheno_Graph(Residual_data_avg,"Residual Data of 2023 and 2024 Avaraged" )
 Pheno_Graph(Residual_Data_23,"Residual Data of 2023")
 Pheno_Graph(Residual_Data_24,"Residual Data of 2024")
 
+#################Function to remove outliars ##################################
+
+remove_outliers <- function(data,stds) {
+  # Select columns 2, 3, and 4
+  cols_to_check <- data[, 2:4]
+  
+  # Calculate the mean and standard deviation for each column
+  means <- apply(cols_to_check, 2, mean, na.rm = TRUE)
+  sds <- apply(cols_to_check, 2, sd, na.rm = TRUE)
+  
+  # Create a logical vector indicating rows within 2.5 standard deviations
+  within_limits <- apply(cols_to_check, 1, function(row) {
+    all(abs(row - means) <= stds * sds)
+  })
+  
+  # Subset data to include only rows that fall within 2.5 standard deviations
+  filtered_data <- data[within_limits, ]
+  
+  return(filtered_data)
+}
+
+############################## End Function ####################################
+
+Residual_data_avg_outliars_rm <- remove_outliers(Residual_data_avg, 2.5)
+Pheno_Graph(Residual_data_avg,"Residual Data of 2023 and 2024 Avaraged" )
+Pheno_Graph(Residual_data_avg_outliars_rm,"Residual Data of 2023 and 2024 Avaraged" )
+nrow(Residual_data_avg) - nrow(Residual_data_avg_outliars_rm)
+
+Residual_Data_23_outliars_rm <- remove_outliers(Residual_Data_23, 2.5)
+Pheno_Graph(Residual_Data_23,"Residual Data of 2023")
+Pheno_Graph(Residual_Data_23_outliars_rm,"Residual Data of 2023")
+nrow(Residual_Data_23) - nrow(Residual_Data_23_outliars_rm)
+
+Residual_Data_24_outliars_rm <- remove_outliers(Residual_Data_24, 2.5)
+Pheno_Graph(Residual_Data_24,"Residual Data of 2024")
+Pheno_Graph(Residual_Data_24_outliars_rm,"Residual Data of 2024")
+nrow(Residual_Data_24) - nrow(Residual_Data_24_outliars_rm)
+
+write.table(Residual_data_avg_outliars_rm,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm.txt")
+write.table(Residual_Data_23_outliars_rm,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm.txt")
+write.table(Residual_Data_24_outliars_rm,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm.txt")
 
 
+################################################################################
+# Now seperating data to make all crosses.
+################################################################################
+Residual_data_avg_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm.txt", header = TRUE)
+Residual_Data_23_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm.txt", header = TRUE)
+Residual_Data_24_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm.txt", header = TRUE)
 
+list_314x310 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/Parental_Lists/310x314_list.txt")  
+list_314x312 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/Parental_Lists/312x314_list.txt")
+
+
+Residual_data_avg
+Residual_Data_23
+Residual_Data_24
 
 

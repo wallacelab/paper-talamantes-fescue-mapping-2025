@@ -10,7 +10,7 @@ library(tidyverse)
 library(AGHmatrix)
 
 # Loading data
-residual_avg_24_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_data_avg.txt"
+residual_avg_24_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_data_avg_tassel_outliars_Removed.csv"
 residual_avg_24 <- read.table(residual_avg_24_loc, header = TRUE, strip.white=TRUE)
 
 parent_data_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Meta_Data/Mother_Father_Data.csv"

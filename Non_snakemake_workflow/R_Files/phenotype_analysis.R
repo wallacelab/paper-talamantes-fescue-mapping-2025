@@ -1041,7 +1041,7 @@ grid.arrange(p1, p2, p3, ncol = 2, nrow = 2)
 phenotype_residuals_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_data_avg_tassel_outliars_Removed.csv", skip = 2, header = TRUE )  
 
 
-# Graphs to look at the avraged residual data
+# Graphs to look at the avraged residual data with outliars removed
 p1 <- ggplot(phenotype_residuals_outliars_rm, aes(x = Alkaloids_Res_avg)) + 
   geom_histogram(binwidth = 1000, fill = "blue", color = "black", alpha = 0.7) +
   labs(title = "Values for Residuals of Alkaloids \n Outliars Removed", x = "Value", y = "Frequency") +

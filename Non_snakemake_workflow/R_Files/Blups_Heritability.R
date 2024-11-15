@@ -11,7 +11,7 @@ library(AGHmatrix)
 
 # Loading data
 residual_avg_24_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_data_avg_tassel_outliars_Removed.csv"
-residual_avg_24 <- read.table(residual_avg_24_loc, header = TRUE, strip.white=TRUE)
+residual_avg_24 <- read.table(residual_avg_24_loc, header = TRUE, strip.white=TRUE, skip = 2 )
 
 parent_data_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Meta_Data/Mother_Father_Data.csv"
 parent_data <- read.table(parent_data_loc, header = TRUE, strip.white=TRUE, sep = ",")
@@ -117,7 +117,7 @@ find_heritability(residuals_all,geno_matrix,"Alkaloids_Res_avg")
 
 
 
-
+################################################################################
 # Ensuring the genomatrix and the residuals have the same IDs
 common_IDs <- intersect(residuals_all$ID, rownames(geno_matrix))
 residuals_all <- residuals_all[residuals_all$ID %in% common_IDs, ]

@@ -120,6 +120,7 @@ head(phenotype_Data_23,15)
 phenotype_Data_23 <- subset(phenotype_Data_23, select = c(ID,Alkaloids_Res,Delta_CT_OG_Res,Delta_CT_adj_Res))
 
 # This is the 2023 Data with no out liar removal
+phenotype_Data_23$ID <- gsub("-", "_", phenotype_Data_23$ID) 
 write.table(phenotype_Data_23, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2023_Data/Resisduals_Starcross_2023.txt', sep = '\t', row.names=FALSE)
 
 
@@ -143,6 +144,7 @@ allpehnotype_data_export_24 <- subset(allpehnotype_data_export_24, select = c(ID
 head(allpehnotype_data_export_24,15)
 
 # This is the 2024 Residual Data with no out liar removal
+allpehnotype_data_export_24$ID <- gsub("-", "_", allpehnotype_data_export_24$ID) 
 write.table(allpehnotype_data_export_24, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Resisduals_Starcross_2024.txt', sep = '\t', row.names=FALSE)
 
 ##################################################################
@@ -197,7 +199,7 @@ Pheno_Graph(Residual_Data_24,"Residual Data of 2024")
 
 #################Function to remove outliars ##################################
 
-remove_outliers <- function(data,stds) {
+remove_outliers <- function(data, stds) {
   # Select columns 2, 3, and 4
   cols_to_check <- data[, 2:4]
   
@@ -205,12 +207,17 @@ remove_outliers <- function(data,stds) {
   means <- apply(cols_to_check, 2, mean, na.rm = TRUE)
   sds <- apply(cols_to_check, 2, sd, na.rm = TRUE)
   
-  # Create a logical vector indicating rows within 2.5 standard deviations
+  # Create a logical vector indicating rows within the limits
   within_limits <- apply(cols_to_check, 1, function(row) {
+    # Check for NA in the row
+    if (any(is.na(row))) {
+      return(FALSE) # Exclude rows with NA
+    }
+    # Check if all columns are within the specified range
     all(abs(row - means) <= stds * sds)
   })
   
-  # Subset data to include only rows that fall within 2.5 standard deviations
+  # Subset data to include only rows that fall within the limits
   filtered_data <- data[within_limits, ]
   
   return(filtered_data)
@@ -241,16 +248,216 @@ write.table(Residual_Data_24_outliars_rm,"/home/darrian/Desktop/UGA/Wallace_Lab/
 ################################################################################
 # Now seperating data to make all crosses.
 ################################################################################
+#Reload Residual Data sets
 Residual_data_avg_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm.txt", header = TRUE)
 Residual_Data_23_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm.txt", header = TRUE)
 Residual_Data_24_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm.txt", header = TRUE)
 
+# Loading in lists
 list_314x310 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/Parental_Lists/310x314_list.txt")  
 list_314x312 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/Parental_Lists/312x314_list.txt")
 
+list_314x310$V1 <- gsub("_dupped\\.bam", "", list_314x310$V1)  # Remove "_dupped.bam"
+list_314x310$V1 <- gsub("-", "_", list_314x310$V1)  # Remove "_dupped.bam"
+list_314x312$V1 <- gsub("_dupped\\.bam", "", list_314x312$V1)  # Remove "_dupped.bam"
+list_314x312$V1 <- gsub("-", "_", list_314x312$V1)  # Remove "_dupped.bam"
 
-Residual_data_avg
-Residual_Data_23
-Residual_Data_24
+########### Function that subsets residual data frame by list of IDs ###########
+residual_subsetter <- function(residual,IDlist){
+  common_IDs <- intersect(residual$ID, IDlist$V1)
+  residual_filtered <- residual %>% filter(ID %in% common_IDs)
+  return(residual_filtered)
+}
+
+Residual_data_avg_outliars_rm_314x310 <- residual_subsetter(Residual_data_avg_outliars_rm,list_314x310 )
+Residual_data_avg_outliars_rm_314x312 <- residual_subsetter(Residual_data_avg_outliars_rm,list_314x312 )
+
+Residual_Data_23_outliars_rm_314x310 <- residual_subsetter(Residual_Data_23_outliars_rm,list_314x310 )
+Residual_Data_23_outliars_rm_314x312 <- residual_subsetter(Residual_Data_23_outliars_rm,list_314x312 )
+
+Residual_Data_24_outliars_rm_314x310 <- residual_subsetter(Residual_Data_24_outliars_rm,list_314x310 )
+Residual_Data_24_outliars_rm_314x312 <- residual_subsetter(Residual_Data_24_outliars_rm,list_314x312 )
+
+# All datasets are now complete.
+write.table(Residual_data_avg_outliars_rm_314x310,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x310.txt")
+write.table(Residual_data_avg_outliars_rm_314x312,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x312.txt")
+
+write.table(Residual_Data_23_outliars_rm_314x310,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm_314x310.txt")
+write.table(Residual_Data_23_outliars_rm_314x312,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm_314x312.txt")
+
+write.table(Residual_Data_24_outliars_rm_314x310,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm_314x310.txt")
+write.table(Residual_Data_24_outliars_rm_314x312,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm_314x312.txt")
+
+################################################################################
+# Calculating heritability
+################################################################################
+# Load in all 9 datasets
+Residual_data_avg_outliars_rm_314x310 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x310.txt", header = TRUE)
+Residual_data_avg_outliars_rm_314x312 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x312.txt", header = TRUE)
+Residual_data_avg_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm.txt", header = TRUE)
+
+Residual_Data_23_outliars_rm_314x310 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm_314x310.txt", header = TRUE)
+Residual_Data_23_outliars_rm_314x312 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm_314x312.txt", header = TRUE)
+Residual_Data_23_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm.txt", header = TRUE)
+
+Residual_Data_24_outliars_rm_314x310 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm_314x310.txt", header = TRUE)
+Residual_Data_24_outliars_rm_314x312 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm_314x312.txt", header = TRUE)
+Residual_Data_24_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm.txt", header = TRUE)
+
+# Load the VCF file
+vcf_data_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_filtered_2.recode.vcf"
+vcf_data <- read.vcfR(vcf_data_loc)
+geno_matrix <- extract.gt(vcf_data, element = "GT")  
+geno_matrix <- t(geno_matrix)
+
+################ Functions needed for heritability finding ##################### 
+##### Function to convert genotype into something usable ####
+convert_genotypes <- function(geno) {
+  geno <- gsub("0/0", "0", geno)
+  geno <- gsub("0/1", "1", geno)
+  geno <- gsub("1/1", "2", geno)
+  return(as.numeric(geno))
+}
+
+###### Getting Heritabilities function ###### 
+find_heritability <- function(pheno_data, geno_matrix, trait) {
+
+  # Ensure both datasets have the same IDs
+  common_IDs <- intersect(pheno_data$ID, rownames(geno_matrix))
+  
+  # Subset data to include only common IDs
+  pheno_data <- pheno_data[pheno_data$ID %in% common_IDs, ]
+  geno_matrix <- geno_matrix[common_IDs, ]
+  
+  # Check if row names match
+  if (!all(rownames(geno_matrix) == pheno_data$ID)) {
+    stop("Row names of geno_data do not match the ID in pheno_data.")
+  }
+  
+  # Convert geno_matrix to data frame, and then convert genotypes
+  geno_data <- as.data.frame(geno_matrix)
+  geno_data <- geno_data %>% mutate_all(convert_genotypes)
+  
+  # Convert geno_data back to matrix for kinship matrix calculation
+  geno_data <- as.matrix(geno_data)
+  
+  # Create kinship matrix using Gmatrix function
+  kinship_matrix <- Gmatrix(SNPmatrix = geno_data, method = "VanRaden")
+  
+  # Ensure the data is in correct format (pheno_data should have necessary columns)
+  pheno_data$ID <- as.character(pheno_data$ID)
+  
+  # Example mixed model for heritability (adjust trait to be a column name)
+  model <- mmer(fixed = as.formula(paste(trait, "~ 1")),
+                random = ~ vsr(ID, Gu = kinship_matrix),
+                rcov = ~ units,
+                data = pheno_data)
+  
+  # Summarize model results
+  model_summary <- summary(model)
+  varcomp_summary <- model_summary$varcomp
+  
+  # Extract variance components for heritability calculation
+  var_ID <- varcomp_summary$VarComp[1]  # Genetic variance
+  var_residual <- varcomp_summary$VarComp[2]  # Residual variance
+  
+  # Calculate heritability
+  heritability <- var_ID / (var_ID + var_residual)
+  
+  # Return heritability estimate
+  return(heritability)
+}
+
+############################## End Function #################################### 
+
+# Calculating Heritability from all data sets
+find_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
+
+find_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
+
+find_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+######################## This is function testing
+
+# This function works with the geno_matrix
+geno <- gsub("0/0", "0", geno)
+geno <- gsub("0/1", "1", geno)
+geno <- gsub("1/1", "2", geno)
+return(as.numeric(geno))
+
+
+
+
+
+
+# Ensure both datasets have the same IDs
+common_IDs <- intersect(Residual_data_avg_outliars_rm_314x312$ID, rownames(geno_matrix))
+
+# Subset data to include only common IDs
+Residual_data_avg_outliars_rm_314x312 <- Residual_data_avg_outliars_rm_314x312[Residual_data_avg_outliars_rm_314x312$ID %in% common_IDs, ]
+geno_matrix <- geno_matrix[common_IDs, ]
+
+# Check if row names match
+if (!all(rownames(geno_matrix) == Residual_data_avg_outliars_rm_314x312$ID)) {
+  stop("Row names of geno_data do not match the ID in Residual_data_avg_outliars_rm_314x312.")
+}
+
+# Convert geno_matrix to data frame, and then convert genotypes
+geno_data <- as.data.frame(geno_matrix)
+geno_data <- geno_data %>% mutate_all(convert_genotypes)
+
+# Convert geno_data back to matrix for kinship matrix calculation
+geno_data <- as.matrix(geno_data)
+
+# Create kinship matrix using Gmatrix function
+kinship_matrix <- Gmatrix(SNPmatrix = geno_data, method = "VanRaden")
+
+# Ensure the data is in correct format (Residual_data_avg_outliars_rm_314x312 should have necessary columns)
+Residual_data_avg_outliars_rm_314x312$ID <- as.character(Residual_data_avg_outliars_rm_314x312$ID)
+
+# Example mixed model for heritability (adjust trait to be a column name)
+model <- mmer(fixed = as.formula(paste("Alkaloids_Res", "~ 1")),
+              random = ~ vsr(ID, Gu = kinship_matrix),
+              rcov = ~ units,
+              data = Residual_data_avg_outliars_rm_314x312)
+
+# Summarize model results
+model_summary <- summary(model)
+varcomp_summary <- model_summary$varcomp
+
+# Extract variance components for heritability calculation
+var_ID <- varcomp_summary$VarComp[1]  # Genetic variance
+var_residual <- varcomp_summary$VarComp[2]  # Residual variance
+
+# Calculate heritability
+heritability <- var_ID / (var_ID + var_residual)
+heritability
+
+
+
+
+
+
+
+
+
+
+
 
 

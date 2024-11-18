@@ -9,6 +9,12 @@ library(car)
 library(reshape2)
 library(gridExtra)
 library(grid)  
+library(vcfR)
+library(AGHmatrix)
+library(sommer)
+library(data.table)
+
+
 ##############################################
 # Step 1: Making every data set
 ##############################################
@@ -219,6 +225,8 @@ remove_outliers <- function(data, stds) {
   
   # Subset data to include only rows that fall within the limits
   filtered_data <- data[within_limits, ]
+  # Gets rid of duplicates
+  filtered_data <- filtered_data[!duplicated(filtered_data$ID), ]
   
   return(filtered_data)
 }
@@ -365,17 +373,77 @@ find_heritability <- function(pheno_data, geno_matrix, trait) {
   heritability <- var_ID / (var_ID + var_residual)
   
   # Return heritability estimate
-  return(heritability)
+  heritability <- round(heritability, 4)
+  resultstable <- data.table(
+    H = heritability,
+    GeneticVar = var_ID,
+    ResidualVar = var_residual,
+    N = model_summary$groups[1]
+  )
+  return(resultstable)
 }
 
 ############################## End Function #################################### 
 
 # Calculating Heritability from all data sets
-find_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
 
-find_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
+# Both years avaraged, heritabilities 
+stats_avg_310_alk <- find_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
+H_avg_310_alk <- stats_avg_310_alk$H[1]
 
-find_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+stats_avg_312_alk <- find_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
+H_avg_312_alk <- stats_avg_312_alk$H[1]
+
+stats_avg_star_alk <- find_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+H_avg_star_alk <- stats_avg_star_alk$H[1]
+
+stats_avg_310_ct <- find_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
+H_avg_310_ct <- stats_avg_310_ct$H[1]
+
+stats_avg_312_ct <- find_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
+H_avg_312_ct <- stats_avg_312_ct$H[1]
+
+stats_avg_star_ct <- find_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
+H_avg_star_ct <- stats_avg_star_ct$H[1]
+
+
+# Just the 2023 heritabilities
+stats_2023_310_alk <- find_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
+H_2023_310_alk <- stats_2023_310_alk$H[1]
+
+stats_2023_312_alk <- find_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
+H_2023_312_alk <- stats_2023_312_alk$H[1]
+
+stats_2023_star_alk <- find_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+H_2023_star_alk <- stats_2023_star_alk$H[1]
+
+stats_2023_310_ct <- find_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
+H_2023_310_ct <- stats_2023_310_ct$H[1]
+
+stats_2023_312_ct <- find_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
+H_2023_312_ct <- stats_2023_312_ct$H[1]
+
+stats_2023_star_ct <- find_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
+H_2023_star_ct <- stats_2023_star_ct$H[1]
+
+# Just the 2024 Heritabilities
+stats_2024_310_alk <- find_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
+H_2024_310_alk <- stats_2024_310_alk$H[1]
+
+stats_2024_312_alk <- find_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
+H_2024_312_alk <- stats_2024_312_alk$H[1]
+
+stats_2024_star_alk <- find_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+H_2024_star_alk <- stats_2024_star_alk$H[1]
+
+stats_2024_310_ct <- find_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
+H_2024_310_ct <- stats_2024_310_ct$H[1]
+
+stats_2024_312_ct <- find_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
+H_2024_312_ct <- stats_2024_312_ct$H[1]
+
+stats_2024_star_ct <- find_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
+H_2024_star_ct <- stats_2024_star_ct$H[1]
 
 
 
@@ -390,10 +458,7 @@ find_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Alkaloids
 
 
 
-
-
-
-######################## This is function testing
+######################## This is function testing #############################
 
 # This function works with the geno_matrix
 geno <- gsub("0/0", "0", geno)
@@ -403,19 +468,26 @@ return(as.numeric(geno))
 
 
 
+# Load the VCF file
+vcf_data_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_filtered_2.recode.vcf"
+vcf_data <- read.vcfR(vcf_data_loc)
+geno_matrix <- extract.gt(vcf_data, element = "GT")  
+geno_matrix <- t(geno_matrix)
 
 
 
+Residual_Data_24_outliars_rm_314x312 #Bad
+Residual_Data_24_outliars_rm_314x310 #Good
 # Ensure both datasets have the same IDs
-common_IDs <- intersect(Residual_data_avg_outliars_rm_314x312$ID, rownames(geno_matrix))
+common_IDs <- intersect(Residual_Data_24_outliars_rm_314x310$ID, rownames(geno_matrix))
 
 # Subset data to include only common IDs
-Residual_data_avg_outliars_rm_314x312 <- Residual_data_avg_outliars_rm_314x312[Residual_data_avg_outliars_rm_314x312$ID %in% common_IDs, ]
+Residual_Data_24_outliars_rm_314x310 <- Residual_Data_24_outliars_rm_314x310[Residual_Data_24_outliars_rm_314x310$ID %in% common_IDs, ]
 geno_matrix <- geno_matrix[common_IDs, ]
 
 # Check if row names match
-if (!all(rownames(geno_matrix) == Residual_data_avg_outliars_rm_314x312$ID)) {
-  stop("Row names of geno_data do not match the ID in Residual_data_avg_outliars_rm_314x312.")
+if (!all(rownames(geno_matrix) == Residual_Data_24_outliars_rm_314x310$ID)) {
+  stop("Row names of geno_data do not match the ID in Residual_Data_24_outliars_rm_314x310.")
 }
 
 # Convert geno_matrix to data frame, and then convert genotypes
@@ -428,14 +500,14 @@ geno_data <- as.matrix(geno_data)
 # Create kinship matrix using Gmatrix function
 kinship_matrix <- Gmatrix(SNPmatrix = geno_data, method = "VanRaden")
 
-# Ensure the data is in correct format (Residual_data_avg_outliars_rm_314x312 should have necessary columns)
-Residual_data_avg_outliars_rm_314x312$ID <- as.character(Residual_data_avg_outliars_rm_314x312$ID)
+# Ensure the data is in correct format (Residual_Data_24_outliars_rm_314x310 should have necessary columns)
+Residual_Data_24_outliars_rm_314x310$ID <- as.character(Residual_Data_24_outliars_rm_314x310$ID)
 
 # Example mixed model for heritability (adjust trait to be a column name)
 model <- mmer(fixed = as.formula(paste("Alkaloids_Res", "~ 1")),
               random = ~ vsr(ID, Gu = kinship_matrix),
               rcov = ~ units,
-              data = Residual_data_avg_outliars_rm_314x312)
+              data = Residual_Data_24_outliars_rm_314x310)
 
 # Summarize model results
 model_summary <- summary(model)
@@ -451,13 +523,35 @@ heritability
 
 
 
+################### Investigating problem heritabilities########################
+# 0 heritability
+stats_2024_312_alk
+summary(Residual_Data_24_outliars_rm_314x312$Alkaloids_Res)
+ggplot(Residual_Data_24_outliars_rm_314x312, aes(x = Alkaloids_Res)) +
+  geom_histogram(binwidth = 5000, fill = "skyblue", color = "black") +
+  labs(title = "Histogram of Alkaloids Residuals",
+       x = "Alkaloids_Res",
+       y = "Frequency") +
+  theme_minimal()
 
+# AN expected heritability
+stats_2024_310_alk
+summary(Residual_Data_24_outliars_rm_314x310$Alkaloids_Res)
+ggplot(Residual_Data_24_outliars_rm_314x310, aes(x = Alkaloids_Res)) +
+  geom_histogram(binwidth = 5000, fill = "skyblue", color = "black") +
+  labs(title = "Histogram of Alkaloids Residuals",
+       x = "Alkaloids_Res",
+       y = "Frequency") +
+  theme_minimal()
 
+# Difference in variance and sd 
 
+# Bad over Good
+var(Residual_Data_24_outliars_rm_314x312$Alkaloids_Res) / var(Residual_Data_24_outliars_rm_314x310$Alkaloids_Res)
+sd(Residual_Data_24_outliars_rm_314x312$Alkaloids_Res) / sd(Residual_Data_24_outliars_rm_314x310$Alkaloids_Res)
+heatmap(as.matrix(kinship_matrix)) 
 
-
-
-
-
-
+### Notes
+# Number of individuals does not seem to cause the 0 in gentic heritability
+# There is no missing data (e.g. NAs)
 

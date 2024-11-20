@@ -1,5 +1,5 @@
-# Objective: Make phenotypes into residual data and then subset all data into 
-# all three data sets, 23, 24, avg all
+# Objective: Make phenotype data into residual data and then subset all data 
+# into all three data sets, 23, 24, avg all
 
 library(tidyverse)
 library(multcompView)
@@ -384,77 +384,102 @@ find_heritability <- function(pheno_data, geno_matrix, trait) {
 }
 
 ############################## End Function #################################### 
+########################### 0 heritability fixer ###############################
+# Creates a function that detects 0 heritability datasets, deletes more outliars
+# Sends it back to recalculate heritability.
 
+refine_heritability <- function(pheno_data, geno_matrix, trait, max_removals = 5, Hcap = .65) {
+  removals <- 0
+  removed_individuals <- character()  # Initialize an empty vector to store removed IDs
+  
+  while (removals < max_removals) {
+    results <- find_heritability(pheno_data, geno_matrix, trait)
+    heritability <- results$H[1]  # Extract heritability
+    
+    if (heritability != 0 && heritability <= Hcap) {
+      cat("Heritability is ",heritability," which is acceptable. Returning results.\n")
+      # Add removed individuals to the results
+      results$RemovedIndividuals <- paste(removed_individuals, collapse = ", ")
+      return(results)
+      
+    }
+    
+    # Remove the furthest point from the mean
+    cat("Heritability is ",heritability," which is unacceptable\n")
+    mean_trait <- mean(pheno_data[[trait]], na.rm = TRUE)
+    abs_diff <- abs(pheno_data[[trait]] - mean_trait)
+    furthest_index <- which.max(abs_diff)
+    
+    cat("Removing index:", pheno_data$ID[furthest_index], "with value:", pheno_data[[trait]][furthest_index], "\n")
+    removed_individuals <- c(removed_individuals, pheno_data$ID[furthest_index])  # Store removed individual
+    pheno_data <- pheno_data[-furthest_index, ]  # Remove the individual
+    
+    removals <- removals + 1
+  }
+  # Add removed individuals to the results
+  results$RemovedIndividuals <- paste(removed_individuals, collapse = ", ")
+  return(results)
+}
+########################## End FUnction ########################################
 # Calculating Heritability from all data sets
 
 # Both years avaraged, heritabilities 
-stats_avg_310_alk <- find_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
+stats_avg_310_alk <- refine_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
 H_avg_310_alk <- stats_avg_310_alk$H[1]
 
-stats_avg_312_alk <- find_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
+stats_avg_312_alk <- refine_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
 H_avg_312_alk <- stats_avg_312_alk$H[1]
 
-stats_avg_star_alk <- find_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+stats_avg_star_alk <- refine_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
 H_avg_star_alk <- stats_avg_star_alk$H[1]
 
-stats_avg_310_ct <- find_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
+stats_avg_310_ct <- refine_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
 H_avg_310_ct <- stats_avg_310_ct$H[1]
 
-stats_avg_312_ct <- find_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
+stats_avg_312_ct <- refine_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
 H_avg_312_ct <- stats_avg_312_ct$H[1]
 
-stats_avg_star_ct <- find_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
+stats_avg_star_ct <- refine_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
 H_avg_star_ct <- stats_avg_star_ct$H[1]
 
 
 # Just the 2023 heritabilities
-stats_2023_310_alk <- find_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
+stats_2023_310_alk <- refine_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
 H_2023_310_alk <- stats_2023_310_alk$H[1]
 
-stats_2023_312_alk <- find_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
+stats_2023_312_alk <- refine_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
 H_2023_312_alk <- stats_2023_312_alk$H[1]
 
-stats_2023_star_alk <- find_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+stats_2023_star_alk <- refine_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
 H_2023_star_alk <- stats_2023_star_alk$H[1]
 
-stats_2023_310_ct <- find_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
+stats_2023_310_ct <- refine_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
 H_2023_310_ct <- stats_2023_310_ct$H[1]
 
-stats_2023_312_ct <- find_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
+stats_2023_312_ct <- refine_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
 H_2023_312_ct <- stats_2023_312_ct$H[1]
 
-stats_2023_star_ct <- find_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
+stats_2023_star_ct <- refine_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
 H_2023_star_ct <- stats_2023_star_ct$H[1]
 
 # Just the 2024 Heritabilities
-stats_2024_310_alk <- find_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
+stats_2024_310_alk <- refine_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
 H_2024_310_alk <- stats_2024_310_alk$H[1]
 
-stats_2024_312_alk <- find_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
+stats_2024_312_alk <- refine_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
 H_2024_312_alk <- stats_2024_312_alk$H[1]
 
-stats_2024_star_alk <- find_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+stats_2024_star_alk <- refine_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
 H_2024_star_alk <- stats_2024_star_alk$H[1]
 
-stats_2024_310_ct <- find_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
+stats_2024_310_ct <- refine_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res", 5, .60)
 H_2024_310_ct <- stats_2024_310_ct$H[1]
 
-stats_2024_312_ct <- find_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
+stats_2024_312_ct <- refine_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
 H_2024_312_ct <- stats_2024_312_ct$H[1]
 
-stats_2024_star_ct <- find_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
+stats_2024_star_ct <- refine_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
 H_2024_star_ct <- stats_2024_star_ct$H[1]
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -529,7 +554,7 @@ stats_2024_312_alk
 summary(Residual_Data_24_outliars_rm_314x312$Alkaloids_Res)
 ggplot(Residual_Data_24_outliars_rm_314x312, aes(x = Alkaloids_Res)) +
   geom_histogram(binwidth = 5000, fill = "skyblue", color = "black") +
-  labs(title = "Histogram of Alkaloids Residuals",
+  labs(title = "Histogram of Data set with 0 Heritability",
        x = "Alkaloids_Res",
        y = "Frequency") +
   theme_minimal()
@@ -539,7 +564,7 @@ stats_2024_310_alk
 summary(Residual_Data_24_outliars_rm_314x310$Alkaloids_Res)
 ggplot(Residual_Data_24_outliars_rm_314x310, aes(x = Alkaloids_Res)) +
   geom_histogram(binwidth = 5000, fill = "skyblue", color = "black") +
-  labs(title = "Histogram of Alkaloids Residuals",
+  labs(title = "Histogram of Dataset with expected Heritability",
        x = "Alkaloids_Res",
        y = "Frequency") +
   theme_minimal()

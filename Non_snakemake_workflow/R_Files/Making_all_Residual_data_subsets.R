@@ -417,6 +417,7 @@ refine_heritability <- function(pheno_data, geno_matrix, trait, max_removals = 5
     removals <- removals + 1
   }
   # Add removed individuals to the results
+  cat("Heritability could not get into acceptable range, returning last results table\n")
   results$RemovedIndividuals <- paste(removed_individuals, collapse = ", ")
   return(results)
 }
@@ -466,7 +467,7 @@ H_2023_star_ct <- stats_2023_star_ct$H[1]
 stats_2024_310_alk <- refine_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
 H_2024_310_alk <- stats_2024_310_alk$H[1]
 
-stats_2024_312_alk <- refine_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
+stats_2024_312_alk <- refine_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res", 20, .60)
 H_2024_312_alk <- stats_2024_312_alk$H[1]
 
 stats_2024_star_alk <- refine_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
@@ -480,6 +481,23 @@ H_2024_312_ct <- stats_2024_312_ct$H[1]
 
 stats_2024_star_ct <- refine_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
 H_2024_star_ct <- stats_2024_star_ct$H[1]
+
+
+
+######################
+# Exploring the stats of data sets that needed to remove more individuals
+######################
+
+stats_2024_310_ct
+stats_2024_312_alk
+
+
+
+
+
+
+
+
 
 
 

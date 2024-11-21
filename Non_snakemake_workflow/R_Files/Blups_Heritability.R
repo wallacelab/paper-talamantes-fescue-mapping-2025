@@ -117,7 +117,7 @@ find_heritability(residuals_all,geno_matrix,"Alkaloids_Res_avg")
 
 
 
-################################################################################
+
 # Ensuring the genomatrix and the residuals have the same IDs
 common_IDs <- intersect(residuals_all$ID, rownames(geno_matrix))
 residuals_all <- residuals_all[residuals_all$ID %in% common_IDs, ]

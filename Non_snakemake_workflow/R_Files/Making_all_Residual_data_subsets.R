@@ -488,17 +488,59 @@ H_2024_star_ct <- stats_2024_star_ct$H[1]
 # Exploring the stats of data sets that needed to remove more individuals
 ######################
 
+# These are the data that had things removed 
+stats_2023_310_ct
 stats_2024_310_ct
 stats_2024_312_alk
+stats_2024_312_ct
 
+############### Function to make graphs showing removed individuals ############
 
+removed_viz <- function(stats, pheno_data, phenotype){
+  removed_individuals <- data.table(
+    ID = unlist(strsplit(stats$RemovedIndividuals, split = ", "))
+  )
+  pheno_data_2 <-  pheno_data[!(pheno_data$ID %in% removed_individuals$ID), ]
 
-
-
-
-
-
-
+  
+  if(phenotype == "Alkaloids_Res"){
+    p1 <- ggplot(pheno_data_2, aes(x = Alkaloids_Res)) + 
+      geom_histogram(binwidth = 1000, fill = "blue", color = "black", alpha = 0.7) +
+      labs(title = "Alkaloid Residuals Extra Removed", x = "Value", y = "Frequency") +
+      theme_bw()
+    
+    p2 <- ggplot(pheno_data, aes(x = Alkaloids_Res)) + 
+      geom_histogram(binwidth = 1000, fill = "blue", color = "black", alpha = 0.7) +
+      labs(title = "Alkaloid Residuals", x = "Value", y = "Frequency") +
+      theme_bw()
+    
+    residual_plot <- grid.arrange(p1, p2, ncol = 2, nrow = 1)
+    return(residual_plot)
+    
+  }else if (phenotype == "Delta_CT_adj_Res") {
+    
+    p1 <- ggplot(pheno_data_2, aes(x = Delta_CT_adj_Res)) + 
+      geom_histogram(binwidth = .25, fill = "yellow", color = "black", alpha = 0.7) +
+      labs(title = "Delta CT Adj Residuals Extra Removed", x = "Value", y = "Frequency") +
+      theme_bw()
+    
+    p2 <- ggplot(pheno_data, aes(x = Delta_CT_adj_Res)) + 
+      geom_histogram(binwidth = .25, fill = "yellow", color = "black", alpha = 0.7) +
+      labs(title = "Delta Adj Adj Residuals", x = "Value", y = "Frequency") +
+      theme_bw()
+    
+    residual_plot <- grid.arrange(p1, p2, ncol = 2, nrow = 1)
+    return(residual_plot)
+    
+  } else{
+    cat("Paramaters are probably wrong\n")
+  }
+}
+############################# End function #####################################
+comparison1 <- removed_viz(stats_2023_310_ct, Residual_Data_23_outliars_rm_314x310, phenotype = "Delta_CT_adj_Res")
+comparison2 <- removed_viz(stats_2024_310_ct, Residual_Data_24_outliars_rm_314x310, phenotype = "Delta_CT_adj_Res")
+comparison3 <- removed_viz(stats_2024_312_alk, Residual_Data_24_outliars_rm_314x312, phenotype = "Alkaloids_Res")
+comparison4 <- removed_viz(stats_2024_312_ct, Residual_Data_24_outliars_rm_314x312, phenotype = "Delta_CT_adj_Res")
 
 
 ######################## This is function testing #############################

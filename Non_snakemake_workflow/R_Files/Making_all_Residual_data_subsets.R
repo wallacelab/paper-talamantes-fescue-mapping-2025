@@ -388,7 +388,7 @@ find_heritability <- function(pheno_data, geno_matrix, trait) {
 # Creates a function that detects 0 heritability datasets, deletes more outliars
 # Sends it back to recalculate heritability.
 
-refine_heritability <- function(pheno_data, geno_matrix, trait, max_removals = 5, Hcap = .65) {
+refine_heritability <- function(pheno_data, geno_matrix, trait, max_removals = 5, Hcap = .65, Hmin = .04) {
   removals <- 0
   removed_individuals <- character()  # Initialize an empty vector to store removed IDs
   
@@ -396,7 +396,7 @@ refine_heritability <- function(pheno_data, geno_matrix, trait, max_removals = 5
     results <- find_heritability(pheno_data, geno_matrix, trait)
     heritability <- results$H[1]  # Extract heritability
     
-    if (heritability != 0 && heritability <= Hcap) {
+    if (heritability >= Hmin && heritability <= Hcap) {
       cat("Heritability is ",heritability," which is acceptable. Returning results.\n")
       # Add removed individuals to the results
       results$RemovedIndividuals <- paste(removed_individuals, collapse = ", ")
@@ -454,17 +454,17 @@ H_2023_312_alk <- stats_2023_312_alk$H[1]
 stats_2023_star_alk <- refine_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
 H_2023_star_alk <- stats_2023_star_alk$H[1]
 
-stats_2023_310_ct <- refine_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
+stats_2023_310_ct <- refine_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res", 15, .6)
 H_2023_310_ct <- stats_2023_310_ct$H[1]
 
 stats_2023_312_ct <- refine_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
 H_2023_312_ct <- stats_2023_312_ct$H[1]
 
-stats_2023_star_ct <- refine_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
+stats_2023_star_ct <- refine_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res", 15, .60)
 H_2023_star_ct <- stats_2023_star_ct$H[1]
 
 # Just the 2024 Heritabilities
-stats_2024_310_alk <- refine_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
+stats_2024_310_alk <- refine_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res", 15, .60)
 H_2024_310_alk <- stats_2024_310_alk$H[1]
 
 stats_2024_312_alk <- refine_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res", 20, .60)

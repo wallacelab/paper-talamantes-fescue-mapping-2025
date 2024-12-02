@@ -422,65 +422,192 @@ refine_heritability <- function(pheno_data, geno_matrix, trait, max_removals = 5
   return(results)
 }
 ########################## End FUnction ########################################
+################# graphing heritability as individuals get removed #############
+# The function will remove a single individual, graph the heritability on the y
+# N on the x. itll do this until ...
+
+graph_heritability <- function(pheno_data, geno_matrix, trait, max_removals = 14, Hdif = .04) {
+  removals <- 0
+  removed_individuals <- character()  # Initialize an empty vector to store removed IDs
+  heritability_old = 100
+  N_list <- c()
+  H_list <- c()
+  
+  
+  while (removals < max_removals) {
+    
+    results <- find_heritability(pheno_data, geno_matrix, trait)
+    heritability <- results$H[1]  # Extract heritability
+    heritability_dif <- abs(heritability - heritability_old)
+    # Append the current N and H values
+    N_list <- c(N_list, nrow(pheno_data))
+    H_list <- c(H_list, heritability)
+    cat("######################## \n")
+    cat("N_list new value ", N_list, "\n")
+    cat("H_list new value ", H_list, "\n")
+    
+    if (heritability_dif <= Hdif && heritability != 0) {
+      cat("Heritability difference is ",heritability_dif," which is acceptable. Returning results.\n")
+      # Add removed individuals to the results
+      results$RemovedIndividuals <- paste(removed_individuals, collapse = ", ")
+      
+      # Remove and calculate 2 more before finishing.
+      cat("Removing one more before finishing \n")
+      mean_trait <- mean(pheno_data[[trait]], na.rm = TRUE)
+      abs_diff <- abs(pheno_data[[trait]] - mean_trait)
+      furthest_index <- which.max(abs_diff)
+      cat("Removing index:", pheno_data$ID[furthest_index], "with value:", pheno_data[[trait]][furthest_index], "\n")
+      removed_individuals <- c(removed_individuals, pheno_data$ID[furthest_index])  # Store removed individual
+      pheno_data <- pheno_data[-furthest_index, ]  # Remove the individual
+      heritability_old <- results$H[1]  
+      removals <- removals + 1
+      results <- find_heritability(pheno_data, geno_matrix, trait)
+      heritability <- results$H[1]  # Extract heritability
+      heritability_dif <- abs(heritability - heritability_old)
+      # Append the current N and H values
+      N_list <- c(N_list, nrow(pheno_data))
+      H_list <- c(H_list, heritability)
+      
+      # Graphing the final product
+      data <- data.frame(N = N_list, H = H_list)
+      H_plot <- ggplot(data, aes(x = N, y = H)) +
+        geom_point(color = "blue", size = 3) +  # Add points
+        geom_line(color = "red") +             # Add a line connecting the points
+        labs(title = "N vs Heritability",
+             x = "N",
+             y = "Heritability") +
+        theme_bw() 
+      
+      return(list(graph = H_plot, Hdata = data, removed = removed_individuals))
+
+    }
+    
+    # Remove the furthest point from the mean
+    cat("Heritability difference is ",heritability_dif," which is unacceptable\n")
+    mean_trait <- mean(pheno_data[[trait]], na.rm = TRUE)
+    abs_diff <- abs(pheno_data[[trait]] - mean_trait)
+    furthest_index <- which.max(abs_diff)
+    
+    cat("Removing index:", pheno_data$ID[furthest_index], "with value:", pheno_data[[trait]][furthest_index], "\n")
+    removed_individuals <- c(removed_individuals, pheno_data$ID[furthest_index])  # Store removed individual
+    pheno_data <- pheno_data[-furthest_index, ]  # Remove the individual
+    heritability_old <- results$H[1]      # Update old heritability
+    removals <- removals + 1
+  }
+  
+  # Add removed individuals to the results
+  # Graphing the final product
+  data <- data.frame(N = N_list, H = H_list)
+  H_plot <- ggplot(data, aes(x = N, y = H)) +
+    geom_point(color = "blue", size = 3) +  # Add points
+    geom_line(color = "red") +             # Add a line connecting the points
+    labs(title = "N vs Heritability",
+         x = "N",
+         y = "Heritability") +
+    theme_bw() 
+  
+  return(list(graph = H_plot, Hdata = data, removed = removed_individuals))
+}
+########################## End FUnction ########################################
 # Calculating Heritability from all data sets
 
-# Both years avaraged, heritabilities 
-stats_avg_310_alk <- refine_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
-H_avg_310_alk <- stats_avg_310_alk$H[1]
+# # Both years avaraged, heritabilities 
+# stats_avg_310_alk <- refine_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
+# H_avg_310_alk <- stats_avg_310_alk$H[1]
+# 
+# stats_avg_312_alk <- refine_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
+# H_avg_312_alk <- stats_avg_312_alk$H[1]
+# 
+# stats_avg_star_alk <- refine_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+# H_avg_star_alk <- stats_avg_star_alk$H[1]
+# 
+# stats_avg_310_ct <- refine_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
+# H_avg_310_ct <- stats_avg_310_ct$H[1]
+# 
+# stats_avg_312_ct <- refine_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
+# H_avg_312_ct <- stats_avg_312_ct$H[1]
+# 
+# stats_avg_star_ct <- refine_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
+# H_avg_star_ct <- stats_avg_star_ct$H[1]
+# 
+# 
+# # Just the 2023 heritabilities
+# stats_2023_310_alk <- refine_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
+# H_2023_310_alk <- stats_2023_310_alk$H[1]
+# 
+# stats_2023_312_alk <- refine_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
+# H_2023_312_alk <- stats_2023_312_alk$H[1]
+# 
+# stats_2023_star_alk <- refine_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+# H_2023_star_alk <- stats_2023_star_alk$H[1]
+# 
+# stats_2023_310_ct <- refine_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res", 15, .6)
+# H_2023_310_ct <- stats_2023_310_ct$H[1]
+# 
+# stats_2023_312_ct <- refine_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
+# H_2023_312_ct <- stats_2023_312_ct$H[1]
+# 
+# stats_2023_star_ct <- refine_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res", 15, .60)
+# H_2023_star_ct <- stats_2023_star_ct$H[1]
+# 
+# # Just the 2024 Heritabilities
+# stats_2024_310_alk <- refine_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res", 15, .60)
+# H_2024_310_alk <- stats_2024_310_alk$H[1]
+# 
+# stats_2024_312_alk <- refine_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res", 20, .60)
+# H_2024_312_alk <- stats_2024_312_alk$H[1]
+# 
+# stats_2024_star_alk <- refine_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+# H_2024_star_alk <- stats_2024_star_alk$H[1]
+# 
+# stats_2024_310_ct <- refine_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res", 5, .60)
+# H_2024_310_ct <- stats_2024_310_ct$H[1]
+# 
+# stats_2024_312_ct <- refine_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
+# H_2024_312_ct <- stats_2024_312_ct$H[1]
+# 
+# stats_2024_star_ct <- refine_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
+# H_2024_star_ct <- stats_2024_star_ct$H[1]
 
-stats_avg_312_alk <- refine_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
-H_avg_312_alk <- stats_avg_312_alk$H[1]
 
-stats_avg_star_alk <- refine_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
-H_avg_star_alk <- stats_avg_star_alk$H[1]
+########## Plotting Heritability platoe ################
 
-stats_avg_310_ct <- refine_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
-H_avg_310_ct <- stats_avg_310_ct$H[1]
+plot_avg_310_alk <- graph_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res", 14, .04)
+plot_avg_312_alk <- graph_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res", 14, .04)
+plot_avg_star_alk <- graph_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+plot_avg_310_ct <- graph_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
+plot_avg_312_ct <- graph_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
+plot_avg_star_ct <- graph_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
 
-stats_avg_312_ct <- refine_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
-H_avg_312_ct <- stats_avg_312_ct$H[1]
+plot_2023_310_alk <- graph_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
+plot_2023_312_alk <- graph_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
+plot_2023_star_alk <- graph_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+plot_2023_310_ct <-graph_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
+plot_2023_312_ct <- graph_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
+plot_2023_star_ct <- graph_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
 
-stats_avg_star_ct <- refine_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
-H_avg_star_ct <- stats_avg_star_ct$H[1]
+plot_2024_310_alk <- graph_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
+plot_2024_312_alk <- graph_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
+plot_2024_star_alk <- graph_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+plot_2024_310_ct <- graph_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
+plot_2024_312_ct <- graph_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
+plot_2024_star_ct <- graph_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
 
 
-# Just the 2023 heritabilities
-stats_2023_310_alk <- refine_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
-H_2023_310_alk <- stats_2023_310_alk$H[1]
 
-stats_2023_312_alk <- refine_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
-H_2023_312_alk <- stats_2023_312_alk$H[1]
 
-stats_2023_star_alk <- refine_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
-H_2023_star_alk <- stats_2023_star_alk$H[1]
 
-stats_2023_310_ct <- refine_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res", 15, .6)
-H_2023_310_ct <- stats_2023_310_ct$H[1]
 
-stats_2023_312_ct <- refine_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
-H_2023_312_ct <- stats_2023_312_ct$H[1]
 
-stats_2023_star_ct <- refine_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res", 15, .60)
-H_2023_star_ct <- stats_2023_star_ct$H[1]
 
-# Just the 2024 Heritabilities
-stats_2024_310_alk <- refine_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res", 15, .60)
-H_2024_310_alk <- stats_2024_310_alk$H[1]
 
-stats_2024_312_alk <- refine_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res", 20, .60)
-H_2024_312_alk <- stats_2024_312_alk$H[1]
 
-stats_2024_star_alk <- refine_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
-H_2024_star_alk <- stats_2024_star_alk$H[1]
 
-stats_2024_310_ct <- refine_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res", 5, .60)
-H_2024_310_ct <- stats_2024_310_ct$H[1]
 
-stats_2024_312_ct <- refine_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
-H_2024_312_ct <- stats_2024_312_ct$H[1]
 
-stats_2024_star_ct <- refine_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
-H_2024_star_ct <- stats_2024_star_ct$H[1]
+
+
+
 
 
 

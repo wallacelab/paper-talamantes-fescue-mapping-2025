@@ -446,41 +446,41 @@ graph_heritability <- function(pheno_data, geno_matrix, trait, max_removals = 14
     cat("N_list new value ", N_list, "\n")
     cat("H_list new value ", H_list, "\n")
     
-    if (heritability_dif <= Hdif && heritability != 0) {
-      cat("Heritability difference is ",heritability_dif," which is acceptable. Returning results.\n")
-      # Add removed individuals to the results
-      results$RemovedIndividuals <- paste(removed_individuals, collapse = ", ")
-      
-      # Remove and calculate 2 more before finishing.
-      cat("Removing one more before finishing \n")
-      mean_trait <- mean(pheno_data[[trait]], na.rm = TRUE)
-      abs_diff <- abs(pheno_data[[trait]] - mean_trait)
-      furthest_index <- which.max(abs_diff)
-      cat("Removing index:", pheno_data$ID[furthest_index], "with value:", pheno_data[[trait]][furthest_index], "\n")
-      removed_individuals <- c(removed_individuals, pheno_data$ID[furthest_index])  # Store removed individual
-      pheno_data <- pheno_data[-furthest_index, ]  # Remove the individual
-      heritability_old <- results$H[1]  
-      removals <- removals + 1
-      results <- find_heritability(pheno_data, geno_matrix, trait)
-      heritability <- results$H[1]  # Extract heritability
-      heritability_dif <- abs(heritability - heritability_old)
-      # Append the current N and H values
-      N_list <- c(N_list, nrow(pheno_data))
-      H_list <- c(H_list, heritability)
-      
-      # Graphing the final product
-      data <- data.frame(N = N_list, H = H_list)
-      H_plot <- ggplot(data, aes(x = N, y = H)) +
-        geom_point(color = "blue", size = 3) +  # Add points
-        geom_line(color = "red") +             # Add a line connecting the points
-        labs(title = "N vs Heritability",
-             x = "N",
-             y = "Heritability") +
-        theme_bw() 
-      
-      return(list(graph = H_plot, Hdata = data, removed = removed_individuals))
-
-    }
+    # if (heritability_dif <= Hdif && heritability != 0) {
+    #   cat("Heritability difference is ",heritability_dif," which is acceptable. Returning results.\n")
+    #   # Add removed individuals to the results
+    #   results$RemovedIndividuals <- paste(removed_individuals, collapse = ", ")
+    #   
+    #   # Remove and calculate 2 more before finishing.
+    #   cat("Removing one more before finishing \n")
+    #   mean_trait <- mean(pheno_data[[trait]], na.rm = TRUE)
+    #   abs_diff <- abs(pheno_data[[trait]] - mean_trait)
+    #   furthest_index <- which.max(abs_diff)
+    #   cat("Removing index:", pheno_data$ID[furthest_index], "with value:", pheno_data[[trait]][furthest_index], "\n")
+    #   removed_individuals <- c(removed_individuals, pheno_data$ID[furthest_index])  # Store removed individual
+    #   pheno_data <- pheno_data[-furthest_index, ]  # Remove the individual
+    #   heritability_old <- results$H[1]  
+    #   removals <- removals + 1
+    #   results <- find_heritability(pheno_data, geno_matrix, trait)
+    #   heritability <- results$H[1]  # Extract heritability
+    #   heritability_dif <- abs(heritability - heritability_old)
+    #   # Append the current N and H values
+    #   N_list <- c(N_list, nrow(pheno_data))
+    #   H_list <- c(H_list, heritability)
+    #   
+    #   # Graphing the final product
+    #   data <- data.frame(N = N_list, H = H_list)
+    #   H_plot <- ggplot(data, aes(x = N, y = H)) +
+    #     geom_point(color = "blue", size = 3) +  # Add points
+    #     geom_line(color = "red") +             # Add a line connecting the points
+    #     labs(title = "N vs Heritability",
+    #          x = "N",
+    #          y = "Heritability") +
+    #     theme_bw() 
+    #   
+    #   return(list(graph = H_plot, Hdata = data, removed = removed_individuals))
+    # 
+    # }
     
     # Remove the furthest point from the mean
     cat("Heritability difference is ",heritability_dif," which is unacceptable\n")
@@ -572,26 +572,26 @@ graph_heritability <- function(pheno_data, geno_matrix, trait, max_removals = 14
 
 ########## Plotting Heritability platoe ################
 
-plot_avg_310_alk <- graph_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res", 14, .04)
-plot_avg_312_alk <- graph_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res", 14, .04)
-plot_avg_star_alk <- graph_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
-plot_avg_310_ct <- graph_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
-plot_avg_312_ct <- graph_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
-plot_avg_star_ct <- graph_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
+plot_avg_310_alk <- graph_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res", nrow(Residual_data_avg_outliars_rm_314x310)/2, .04)
+plot_avg_312_alk <- graph_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res", nrow(Residual_data_avg_outliars_rm_314x312)/2, .04)
+plot_avg_star_alk <- graph_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Alkaloids_Res", nrow(Residual_data_avg_outliars_rm)/2)
+plot_avg_310_ct <- graph_heritability(Residual_data_avg_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res",nrow(Residual_data_avg_outliars_rm_314x310)/2)
+plot_avg_312_ct <- graph_heritability(Residual_data_avg_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res",nrow(Residual_data_avg_outliars_rm_314x312)/2)
+plot_avg_star_ct <- graph_heritability(Residual_data_avg_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res",nrow(Residual_data_avg_outliars_rm)/2)
 
-plot_2023_310_alk <- graph_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
-plot_2023_312_alk <- graph_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
-plot_2023_star_alk <- graph_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
-plot_2023_310_ct <-graph_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
-plot_2023_312_ct <- graph_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
-plot_2023_star_ct <- graph_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res",20)
+plot_2023_310_alk <- graph_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res",nrow(Residual_Data_23_outliars_rm_314x310)/2)
+plot_2023_312_alk <- graph_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res",nrow(Residual_Data_23_outliars_rm_314x312)/2)
+plot_2023_star_alk <- graph_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Alkaloids_Res",nrow(Residual_Data_23_outliars_rm)/2)
+plot_2023_310_ct <-graph_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res",nrow(Residual_Data_23_outliars_rm_314x310)/2)
+plot_2023_312_ct <- graph_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res",nrow(Residual_Data_23_outliars_rm_314x312)/2)
+plot_2023_star_ct <- graph_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res",nrow(Residual_Data_23_outliars_rm)/2)
 
-plot_2024_310_alk <- graph_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res",20)
-plot_2024_312_alk <- graph_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res",20)
-plot_2024_star_alk <- graph_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Alkaloids_Res",20)
-plot_2024_310_ct <- graph_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
-plot_2024_312_ct <- graph_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
-plot_2024_star_ct <- graph_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
+plot_2024_310_alk <- graph_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res",nrow(Residual_Data_24_outliars_rm_314x310)/2)
+plot_2024_312_alk <- graph_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res",nrow(Residual_Data_24_outliars_rm_314x312)/2)
+plot_2024_star_alk <- graph_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Alkaloids_Res",nrow(Residual_Data_24_outliars_rm)/2)
+plot_2024_310_ct <- graph_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res",nrow(Residual_Data_24_outliars_rm_314x310)/2)
+plot_2024_312_ct <- graph_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res", nrow(Residual_Data_24_outliars_rm_314x312)/2)
+plot_2024_star_ct <- graph_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res",nrow(Residual_Data_24_outliars_rm)/2)
 
 
 

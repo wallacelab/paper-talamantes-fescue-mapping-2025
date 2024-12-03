@@ -388,7 +388,7 @@ find_heritability <- function(pheno_data, geno_matrix, trait) {
 # Creates a function that detects 0 heritability datasets, deletes more outliars
 # Sends it back to recalculate heritability.
 
-refine_heritability <- function(pheno_data, geno_matrix, trait, max_removals = 5, Hcap = .65, Hmin = .04) {
+refine_heritability <- function(pheno_data, geno_matrix, trait, max_removals = 5, Hcap = .65, Hmin = .03) {
   removals <- 0
   removed_individuals <- character()  # Initialize an empty vector to store removed IDs
   
@@ -557,7 +557,7 @@ graph_heritability <- function(pheno_data, geno_matrix, trait, max_removals = 14
 # stats_2024_312_alk <- refine_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res", 20, .60)
 # H_2024_312_alk <- stats_2024_312_alk$H[1]
 # 
-# stats_2024_star_alk <- refine_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+# stats_2024_star_alk <- refine_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Alkaloids_Res", 20, .60)
 # H_2024_star_alk <- stats_2024_star_alk$H[1]
 # 
 # stats_2024_310_ct <- refine_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res", 5, .60)
@@ -584,11 +584,11 @@ plot_2023_312_alk <- graph_heritability(Residual_Data_23_outliars_rm_314x312, ge
 plot_2023_star_alk <- graph_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
 plot_2023_310_ct <-graph_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
 plot_2023_312_ct <- graph_heritability(Residual_Data_23_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
-plot_2023_star_ct <- graph_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
+plot_2023_star_ct <- graph_heritability(Residual_Data_23_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res",20)
 
-plot_2024_310_alk <- graph_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res")
-plot_2024_312_alk <- graph_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res")
-plot_2024_star_alk <- graph_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Alkaloids_Res")
+plot_2024_310_alk <- graph_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res",20)
+plot_2024_312_alk <- graph_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Alkaloids_Res",20)
+plot_2024_star_alk <- graph_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Alkaloids_Res",20)
 plot_2024_310_ct <- graph_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res")
 plot_2024_312_ct <- graph_heritability(Residual_Data_24_outliars_rm_314x312, geno_matrix, trait = "Delta_CT_adj_Res")
 plot_2024_star_ct <- graph_heritability(Residual_Data_24_outliars_rm, geno_matrix, trait = "Delta_CT_adj_Res")
@@ -596,15 +596,95 @@ plot_2024_star_ct <- graph_heritability(Residual_Data_24_outliars_rm, geno_matri
 
 
 
+# Plot for avg data
+# Create overall titles
+title_avg <- textGrob("Average Data", gp = gpar(fontsize = 20, fontface = "bold"))
+x_axis <- textGrob("310 \t\t\t\t\t 312 \t\t\t\t\t Star", gp = gpar(fontsize = 16), vjust = -.5)
+y_axis <- textGrob("CT Ratio \t\t Alkaloids", gp = gpar(fontsize = 16), rot = 90)
+# Arrange plots with grid.arrange
+avg_H_plot <- grid.arrange(
+  arrangeGrob(plot_avg_310_alk$graph, plot_avg_312_alk$graph, plot_avg_star_alk$graph,
+              plot_avg_310_ct$graph,plot_avg_312_ct$graph,plot_avg_star_ct$graph, 
+              ncol = 3, nrow = 2),  # Add your plots here
+  top = title_avg,                             # Add the top title
+  bottom = x_axis,                             # Add the x-axis title
+  left = y_axis                                # Add the y-axis title
+)
+
+# Plot for 2023 data
+# Create overall titles
+title_avg <- textGrob("2023 Data", gp = gpar(fontsize = 20, fontface = "bold"))
+x_axis <- textGrob("310 \t\t\t\t\t 312 \t\t\t\t\t Star", gp = gpar(fontsize = 16), vjust = -.5)
+y_axis <- textGrob("CT Ratio \t\t Alkaloids", gp = gpar(fontsize = 16), rot = 90)
+# Arrange plots with grid.arrange
+avg_H_plot <- grid.arrange(
+  arrangeGrob(plot_2023_310_alk$graph, plot_2023_312_alk$graph, plot_2023_star_alk$graph,
+              plot_2023_310_ct$graph,plot_2023_312_ct$graph,plot_2023_star_ct$graph, 
+              ncol = 3, nrow = 2),  # Add your plots here
+  top = title_avg,                             # Add the top title
+  bottom = x_axis,                             # Add the x-axis title
+  left = y_axis                                # Add the y-axis title
+)
 
 
+# Plot for 2024 data
+# Create overall titles
+title_avg <- textGrob("2024 Data", gp = gpar(fontsize = 20, fontface = "bold"))
+x_axis <- textGrob("310 \t\t\t\t\t 312 \t\t\t\t\t Star", gp = gpar(fontsize = 16), vjust = -.5)
+y_axis <- textGrob("CT Ratio \t\t Alkaloids", gp = gpar(fontsize = 16), rot = 90)
+# Arrange plots with grid.arrange
+avg_H_plot <- grid.arrange(
+  arrangeGrob(plot_2024_310_alk$graph, plot_2024_312_alk$graph, plot_2024_star_alk$graph,
+              plot_2024_310_ct$graph,plot_2024_312_ct$graph,plot_2024_star_ct$graph, 
+              ncol = 3, nrow = 2),  # Add your plots here
+  top = title_avg,                             # Add the top title
+  bottom = x_axis,                             # Add the x-axis title
+  left = y_axis                                # Add the y-axis title
+)
 
 
+####################### Saving the data ########################################
+output_dir <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Heritability_Outputs"
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir)
+}
 
+# Function to save plots and data tables
+save_results <- function(result, name, output_dir) {
+  # Save the plot (assuming the first element is the plot)
+  plot_file <- file.path(output_dir, paste0(name, ".png"))
+  ggsave(plot_file, result[[1]])
+  
+  # Save the data tables (assuming the second and third elements are data tables)
+  if (length(result) > 1) {
+    for (i in 2:length(result)) {
+      data_file <- file.path(output_dir, paste0(name, "_data_", i - 1, ".csv"))
+      write.csv(result[[i]], data_file, row.names = FALSE)
+    }
+  }
+}
 
+# Save all results
+save_results(plot_avg_310_alk, "plot_avg_310_alk", output_dir)
+save_results(plot_avg_312_alk, "plot_avg_312_alk", output_dir)
+save_results(plot_avg_star_alk, "plot_avg_star_alk", output_dir)
+save_results(plot_avg_310_ct, "plot_avg_310_ct", output_dir)
+save_results(plot_avg_312_ct, "plot_avg_312_ct", output_dir)
+save_results(plot_avg_star_ct, "plot_avg_star_ct", output_dir)
 
+save_results(plot_2023_310_alk, "plot_2023_310_alk", output_dir)
+save_results(plot_2023_312_alk, "plot_2023_312_alk", output_dir)
+save_results(plot_2023_star_alk, "plot_2023_star_alk", output_dir)
+save_results(plot_2023_310_ct, "plot_2023_310_ct", output_dir)
+save_results(plot_2023_312_ct, "plot_2023_312_ct", output_dir)
+save_results(plot_2023_star_ct, "plot_2023_star_ct", output_dir)
 
-
+save_results(plot_2024_310_alk, "plot_2024_310_alk", output_dir)
+save_results(plot_2024_312_alk, "plot_2024_312_alk", output_dir)
+save_results(plot_2024_star_alk, "plot_2024_star_alk", output_dir)
+save_results(plot_2024_310_ct, "plot_2024_310_ct", output_dir)
+save_results(plot_2024_312_ct, "plot_2024_312_ct", output_dir)
+save_results(plot_2024_star_ct, "plot_2024_star_ct", output_dir)
 
 
 

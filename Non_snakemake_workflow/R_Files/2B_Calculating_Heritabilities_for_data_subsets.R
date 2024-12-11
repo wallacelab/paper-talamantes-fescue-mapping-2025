@@ -14,6 +14,7 @@ library(vcfR)
 library(AGHmatrix)
 library(sommer)
 library(data.table)
+library(pheatmap)
 
 
 
@@ -21,6 +22,8 @@ library(data.table)
 ################################################################################
 # Calculating heritability
 ################################################################################
+base_path <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/"
+
 # Load in all 9 datasets
 Residual_data_avg_outliars_rm_314x310 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x310.txt", header = TRUE)
 Residual_data_avg_outliars_rm_314x312 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x312.txt", header = TRUE)
@@ -39,6 +42,10 @@ vcf_data_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/
 vcf_data <- read.vcfR(vcf_data_loc)
 geno_matrix <- extract.gt(vcf_data, element = "GT")  
 geno_matrix <- t(geno_matrix)
+
+# Load in Cross Identifier file
+cross_list_loc <- paste0(base_path, "Data/Lists/Parent_Progeny_Lists/314_Star_Cross_Parents.txt")
+cross_list <- read.table(cross_list_loc, header = FALSE)
 
 ################ Functions needed for heritability finding ##################### 
 ##### Function to convert genotype into something usable ####
@@ -458,64 +465,96 @@ model$convergence
 
 
 ################# Genetic relatedness matrix ###################################
-library(pheatmap)
-pheno_data <- Residual_Data_23_outliars_rm_314x310
-pheno_data <- Residual_Data_24_outliars_rm_314x310
-pheno_data <- Residual_Data_23_outliars_rm
 
-# Load the VCF file
-vcf_data_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_filtered_2.recode.vcf"
-vcf_data <- read.vcfR(vcf_data_loc)
-geno_matrix <- extract.gt(vcf_data, element = "GT")  
-geno_matrix <- t(geno_matrix)
+################## Heatmap and PCA Analysis Function ###########################
+base_kin_analysis <- function(pheno_data, geno_matrix, cross_list, title, removed_data) {
+    
+  # Ensure both datasets have the same IDs
+  common_IDs <- intersect(pheno_data$ID, rownames(geno_matrix))
+  # Subset data to include only common IDs
+  pheno_data <- pheno_data[pheno_data$ID %in% common_IDs, ]
+  geno_matrix <- geno_matrix[common_IDs, ]
+  # Check if row names match
+  if (!all(rownames(geno_matrix) == pheno_data$ID)) {
+    stop("Row names of geno_data do not match the ID in pheno_data.")
+  }
+  # Convert geno_matrix to data frame, and then convert genotypes
+  geno_data <- as.data.frame(geno_matrix)
+  geno_data <- geno_data %>% mutate_all(convert_genotypes)
+  # Convert geno_data back to matrix for kinship matrix calculation
+  geno_data <- as.matrix(geno_data)
+  # Create kinship matrix using Gmatrix function
+  kinship_matrix <- Gmatrix(SNPmatrix = geno_data, method = "VanRaden")
+  pca_result <- prcomp(kinship_matrix)
+  diag(kinship_matrix) <- NA
+  
+  kin_heatmap <- pheatmap(kinship_matrix, 
+               cluster_rows = TRUE, 
+               cluster_cols = TRUE, 
+               color = colorRampPalette(c("blue", "white", "red"))(50),
+               main = paste0("Kinship Matrix Heatmap ", title))
+  
+  
+  # Perform PCA on the kinship matrix (or SNP matrix if needed)
+  pca_scores <- pca_result$x  # Principal component scores
+  explained_variance <- pca_result$sdev^2 / sum(pca_result$sdev^2)
+  pca_df <- data.frame(PC1 = pca_scores[, 1], PC2 = pca_scores[, 2])
+  pca_df <-merge(pca_df, cross_list, by.x = "row.names", by.y = "V1" )
+  pca_df <- pca_df %>% rename(Cross = V2)
+  
+  # Create the scatter plot of PC1 vs PC2
+  kin_pca <- ggplot(pca_df, aes(x = PC1, y = PC2)) +
+            geom_point(aes(color = Cross), size = 3, alpha = 0.3) +  # Plot the points
+            geom_text(
+              data = subset(pca_df, grepl("parent", Cross, ignore.case = TRUE)),  # Filter for "parent"
+              aes(label = Row.names),
+              vjust = -1,  # Adjust text position
+              size = 3,
+              color = "black"
+            ) +
+            labs(title = paste0("PCA:", title), x = "PC1", y = "PC2") +
+            theme_minimal()
+  
+  # PCA of data being removed
+  data_path <- "../../Data/Heritability_Outputs/"
+  number_heri <- read.csv(paste0(data_path, removed_data, "_data_1.csv"), header = TRUE)
+  indviduals_removed <- read.csv(paste0(data_path, removed_data, "_data_2.csv"), header = TRUE)
+  NHI_data <- cbind(number_heri, indviduals_removed)
+  pca_df_2 <- merge(pca_df,NHI_data, by.x = "Row.names", by.y = "x", all = TRUE )
+  pca_df_2$color <- ifelse(is.na(pca_df_2$N), "black", "purple")
+  
+  #Create plot that shows removed individuals
+  ggplot(pca_df_2, aes(x = PC1, y = PC2)) +
+    geom_point(aes(color = color), size = 3) + # Color based on N
+    scale_color_manual(values = c("black", "purple")) + # Set color scheme
+    geom_text(aes(label = ifelse(!is.na(N), N, "")), vjust = -1, size = 3) + # Add N value above points
+    labs(title = "PCA Plot", x = "PC1", y = "PC2") +
+    theme_minimal() 
+  
+  
+  # return plot list
+  return(list(plot1 = kin_heatmap, plot2 = kin_pca))
 
-# Ensure both datasets have the same IDs
-common_IDs <- intersect(pheno_data$ID, rownames(geno_matrix))
-# Subset data to include only common IDs
-pheno_data <- pheno_data[pheno_data$ID %in% common_IDs, ]
-geno_matrix <- geno_matrix[common_IDs, ]
-# Check if row names match
-if (!all(rownames(geno_matrix) == pheno_data$ID)) {
-  stop("Row names of geno_data do not match the ID in pheno_data.")
 }
-# Convert geno_matrix to data frame, and then convert genotypes
-geno_data <- as.data.frame(geno_matrix)
-geno_data <- geno_data %>% mutate_all(convert_genotypes)
-# Convert geno_data back to matrix for kinship matrix calculation
-geno_data <- as.matrix(geno_data)
-# Create kinship matrix using Gmatrix function
-kinship_matrix <- Gmatrix(SNPmatrix = geno_data, method = "VanRaden")
+##################### Function End #############################################
+
+plots_star_23 <- base_kin_analysis(Residual_Data_23_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2023")
+plots_314x310_23 <- base_kin_analysis(Residual_Data_23_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2023")
+plots_314x312_23 <- base_kin_analysis(Residual_Data_23_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2023")
+
+plots_star_avg <- base_kin_analysis(Residual_data_avg_outliars_rm, geno_matrix, cross_list, title = "Star Cross Years Avraged", removed_data = "plot_2023_310_alk")
+plots_314x310_avg <- base_kin_analysis(Residual_data_avg_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 Years Avraged")
+plots_314x312_avg <- base_kin_analysis(Residual_data_avg_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 Years Avraged")
 
 
-pheatmap(kinship_matrix, 
-         cluster_rows = TRUE, 
-         cluster_cols = TRUE, 
-         color = colorRampPalette(c("blue", "white", "red"))(50),
-         main = "Kinship Matrix Heatmap")
+# /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Heritability_Outputs/plot_2023_310_alk_data_1.csv
 
-
-# Perform PCA on the kinship matrix (or SNP matrix if needed)
-pca_result <- prcomp(kinship_matrix)
-pca_scores <- pca_result$x  # Principal component scores
-explained_variance <- pca_result$sdev^2 / sum(pca_result$sdev^2)
-pca_df <- data.frame(PC1 = pca_scores[, 1], PC2 = pca_scores[, 2])
-
-# Create the scatter plot of PC1 vs PC2
-ggplot(pca_df, aes(x = PC1, y = PC2)) +
-  geom_point(aes(color = PC1), size = 3) +
-  labs(title = "PCA: PC1 vs PC2", x = "PC1", y = "PC2") +
-  theme_minimal() +
-  theme(legend.position = "none")  # Remove legend if it's not needed
+##################### PCA Graph Iterator #######################################
+# This function will color the points that get removed in the PCA and number em
 
 
 
 
-
-
-
-
-
-
-
+##################### Function End #############################################
 
 

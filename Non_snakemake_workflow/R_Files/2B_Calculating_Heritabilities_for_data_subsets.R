@@ -18,35 +18,36 @@ library(pheatmap)
 
 
 
-
 ################################################################################
 # Calculating heritability
 ################################################################################
 base_path <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/"
 
 # Load in all 9 datasets
-Residual_data_avg_outliars_rm_314x310 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x310.txt", header = TRUE)
-Residual_data_avg_outliars_rm_314x312 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x312.txt", header = TRUE)
-Residual_data_avg_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm.txt", header = TRUE)
+Residual_data_avg_outliars_rm_314x310 <- read.table("../../Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x310.txt", header = TRUE)
+Residual_data_avg_outliars_rm_314x312 <- read.table("../../Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x312.txt", header = TRUE)
+Residual_data_avg_outliars_rm <- read.table("../../Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm.txt", header = TRUE)
 
-Residual_Data_23_outliars_rm_314x310 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm_314x310.txt", header = TRUE)
-Residual_Data_23_outliars_rm_314x312 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm_314x312.txt", header = TRUE)
-Residual_Data_23_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm.txt", header = TRUE)
+Residual_Data_23_outliars_rm_314x310 <- read.table("../../Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm_314x310.txt", header = TRUE)
+Residual_Data_23_outliars_rm_314x312 <- read.table("../../Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm_314x312.txt", header = TRUE)
+Residual_Data_23_outliars_rm <- read.table("../../Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm.txt", header = TRUE)
 
-Residual_Data_24_outliars_rm_314x310 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm_314x310.txt", header = TRUE)
-Residual_Data_24_outliars_rm_314x312 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm_314x312.txt", header = TRUE)
-Residual_Data_24_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm.txt", header = TRUE)
+Residual_Data_24_outliars_rm_314x310 <- read.table("../../Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm_314x310.txt", header = TRUE)
+Residual_Data_24_outliars_rm_314x312 <- read.table("../../Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm_314x312.txt", header = TRUE)
+Residual_Data_24_outliars_rm <- read.table("../../Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm.txt", header = TRUE)
 
 # Load the VCF file
-vcf_data_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/VCF/all_snps_filtered_2.recode.vcf"
+vcf_data_loc <- "../../Data/VCF/all_snps_filtered_2.recode.vcf"
 vcf_data <- read.vcfR(vcf_data_loc)
 geno_matrix <- extract.gt(vcf_data, element = "GT")  
 geno_matrix <- t(geno_matrix)
 
 # Load in Cross Identifier file
-cross_list_loc <- paste0(base_path, "Data/Lists/Parent_Progeny_Lists/314_Star_Cross_Parents.txt")
+cross_list_loc <- ("../../Data/Lists/Parent_Progeny_Lists/314_Star_Cross_Parents.txt")
 cross_list <- read.table(cross_list_loc, header = FALSE)
 
+
+############### Done Loading in Data ###########################################
 ################ Functions needed for heritability finding ##################### 
 ##### Function to convert genotype into something usable ####
 convert_genotypes <- function(geno) {
@@ -378,7 +379,7 @@ avg_H_plot <- grid.arrange(
 
 
 ####################### Saving the data ########################################
-output_dir <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Heritability_Outputs"
+output_dir <- "../../Data/Heritability_Outputs"
 if (!dir.exists(output_dir)) {
   dir.create(output_dir)
 }
@@ -421,53 +422,11 @@ save_results(plot_2024_312_ct, "plot_2024_312_ct", output_dir)
 save_results(plot_2024_star_ct, "plot_2024_star_ct", output_dir)
 
 
-#################### Me looking into oddities ##################################
-
-# Explrong data sets that have lots of 0's
-plot_2024_310_alk <- graph_heritability(Residual_Data_24_outliars_rm_314x310, geno_matrix, trait = "Alkaloids_Res",nrow(Residual_Data_24_outliars_rm_314x310)/2) ## This one is all 0's
-plot_2023_310_ct <-graph_heritability(Residual_Data_23_outliars_rm_314x310, geno_matrix, trait = "Delta_CT_adj_Res",nrow(Residual_Data_23_outliars_rm_314x310)/2)
-
-pheno_input <- Residual_Data_23_outliars_rm_314x310
-trait <- "Delta_CT_adj_Res"
-# Ensure both datasets have the same IDs
-common_IDs <- intersect(pheno_input$ID, rownames(geno_matrix))
-
-# Subset data to include only common IDs
-pheno_data <- pheno_input[pheno_input$ID %in% common_IDs, ]
-geno_matrix2 <- geno_matrix[common_IDs, ]
-
-# Check if row names match
-if (!all(rownames(geno_matrix2) == pheno_data$ID)) {
-  stop("Row names of geno_data do not match the ID in pheno_data.")
-}
-
-# Convert geno_matrix to data frame, and then convert genotypes
-geno_data <- as.data.frame(geno_matrix2)
-geno_data <- geno_data %>% mutate_all(convert_genotypes)
-
-# Convert geno_data back to matrix for kinship matrix calculation
-geno_data <- as.matrix(geno_data)
-
-# Create kinship matrix using Gmatrix function
-kinship_matrix <- Gmatrix(SNPmatrix = geno_data, method = "VanRaden")
-
-# Ensure the data is in correct format (pheno_data should have necessary columns)
-pheno_data$ID <- as.character(pheno_data$ID)
-
-# Example mixed model for heritability (adjust trait to be a column name)
-model <- mmer(fixed = as.formula(paste(trait, "~ 1")),
-              random = ~ vsr(ID, Gu = kinship_matrix),
-              rcov = ~ units,
-              data = pheno_data)
-model_summary <- summary(model)
-varcomp_summary <- model_summary$varcomp
-model$convergence
-
 
 ################# Genetic relatedness matrix ###################################
 
 ################## Heatmap and PCA Analysis Function ###########################
-base_kin_analysis <- function(pheno_data, geno_matrix, cross_list, title, removed_data) {
+base_kin_analysis <- function(pheno_data, geno_matrix, cross_list, title, removed_data_alk, removed_data_ct) {
     
   # Ensure both datasets have the same IDs
   common_IDs <- intersect(pheno_data$ID, rownames(geno_matrix))
@@ -517,37 +476,99 @@ base_kin_analysis <- function(pheno_data, geno_matrix, cross_list, title, remove
   
   # PCA of data being removed
   data_path <- "../../Data/Heritability_Outputs/"
-  number_heri <- read.csv(paste0(data_path, removed_data, "_data_1.csv"), header = TRUE)
-  indviduals_removed <- read.csv(paste0(data_path, removed_data, "_data_2.csv"), header = TRUE)
-  NHI_data <- cbind(number_heri, indviduals_removed)
-  pca_df_2 <- merge(pca_df,NHI_data, by.x = "Row.names", by.y = "x", all = TRUE )
+  number_heri_alk <- read.csv(paste0(data_path, removed_data_alk, "_data_1.csv"), header = TRUE)
+  indviduals_removed_alk <- read.csv(paste0(data_path, removed_data_alk, "_data_2.csv"), header = TRUE)
+  number_heri_ct <- read.csv(paste0(data_path, removed_data_ct, "_data_1.csv"), header = TRUE)
+  indviduals_removed_ct <- read.csv(paste0(data_path, removed_data_ct, "_data_2.csv"), header = TRUE)
+  
+  NHI_data_alk <- cbind(number_heri_alk, indviduals_removed_alk)
+  NHI_data_ct <- cbind(number_heri_ct, indviduals_removed_ct)
+  
+  
+  pca_df_2 <- merge(pca_df,NHI_data_alk, by.x = "Row.names", by.y = "x", all = TRUE )
   pca_df_2$color <- ifelse(is.na(pca_df_2$N), "black", "purple")
   
   #Create plot that shows removed individuals
-  ggplot(pca_df_2, aes(x = PC1, y = PC2)) +
+  removed_data_pca <- ggplot(pca_df_2, aes(x = PC1, y = PC2)) +
     geom_point(aes(color = color), size = 3) + # Color based on N
-    scale_color_manual(values = c("black", "purple")) + # Set color scheme
+    scale_color_manual(values = c("black", "purple"),
+                       labels = c("black" = "Stayed", "purple" = "Removed")) + # Set color scheme
     geom_text(aes(label = ifelse(!is.na(N), N, "")), vjust = -1, size = 3) + # Add N value above points
-    labs(title = "PCA Plot", x = "PC1", y = "PC2") +
+    labs(title = paste0("PCA Plot Colored by Removed Individuals ", "Alkaloids" ), x = "PC1", y = "PC2") +
     theme_minimal() 
+  
+  # PCA graphic showing individuals removed from both alkaloids and CT
+  # Combine the IDs from both datasets
+  combined_ids <- data.frame(ID = unique(c(NHI_data_alk$x, NHI_data_ct$x)))
+  
+  # Check where each ID appears
+  combined_ids$Source <- ifelse(
+    combined_ids$ID %in% NHI_data_alk$x & combined_ids$ID %in% NHI_data_ct$x, "Both",
+    ifelse(combined_ids$ID %in% NHI_data_alk$x, "NHI_data_alk", "NHI_data_ct")
+  )
+  
+  pca_df_4 <- merge(pca_df,combined_ids, by.x = "Row.names", by.y = "ID", all = TRUE )
+  pca_df_4$Source[is.na(pca_df_4$Source)] <- "Not_Removed"
+  
+  
+  
+  #Create plot that shows removed individuals
+  removed_data_by_pheno <- ggplot(pca_df_4, aes(x = PC1, y = PC2)) +
+    geom_point(aes(color = Source), size = 4, alpha = 0.75) + # Color based on N
+    scale_color_manual(values = c("purple", "red", "blue", "black"),
+                       labels = c("Removed in Both", "Removed in Alkaloids", "Removed in CT", "Not Removed")) + 
+    labs(title = paste0("PCA Plot Colored by Removed Individuals by Phenotype" ), x = "PC1", y = "PC2") +
+    theme_bw()
   
   
   # return plot list
-  return(list(plot1 = kin_heatmap, plot2 = kin_pca))
+  return(list(plot1 = kin_heatmap, plot2 = kin_pca, plot3 = removed_data_pca, plot4 = removed_data_by_pheno))
 
 }
 ##################### Function End #############################################
 
-plots_star_23 <- base_kin_analysis(Residual_Data_23_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2023")
-plots_314x310_23 <- base_kin_analysis(Residual_Data_23_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2023")
-plots_314x312_23 <- base_kin_analysis(Residual_Data_23_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2023")
+plots_star_23 <- base_kin_analysis(Residual_Data_23_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2023", removed_data = "plot_2023_star_alk", alkorbio = "Alkaloids")
+plots_314x310_23 <- base_kin_analysis(Residual_Data_23_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2023", removed_data = "plot_2023_310_alk", alkorbio = "Alkaloids")
+plots_314x312_23 <- base_kin_analysis(Residual_Data_23_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2023",removed_data = "plot_2023_312_alk", alkorbio = "Alkaloids")
+plots_star_23_ct <- base_kin_analysis(Residual_Data_23_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2023", removed_data = "plot_2023_star_ct", alkorbio = "CT")
+plots_314x310_23_ct <- base_kin_analysis(Residual_Data_23_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2023", removed_data = "plot_2023_310_ct", alkorbio = "CT")
+plots_314x312_23_ct <- base_kin_analysis(Residual_Data_23_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2023",removed_data = "plot_2023_312_ct", alkorbio = "CT")
 
-plots_star_avg <- base_kin_analysis(Residual_data_avg_outliars_rm, geno_matrix, cross_list, title = "Star Cross Years Avraged", removed_data = "plot_2023_310_alk")
-plots_314x310_avg <- base_kin_analysis(Residual_data_avg_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 Years Avraged")
-plots_314x312_avg <- base_kin_analysis(Residual_data_avg_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 Years Avraged")
+plots_star_24 <- base_kin_analysis(Residual_Data_24_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2024", removed_data = "plot_2024_star_alk", alkorbio = "Alkaloids")
+plots_314x310_24 <- base_kin_analysis(Residual_Data_24_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2024", removed_data = "plot_2024_310_alk", alkorbio = "Alkaloids")
+plots_314x312_24 <- base_kin_analysis(Residual_Data_24_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2024",removed_data = "plot_2024_312_alk", alkorbio = "Alkaloids")
+plots_star_24_ct <- base_kin_analysis(Residual_Data_24_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2024", removed_data = "plot_2024_star_ct", alkorbio = "CT")
+plots_314x310_24_ct <- base_kin_analysis(Residual_Data_24_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2024", removed_data = "plot_2024_310_ct", alkorbio = "CT")
+plots_314x312_24_ct <- base_kin_analysis(Residual_Data_24_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2024",removed_data = "plot_2024_312_ct", alkorbio = "CT")
+
+plots_star_avg <- base_kin_analysis(Residual_data_avg_outliars_rm, geno_matrix, cross_list, title = "Star Cross Years Avraged", removed_data_alk = "plot_avg_star_alk", removed_data_ct = "plot_avg_star_ct")
+plots_314x310_avg <- base_kin_analysis(Residual_data_avg_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 Years Avraged", removed_data = "plot_avg_310_alk", alkorbio = "Alkaloids")
+plots_314x312_avg <- base_kin_analysis(Residual_data_avg_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 Years Avraged", removed_data = "plot_avg_312_alk", alkorbio = "Alkaloids")
+plots_star_avg_ct <- base_kin_analysis(Residual_data_avg_outliars_rm, geno_matrix, cross_list, title = "Star Cross Years Avraged", removed_data = "plot_avg_star_ct", alkorbio = "CT" )
+plots_314x310_avg_ct <- base_kin_analysis(Residual_data_avg_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 Years Avraged", removed_data = "plot_avg_310_ct", alkorbio = "CT")
+plots_314x312_avg_ct <- base_kin_analysis(Residual_data_avg_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 Years Avraged", removed_data = "plot_avg_312_ct", alkorbio = "CT")
 
 
-# /home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Heritability_Outputs/plot_2023_310_alk_data_1.csv
+plot_2023_310_alk
+plot_2023_310_ct
+plot_2023_312_alk
+plot_2023_312_ct
+plot_2023_star_alk
+plot_2023_star_ct
+plot_2024_310_alk
+plot_2024_310_ct
+plot_2024_312_alk
+plot_2024_312_ct
+plot_2024_star_alk
+plot_2024_star_ct
+plot_avg_310_alk
+plot_avg_310_ct
+plot_avg_312_alk
+plot_avg_312_ct
+plot_avg_star_alk
+plot_avg_star_ct
+
+# ../../Data/Heritability_Outputs/plot_2023_310_alk_data_1.csv
 
 ##################### PCA Graph Iterator #######################################
 # This function will color the points that get removed in the PCA and number em
@@ -558,3 +579,154 @@ plots_314x312_avg <- base_kin_analysis(Residual_data_avg_outliars_rm_314x312, ge
 ##################### Function End #############################################
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#################### fixing functions         ##################################
+
+pheno_data <- Residual_data_avg_outliars_rm
+geno_matrix2 <- geno_matrix
+cross_list2 <- cross_list
+title <- "Star Cross Years Avraged"
+removed_data_alk <- "plot_avg_star_alk" 
+removed_data_ct <- "plot_avg_star_ct"
+
+# Ensure both datasets have the same IDs
+common_IDs <- intersect(pheno_data$ID, rownames(geno_matrix2))
+# Subset data to include only common IDs
+pheno_data <- pheno_data[pheno_data$ID %in% common_IDs, ]
+geno_matrix2 <- geno_matrix2[common_IDs, ]
+# Check if row names match
+if (!all(rownames(geno_matrix2) == pheno_data$ID)) {
+  stop("Row names of geno_data do not match the ID in pheno_data.")
+}
+# Convert geno_matrix2 to data frame, and then convert genotypes
+geno_data <- as.data.frame(geno_matrix2)
+geno_data <- geno_data %>% mutate_all(convert_genotypes)
+# Convert geno_data back to matrix for kinship matrix calculation
+geno_data <- as.matrix(geno_data)
+# Create kinship matrix using Gmatrix function
+kinship_matrix <- Gmatrix(SNPmatrix = geno_data, method = "VanRaden")
+pca_result <- prcomp(kinship_matrix)
+diag(kinship_matrix) <- NA
+
+kin_heatmap <- pheatmap(kinship_matrix, 
+                        cluster_rows = TRUE, 
+                        cluster_cols = TRUE, 
+                        color = colorRampPalette(c("blue", "white", "red"))(50),
+                        main = paste0("Kinship Matrix Heatmap ", title))
+
+
+# Perform PCA on the kinship matrix (or SNP matrix if needed)
+pca_scores <- pca_result$x  # Principal component scores
+explained_variance <- pca_result$sdev^2 / sum(pca_result$sdev^2)
+pca_df <- data.frame(PC1 = pca_scores[, 1], PC2 = pca_scores[, 2])
+pca_df <-merge(pca_df, cross_list2, by.x = "row.names", by.y = "V1" )
+pca_df <- pca_df %>% rename(Cross = V2)
+
+# Create the scatter plot of PC1 vs PC2
+kin_pca <- ggplot(pca_df, aes(x = PC1, y = PC2)) +
+  geom_point(aes(color = Cross), size = 3, alpha = 0.3) +  # Plot the points
+  geom_text(
+    data = subset(pca_df, grepl("parent", Cross, ignore.case = TRUE)),  # Filter for "parent"
+    aes(label = Row.names),
+    vjust = -1,  # Adjust text position
+    size = 3,
+    color = "black"
+  ) +
+  labs(title = paste0("PCA:", title), x = "PC1", y = "PC2") +
+  theme_minimal()
+
+# PCA of data being removed
+data_path <- "../../Data/Heritability_Outputs/"
+number_heri_alk <- read.csv(paste0(data_path, removed_data_alk, "_data_1.csv"), header = TRUE)
+indviduals_removed_alk <- read.csv(paste0(data_path, removed_data_alk, "_data_2.csv"), header = TRUE)
+number_heri_ct <- read.csv(paste0(data_path, removed_data_ct, "_data_1.csv"), header = TRUE)
+indviduals_removed_ct <- read.csv(paste0(data_path, removed_data_ct, "_data_2.csv"), header = TRUE)
+
+NHI_data_alk <- cbind(number_heri_alk, indviduals_removed_alk)
+NHI_data_ct <- cbind(number_heri_ct, indviduals_removed_ct)
+
+
+pca_df_2 <- merge(pca_df,NHI_data_alk, by.x = "Row.names", by.y = "x", all = TRUE )
+pca_df_2$color <- ifelse(is.na(pca_df_2$N), "black", "purple")
+
+#Create plot that shows removed individuals
+removed_data_pca <- ggplot(pca_df_2, aes(x = PC1, y = PC2)) +
+  geom_point(aes(color = color), size = 3) + # Color based on N
+  scale_color_manual(values = c("black", "purple"),
+                     labels = c("black" = "Stayed", "purple" = "Removed")) + # Set color scheme
+  geom_text(aes(label = ifelse(!is.na(N), N, "")), vjust = -1, size = 3) + # Add N value above points
+  labs(title = paste0("PCA Plot Colored by Removed Individuals ", "Alkaloids" ), x = "PC1", y = "PC2") +
+  theme_minimal() 
+
+# PCA graphic showing individuals removed from both alkaloids and CT
+# Combine the IDs from both datasets
+combined_ids <- data.frame(ID = unique(c(NHI_data_alk$x, NHI_data_ct$x)))
+
+# Check where each ID appears
+combined_ids$Source <- ifelse(
+  combined_ids$ID %in% NHI_data_alk$x & combined_ids$ID %in% NHI_data_ct$x, "Both",
+  ifelse(combined_ids$ID %in% NHI_data_alk$x, "NHI_data_alk", "NHI_data_ct")
+)
+
+pca_df_4 <- merge(pca_df,combined_ids, by.x = "Row.names", by.y = "ID", all = TRUE )
+pca_df_4$Source[is.na(pca_df_4$Source)] <- "Not_Removed"
+
+
+
+#Create plot that shows removed individuals
+removed_data_by_pheno <- ggplot(pca_df_4, aes(x = PC1, y = PC2)) +
+  geom_point(aes(color = Source), size = 4, alpha = 0.75) + # Color based on N
+  scale_color_manual(values = c("purple", "red", "blue", "black"),
+                     labels = c("Removed in Both", "Removed in Alkaloids", "Removed in CT", "Not Removed")) + 
+  labs(title = paste0("PCA Plot Colored by Removed Individuals by Phenotype" ), x = "PC1", y = "PC2") +
+  theme_bw() 
+
+
+
+
+# What are the 3 to 4 biological insights that we can confirm based off of this data
+# 1 fungal load not correlated to alkaloid amount
+# 2 grass genetics seemingly have no influence on fungal laod
+# Can try an anova by year or plant ID to see the environmental impact on the data (residuals are assumed to be a normal distribution)

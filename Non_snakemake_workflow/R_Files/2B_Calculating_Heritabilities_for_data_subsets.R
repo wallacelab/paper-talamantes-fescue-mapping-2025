@@ -488,6 +488,9 @@ base_kin_analysis <- function(pheno_data, geno_matrix, cross_list, title, remove
   pca_df_2 <- merge(pca_df,NHI_data_alk, by.x = "Row.names", by.y = "x", all = TRUE )
   pca_df_2$color <- ifelse(is.na(pca_df_2$N), "black", "purple")
   
+  pca_df_3 <- merge(pca_df,NHI_data_ct, by.x = "Row.names", by.y = "x", all = TRUE )
+  pca_df_3$color <- ifelse(is.na(pca_df_3$N), "black", "purple")
+  
   #Create plot that shows removed individuals
   removed_data_pca <- ggplot(pca_df_2, aes(x = PC1, y = PC2)) +
     geom_point(aes(color = color), size = 3) + # Color based on N
@@ -495,6 +498,14 @@ base_kin_analysis <- function(pheno_data, geno_matrix, cross_list, title, remove
                        labels = c("black" = "Stayed", "purple" = "Removed")) + # Set color scheme
     geom_text(aes(label = ifelse(!is.na(N), N, "")), vjust = -1, size = 3) + # Add N value above points
     labs(title = paste0("PCA Plot Colored by Removed Individuals ", "Alkaloids" ), x = "PC1", y = "PC2") +
+    theme_minimal() 
+  
+  removed_data_pca2 <- ggplot(pca_df_3, aes(x = PC1, y = PC2)) +
+    geom_point(aes(color = color), size = 3) + # Color based on N
+    scale_color_manual(values = c("black", "purple"),
+                       labels = c("black" = "Stayed", "purple" = "Removed")) + # Set color scheme
+    geom_text(aes(label = ifelse(!is.na(N), N, "")), vjust = -1, size = 3) + # Add N value above points
+    labs(title = paste0("PCA Plot Colored by Removed Individuals ", "CT" ), x = "PC1", y = "PC2") +
     theme_minimal() 
   
   # PCA graphic showing individuals removed from both alkaloids and CT
@@ -522,51 +533,35 @@ base_kin_analysis <- function(pheno_data, geno_matrix, cross_list, title, remove
   
   
   # return plot list
-  return(list(plot1 = kin_heatmap, plot2 = kin_pca, plot3 = removed_data_pca, plot4 = removed_data_by_pheno))
+  return(list(plot1 = kin_heatmap, plot2 = kin_pca, plot3 = removed_data_pca, plot4 = removed_data_pca2, plot5 = removed_data_by_pheno))
 
 }
 ##################### Function End #############################################
 
-plots_star_23 <- base_kin_analysis(Residual_Data_23_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2023", removed_data = "plot_2023_star_alk", alkorbio = "Alkaloids")
-plots_314x310_23 <- base_kin_analysis(Residual_Data_23_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2023", removed_data = "plot_2023_310_alk", alkorbio = "Alkaloids")
-plots_314x312_23 <- base_kin_analysis(Residual_Data_23_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2023",removed_data = "plot_2023_312_alk", alkorbio = "Alkaloids")
-plots_star_23_ct <- base_kin_analysis(Residual_Data_23_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2023", removed_data = "plot_2023_star_ct", alkorbio = "CT")
-plots_314x310_23_ct <- base_kin_analysis(Residual_Data_23_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2023", removed_data = "plot_2023_310_ct", alkorbio = "CT")
-plots_314x312_23_ct <- base_kin_analysis(Residual_Data_23_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2023",removed_data = "plot_2023_312_ct", alkorbio = "CT")
+plots_star_23 <- base_kin_analysis(Residual_Data_23_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2023", removed_data_alk = "plot_2023_star_alk", removed_data_ct = "plot_2023_star_ct")
+plots_314x310_23 <- base_kin_analysis(Residual_Data_23_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2023", removed_data_alk = "plot_2023_310_alk", removed_data_ct = "plot_2023_310_ct")
+plots_314x312_23 <- base_kin_analysis(Residual_Data_23_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2023",removed_data_alk = "plot_2023_312_alk", removed_data_ct = "plot_2023_312_ct")
 
-plots_star_24 <- base_kin_analysis(Residual_Data_24_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2024", removed_data = "plot_2024_star_alk", alkorbio = "Alkaloids")
-plots_314x310_24 <- base_kin_analysis(Residual_Data_24_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2024", removed_data = "plot_2024_310_alk", alkorbio = "Alkaloids")
-plots_314x312_24 <- base_kin_analysis(Residual_Data_24_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2024",removed_data = "plot_2024_312_alk", alkorbio = "Alkaloids")
-plots_star_24_ct <- base_kin_analysis(Residual_Data_24_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2024", removed_data = "plot_2024_star_ct", alkorbio = "CT")
-plots_314x310_24_ct <- base_kin_analysis(Residual_Data_24_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2024", removed_data = "plot_2024_310_ct", alkorbio = "CT")
-plots_314x312_24_ct <- base_kin_analysis(Residual_Data_24_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2024",removed_data = "plot_2024_312_ct", alkorbio = "CT")
+plots_star_24 <- base_kin_analysis(Residual_Data_24_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2024", removed_data_alk = "plot_2024_star_alk", removed_data_ct = "plot_2024_star_ct")
+plots_314x310_24 <- base_kin_analysis(Residual_Data_24_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2024", removed_data_alk = "plot_2024_310_alk", removed_data_ct = "plot_2024_310_ct")
+plots_314x312_24 <- base_kin_analysis(Residual_Data_24_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2024",removed_data_alk = "plot_2024_312_alk", removed_data_ct = "plot_2024_312_ct")
+
 
 plots_star_avg <- base_kin_analysis(Residual_data_avg_outliars_rm, geno_matrix, cross_list, title = "Star Cross Years Avraged", removed_data_alk = "plot_avg_star_alk", removed_data_ct = "plot_avg_star_ct")
-plots_314x310_avg <- base_kin_analysis(Residual_data_avg_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 Years Avraged", removed_data = "plot_avg_310_alk", alkorbio = "Alkaloids")
-plots_314x312_avg <- base_kin_analysis(Residual_data_avg_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 Years Avraged", removed_data = "plot_avg_312_alk", alkorbio = "Alkaloids")
-plots_star_avg_ct <- base_kin_analysis(Residual_data_avg_outliars_rm, geno_matrix, cross_list, title = "Star Cross Years Avraged", removed_data = "plot_avg_star_ct", alkorbio = "CT" )
-plots_314x310_avg_ct <- base_kin_analysis(Residual_data_avg_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 Years Avraged", removed_data = "plot_avg_310_ct", alkorbio = "CT")
-plots_314x312_avg_ct <- base_kin_analysis(Residual_data_avg_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 Years Avraged", removed_data = "plot_avg_312_ct", alkorbio = "CT")
+plots_314x310_avg <- base_kin_analysis(Residual_data_avg_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 Years Avraged", removed_data_alk = "plot_avg_310_alk", removed_data_ct = "plot_avg_310_ct")
+plots_314x312_avg <- base_kin_analysis(Residual_data_avg_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 Years Avraged", removed_data_alk = "plot_avg_312_alk", removed_data_ct = "plot_avg_312_ct")
+
+plot1 <- plots_star_avg$plot1
+plot2 <- plots_star_avg$plot2
+plot3 <- plots_star_avg$plot3
+plot4 <- plots_star_avg$plot4
+plot5 <- plots_star_avg$plot5
 
 
-plot_2023_310_alk
-plot_2023_310_ct
-plot_2023_312_alk
-plot_2023_312_ct
-plot_2023_star_alk
-plot_2023_star_ct
-plot_2024_310_alk
-plot_2024_310_ct
-plot_2024_312_alk
-plot_2024_312_ct
-plot_2024_star_alk
-plot_2024_star_ct
-plot_avg_310_alk
-plot_avg_310_ct
-plot_avg_312_alk
-plot_avg_312_ct
-plot_avg_star_alk
-plot_avg_star_ct
+grid.arrange(plot2, plot3, plot4, plot5, ncol = 2, nrow = 2) 
+
+
+
 
 # ../../Data/Heritability_Outputs/plot_2023_310_alk_data_1.csv
 

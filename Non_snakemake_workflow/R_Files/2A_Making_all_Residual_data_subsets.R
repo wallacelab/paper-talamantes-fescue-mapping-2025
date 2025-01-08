@@ -20,7 +20,9 @@ library(data.table)
 ##############################################
 # Loading in the data
 # The two data sets you need are all_Data_2024 and phenotype_Data_2023
-phenotype_Data <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/All_Data_Filtered/phenotype_data.txt", header = TRUE)
+datafolder = "/home/darrian/Documents/Mapping_and_QTL/Data"
+
+phenotype_Data <- read.table(paste0(datafolder,"/Phenotype_Data/All_Data_Filtered/phenotype_data.txt"), header = TRUE)
 phenotype_Data$Delta_CT[phenotype_Data$ID == "306-3-8"] <- NA
 phenotype_Data$Delta_CT[phenotype_Data$ID == "320-5-26"] <- NA
 phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "306-3-8"] <- NA
@@ -29,7 +31,11 @@ phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "314" & phenotype_Data$D
 phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Data_Set == "315x320"),]
 phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Extraction_Date == "03/16/23"),]
 
-all_Data_2024 <- read.csv("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv", header = TRUE)
+all_Data_2024 <- read.csv(paste0(datafolder,"/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv"), header = TRUE)
+
+# Load in Cross Identifier file
+cross_list_loc <- ("../../Data/Lists/Parent_Progeny_Lists/314_Star_Cross_Parents.txt")
+cross_list <- read.table(cross_list_loc, header = FALSE)
 
 # Fixing naming conventions
 phenotype_Data <- phenotype_Data %>%
@@ -38,13 +44,17 @@ phenotype_Data_2023 <- phenotype_Data
 all_Data_2024 <- all_Data_2024 %>%
   rename(ID = Treatment)
 
-
+# Loading the genotype data
+vcf_data_loc <- "../../Data/VCF/all_snps_filtered_2.recode.vcf"
+vcf_data <- read.vcfR(vcf_data_loc)
+geno_matrix <- extract.gt(vcf_data, element = "GT")  
+geno_matrix <- t(geno_matrix)
 
 ########## Getting residual data set for 2023 and 2024 avraged #################
 
 # Removing data thats not star cross
-list_314x310 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/Parental_Lists/310x314_list.txt")  
-list_314x312 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/Parental_Lists/312x314_list.txt")
+list_314x310 <- read.table(paste0(datafolder,"/Lists/Parental_Lists/310x314_list.txt"))  
+list_314x312 <- read.table(paste0(datafolder,"/Lists/Parental_Lists/312x314_list.txt"))
 new_rows <- data.frame(V1 = c(301, 302, 303, 304, 305, 306, 307, 308, 310, 312, 313, 314, 315, 316, 318, 319, 320))
 
 #List of non star cross parents
@@ -105,7 +115,7 @@ Residual_data_avg <- merge(Residual_data_avg,
 
 
 # This is the 2023 and 2024 residual data avraged with outliars
-write.table(Residual_data_avg, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_data_avg.txt', sep = '\t', row.names=FALSE)
+write.table(Residual_data_avg, file = '/home/darrian/Documents/Mapping_and_QTL/Data/Phenotype_Data/Residual_data_avg.txt', sep = '\t', row.names=FALSE)
 
 
 ################### Getting residual data for 2023 only ########################
@@ -127,7 +137,7 @@ phenotype_Data_23 <- subset(phenotype_Data_23, select = c(ID,Alkaloids_Res,Delta
 
 # This is the 2023 Data with no out liar removal
 phenotype_Data_23$ID <- gsub("-", "_", phenotype_Data_23$ID) 
-write.table(phenotype_Data_23, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2023_Data/Resisduals_Starcross_2023.txt', sep = '\t', row.names=FALSE)
+write.table(phenotype_Data_23, file = '/home/darrian/Documents/Mapping_and_QTL/Data/Phenotype_Data/2023_Data/Resisduals_Starcross_2023.txt', sep = '\t', row.names=FALSE)
 
 
 ################### Getting residual data for 2024 only ########################
@@ -151,16 +161,16 @@ head(allpehnotype_data_export_24,15)
 
 # This is the 2024 Residual Data with no out liar removal
 allpehnotype_data_export_24$ID <- gsub("-", "_", allpehnotype_data_export_24$ID) 
-write.table(allpehnotype_data_export_24, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Resisduals_Starcross_2024.txt', sep = '\t', row.names=FALSE)
+write.table(allpehnotype_data_export_24, file = '/home/darrian/Documents/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Resisduals_Starcross_2024.txt', sep = '\t', row.names=FALSE)
 
 ################################################################################
 # Outliar exploration and removal
 ################################################################################
 
 # load in previously saved data
-Residual_data_avg <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_data_avg.txt", header = TRUE)
-Residual_Data_23 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2023_Data/Resisduals_Starcross_2023.txt", header = TRUE)
-Residual_Data_24 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Resisduals_Starcross_2024.txt", header = TRUE)
+Residual_data_avg <- read.table(paste0(datafolder,"/Phenotype_Data/Residual_data_avg.txt"), header = TRUE)
+Residual_Data_23 <- read.table(paste0(datafolder,"/Phenotype_Data/2023_Data/Resisduals_Starcross_2023.txt"), header = TRUE)
+Residual_Data_24 <- read.table(paste0(datafolder,"/Phenotype_Data/2024_Data/Resisduals_Starcross_2024.txt"), header = TRUE)
 
 #Making all column names the same
 colnames(Residual_data_avg) <- gsub("_avg", "", colnames(Residual_data_avg))
@@ -203,9 +213,67 @@ Pheno_Graph(Residual_data_avg,"Residual Data of 2023 and 2024 Avaraged" )
 Pheno_Graph(Residual_Data_23,"Residual Data of 2023")
 Pheno_Graph(Residual_Data_24,"Residual Data of 2024")
 
-#################Function to remove outliars ##################################
+################ Creating a list of Geneetic outliars ##########################
+######################## Small function for genotype data ######################
+convert_genotypes <- function(geno) {
+  geno <- gsub("0/0", "0", geno)
+  geno <- gsub("0/1", "1", geno)
+  geno <- gsub("1/1", "2", geno)
+  return(as.numeric(geno))
+}
+############################## End Function ####################################
+# Now we are going to look at a PCA and remove genetic outliars
+geno_data <- as.data.frame(geno_matrix)
+geno_data <- geno_data %>% mutate_all(convert_genotypes)
+# Convert geno_data back to matrix for kinship matrix calculation
+geno_data <- as.matrix(geno_data)
+kinship_matrix <- Gmatrix(SNPmatrix = geno_data, method = "VanRaden")
+pca_result <- prcomp(kinship_matrix)
 
-remove_outliers <- function(data, stds) {
+
+# Perform PCA on the kinship matrix (or SNP matrix if needed)
+pca_scores <- pca_result$x  # Principal component scores
+pca_df <- data.frame(PC1 = pca_scores[, 1], PC2 = pca_scores[, 2])
+pca_df <-merge(pca_df, cross_list, by.x = "row.names", by.y = "V1" )
+pca_df <- pca_df %>% rename(Cross = V2)
+
+
+# Create the scatter plot of PC1 vs PC2
+ggplot(pca_df, aes(x = PC1, y = PC2)) +
+  geom_point(aes(color = Cross), size = 3, alpha = 0.3) +  # Plot the points
+  geom_text(
+    data = subset(pca_df, grepl("parent", Cross, ignore.case = TRUE)),  # Filter for "parent"
+    aes(label = Row.names),
+    vjust = -1,  # Adjust text position
+    size = 3,
+    color = "black"
+  ) +
+  labs(title = paste0("PCA"), x = "PC1", y = "PC2") +
+  theme_minimal()
+
+#Subset the data to get rid of weird genetic outliars
+pca_df2 <- subset(pca_df, !((Cross == "314x312" & PC1 < 0) | (Cross == "314x310" & PC1 < -4)))
+
+good_geentics <- pca_df2$Row.names
+
+ggplot(pca_df2, aes(x = PC1, y = PC2)) +
+  geom_point(aes(color = Cross), size = 3, alpha = 0.3) +  # Plot the points
+  geom_text(
+    data = subset(pca_df2, grepl("parent", Cross, ignore.case = TRUE)),  # Filter for "parent"
+    aes(label = Row.names),
+    vjust = -1,  # Adjust text position
+    size = 3,
+    color = "black"
+  ) +
+  labs(title = paste0("PCA"), x = "PC1", y = "PC2") +
+  theme_minimal()
+
+
+################ End Make list of  Genetic outliars ############################
+
+#################Function to remove outliars ###################################
+
+remove_outliers <- function(data, stds, good_geentics) {
   # Select columns 2, 3, and 4
   cols_to_check <- data[, 2:4]
   
@@ -227,43 +295,44 @@ remove_outliers <- function(data, stds) {
   filtered_data <- data[within_limits, ]
   # Gets rid of duplicates
   filtered_data <- filtered_data[!duplicated(filtered_data$ID), ]
-  
+  filtered_data <- filtered_data[filtered_data$ID %in% good_geentics, ]
   return(filtered_data)
 }
 
 ############################## End Function ####################################
 
-Residual_data_avg_outliars_rm <- remove_outliers(Residual_data_avg, 2.5)
+
+Residual_data_avg_outliars_rm <- remove_outliers(Residual_data_avg, 2.5, good_geentics)
 Pheno_Graph(Residual_data_avg,"Residual Data of 2023 and 2024 Avaraged" )
 Pheno_Graph(Residual_data_avg_outliars_rm,"Residual Data of 2023 and 2024 Avaraged" )
 nrow(Residual_data_avg) - nrow(Residual_data_avg_outliars_rm)
 
-Residual_Data_23_outliars_rm <- remove_outliers(Residual_Data_23, 2.5)
+Residual_Data_23_outliars_rm <- remove_outliers(Residual_Data_23, 2.5, good_geentics)
 Pheno_Graph(Residual_Data_23,"Residual Data of 2023")
 Pheno_Graph(Residual_Data_23_outliars_rm,"Residual Data of 2023")
 nrow(Residual_Data_23) - nrow(Residual_Data_23_outliars_rm)
 
-Residual_Data_24_outliars_rm <- remove_outliers(Residual_Data_24, 2.5)
+Residual_Data_24_outliars_rm <- remove_outliers(Residual_Data_24, 2.5, good_geentics)
 Pheno_Graph(Residual_Data_24,"Residual Data of 2024")
 Pheno_Graph(Residual_Data_24_outliars_rm,"Residual Data of 2024")
 nrow(Residual_Data_24) - nrow(Residual_Data_24_outliars_rm)
 
-write.table(Residual_data_avg_outliars_rm,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm.txt")
-write.table(Residual_Data_23_outliars_rm,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm.txt")
-write.table(Residual_Data_24_outliars_rm,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm.txt")
+write.table(Residual_data_avg_outliars_rm,paste0(datafolder,"/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm.txt"))
+write.table(Residual_Data_23_outliars_rm,paste0(datafolder,"/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm.txt"))
+write.table(Residual_Data_24_outliars_rm,paste0(datafolder,"/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm.txt"))
 
 
 ################################################################################
 # Now seperating data to make all crosses.
 ################################################################################
 #Reload Residual Data sets
-Residual_data_avg_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm.txt", header = TRUE)
-Residual_Data_23_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm.txt", header = TRUE)
-Residual_Data_24_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm.txt", header = TRUE)
+Residual_data_avg_outliars_rm <- read.table(paste0(datafolder,"/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm.txt"), header = TRUE)
+Residual_Data_23_outliars_rm <- read.table(paste0(datafolder,"/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm.txt"), header = TRUE)
+Residual_Data_24_outliars_rm <- read.table(paste0(datafolder,"/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm.txt"), header = TRUE)
 
 # Loading in lists
-list_314x310 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/Parental_Lists/310x314_list.txt")  
-list_314x312 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/Parental_Lists/312x314_list.txt")
+list_314x310 <- read.table(paste0(datafolder,"/Lists/Parental_Lists/310x314_list.txt"))  
+list_314x312 <- read.table(paste0(datafolder,"/Lists/Parental_Lists/312x314_list.txt"))
 
 list_314x310$V1 <- gsub("_dupped\\.bam", "", list_314x310$V1)  # Remove "_dupped.bam"
 list_314x310$V1 <- gsub("-", "_", list_314x310$V1)  # Remove "_dupped.bam"
@@ -287,14 +356,14 @@ Residual_Data_24_outliars_rm_314x310 <- residual_subsetter(Residual_Data_24_outl
 Residual_Data_24_outliars_rm_314x312 <- residual_subsetter(Residual_Data_24_outliars_rm,list_314x312 )
 
 # All datasets are now complete.
-write.table(Residual_data_avg_outliars_rm_314x310,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x310.txt")
-write.table(Residual_data_avg_outliars_rm_314x312,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x312.txt")
+write.table(Residual_data_avg_outliars_rm_314x310,paste0(datafolder,"/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x310.txt"))
+write.table(Residual_data_avg_outliars_rm_314x312,paste0(datafolder,"/Phenotype_Data/Residual_Data/Residual_data_avg_outliars_rm_314x312.txt"))
 
-write.table(Residual_Data_23_outliars_rm_314x310,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm_314x310.txt")
-write.table(Residual_Data_23_outliars_rm_314x312,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm_314x312.txt")
+write.table(Residual_Data_23_outliars_rm_314x310,paste0(datafolder,"/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm_314x310.txt"))
+write.table(Residual_Data_23_outliars_rm_314x312,paste0(datafolder,"/Phenotype_Data/Residual_Data/Residual_Data_23_outliars_rm_314x312.txt"))
 
-write.table(Residual_Data_24_outliars_rm_314x310,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm_314x310.txt")
-write.table(Residual_Data_24_outliars_rm_314x312,"/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm_314x312.txt")
+write.table(Residual_Data_24_outliars_rm_314x310,paste0(datafolder,"/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm_314x310.txt"))
+write.table(Residual_Data_24_outliars_rm_314x312,paste0(datafolder,"/Phenotype_Data/Residual_Data/Residual_Data_24_outliars_rm_314x312.txt"))
 
 
 

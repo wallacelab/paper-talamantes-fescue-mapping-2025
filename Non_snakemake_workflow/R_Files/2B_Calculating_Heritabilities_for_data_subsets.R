@@ -400,26 +400,26 @@ save_results <- function(result, name, output_dir) {
 }
 
 # Save all results
-save_results(plot_avg_310_alk, "plot_avg_310_alk", output_dir)
-save_results(plot_avg_312_alk, "plot_avg_312_alk", output_dir)
-save_results(plot_avg_star_alk, "plot_avg_star_alk", output_dir)
-save_results(plot_avg_310_ct, "plot_avg_310_ct", output_dir)
-save_results(plot_avg_312_ct, "plot_avg_312_ct", output_dir)
-save_results(plot_avg_star_ct, "plot_avg_star_ct", output_dir)
+save_results(plot_avg_310_alk, "plot_avg_310_alk_gen_removed", output_dir)
+save_results(plot_avg_312_alk, "plot_avg_312_alk_gen_removed", output_dir)
+save_results(plot_avg_star_alk, "plot_avg_star_alk_gen_removed", output_dir)
+save_results(plot_avg_310_ct, "plot_avg_310_ct_gen_removed", output_dir)
+save_results(plot_avg_312_ct, "plot_avg_312_ct_gen_removed", output_dir)
+save_results(plot_avg_star_ct, "plot_avg_star_ct_gen_removed", output_dir)
 
-save_results(plot_2023_310_alk, "plot_2023_310_alk", output_dir)
-save_results(plot_2023_312_alk, "plot_2023_312_alk", output_dir)
-save_results(plot_2023_star_alk, "plot_2023_star_alk", output_dir)
-save_results(plot_2023_310_ct, "plot_2023_310_ct", output_dir)
-save_results(plot_2023_312_ct, "plot_2023_312_ct", output_dir)
-save_results(plot_2023_star_ct, "plot_2023_star_ct", output_dir)
+save_results(plot_2023_310_alk, "plot_2023_310_alk_gen_removed", output_dir)
+save_results(plot_2023_312_alk, "plot_2023_312_alk_gen_removed", output_dir)
+save_results(plot_2023_star_alk, "plot_2023_star_alk_gen_removed", output_dir)
+save_results(plot_2023_310_ct, "plot_2023_310_ct_gen_removed", output_dir)
+save_results(plot_2023_312_ct, "plot_2023_312_ct_gen_removed", output_dir)
+save_results(plot_2023_star_ct, "plot_2023_star_ct_gen_removed", output_dir)
 
-save_results(plot_2024_310_alk, "plot_2024_310_alk", output_dir)
-save_results(plot_2024_312_alk, "plot_2024_312_alk", output_dir)
-save_results(plot_2024_star_alk, "plot_2024_star_alk", output_dir)
-save_results(plot_2024_310_ct, "plot_2024_310_ct", output_dir)
-save_results(plot_2024_312_ct, "plot_2024_312_ct", output_dir)
-save_results(plot_2024_star_ct, "plot_2024_star_ct", output_dir)
+save_results(plot_2024_310_alk, "plot_2024_310_alk_gen_removed", output_dir)
+save_results(plot_2024_312_alk, "plot_2024_312_alk_gen_removed", output_dir)
+save_results(plot_2024_star_alk, "plot_2024_star_alk_gen_removed", output_dir)
+save_results(plot_2024_310_ct, "plot_2024_310_ct_gen_removed", output_dir)
+save_results(plot_2024_312_ct, "plot_2024_312_ct_gen_removed", output_dir)
+save_results(plot_2024_star_ct, "plot_2024_star_ct_gen_removed", output_dir)
 
 
 
@@ -538,15 +538,17 @@ base_kin_analysis <- function(pheno_data, geno_matrix, cross_list, title, remove
 }
 ##################### Function End #############################################
 
+nrow(Residual_Data_23_outliars_rm)
 plots_star_23 <- base_kin_analysis(Residual_Data_23_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2023", removed_data_alk = "plot_2023_star_alk", removed_data_ct = "plot_2023_star_ct")
 plots_314x310_23 <- base_kin_analysis(Residual_Data_23_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2023", removed_data_alk = "plot_2023_310_alk", removed_data_ct = "plot_2023_310_ct")
 plots_314x312_23 <- base_kin_analysis(Residual_Data_23_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2023",removed_data_alk = "plot_2023_312_alk", removed_data_ct = "plot_2023_312_ct")
 
+nrow(Residual_Data_24_outliars_rm)
 plots_star_24 <- base_kin_analysis(Residual_Data_24_outliars_rm, geno_matrix, cross_list, title = "Star Cross 2024", removed_data_alk = "plot_2024_star_alk", removed_data_ct = "plot_2024_star_ct")
 plots_314x310_24 <- base_kin_analysis(Residual_Data_24_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 2024", removed_data_alk = "plot_2024_310_alk", removed_data_ct = "plot_2024_310_ct")
 plots_314x312_24 <- base_kin_analysis(Residual_Data_24_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 2024",removed_data_alk = "plot_2024_312_alk", removed_data_ct = "plot_2024_312_ct")
 
-
+nrow(Residual_data_avg_outliars_rm)
 plots_star_avg <- base_kin_analysis(Residual_data_avg_outliars_rm, geno_matrix, cross_list, title = "Star Cross Years Avraged", removed_data_alk = "plot_avg_star_alk", removed_data_ct = "plot_avg_star_ct")
 plots_314x310_avg <- base_kin_analysis(Residual_data_avg_outliars_rm_314x310, geno_matrix, cross_list, title = "314x310 Years Avraged", removed_data_alk = "plot_avg_310_alk", removed_data_ct = "plot_avg_310_ct")
 plots_314x312_avg <- base_kin_analysis(Residual_data_avg_outliars_rm_314x312, geno_matrix, cross_list, title = "314x312 Years Avraged", removed_data_alk = "plot_avg_312_alk", removed_data_ct = "plot_avg_312_ct")

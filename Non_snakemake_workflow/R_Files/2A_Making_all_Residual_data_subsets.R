@@ -115,7 +115,7 @@ Residual_data_avg <- merge(Residual_data_avg,
 
 
 # This is the 2023 and 2024 residual data avraged with outliars
-write.table(Residual_data_avg, file = '/home/darrian/Documents/Mapping_and_QTL/Data/Phenotype_Data/Residual_data_avg.txt', sep = '\t', row.names=FALSE)
+write.table(Residual_data_avg, file = paste0(datafolder, '/Phenotype_Data/Residual_data_avg.txt'), sep = '\t', row.names=FALSE)
 
 
 ################### Getting residual data for 2023 only ########################
@@ -137,7 +137,7 @@ phenotype_Data_23 <- subset(phenotype_Data_23, select = c(ID,Alkaloids_Res,Delta
 
 # This is the 2023 Data with no out liar removal
 phenotype_Data_23$ID <- gsub("-", "_", phenotype_Data_23$ID) 
-write.table(phenotype_Data_23, file = '/home/darrian/Documents/Mapping_and_QTL/Data/Phenotype_Data/2023_Data/Resisduals_Starcross_2023.txt', sep = '\t', row.names=FALSE)
+write.table(phenotype_Data_23, file = paste0(datafolder, '/Phenotype_Data/2023_Data/Resisduals_Starcross_2023.txt'), sep = '\t', row.names=FALSE)
 
 
 ################### Getting residual data for 2024 only ########################
@@ -161,7 +161,7 @@ head(allpehnotype_data_export_24,15)
 
 # This is the 2024 Residual Data with no out liar removal
 allpehnotype_data_export_24$ID <- gsub("-", "_", allpehnotype_data_export_24$ID) 
-write.table(allpehnotype_data_export_24, file = '/home/darrian/Documents/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Resisduals_Starcross_2024.txt', sep = '\t', row.names=FALSE)
+write.table(allpehnotype_data_export_24, file = paste0(datafolder, '/Phenotype_Data/2024_Data/Resisduals_Starcross_2024.txt'), sep = '\t', row.names=FALSE)
 
 ################################################################################
 # Outliar exploration and removal
@@ -255,6 +255,8 @@ ggplot(pca_df, aes(x = PC1, y = PC2)) +
 pca_df2 <- subset(pca_df, !((Cross == "314x312" & PC1 < 0) | (Cross == "314x310" & PC1 < -4)))
 
 good_geentics <- pca_df2$Row.names
+write.table(good_geentics, file = paste0(datafolder, '/Lists/Good_Genetics.txt'), sep = '\t', row.names=FALSE)
+
 
 ggplot(pca_df2, aes(x = PC1, y = PC2)) +
   geom_point(aes(color = Cross), size = 3, alpha = 0.3) +  # Plot the points

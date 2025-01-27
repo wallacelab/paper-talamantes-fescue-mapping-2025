@@ -4,7 +4,7 @@
 library(tidyverse)
 library(multcompView)
 library(gvlma)
-library(mbQTL)
+library(mbQTL) #does not work? WHat did I use this for?
 library(ggpubr)
 library(car)
 library(reshape2)
@@ -13,6 +13,7 @@ library(gridExtra)
 ###############################################################################
 # CT Data filtering and adding
 ###############################################################################
+data_folder = "/home/darrian/Documents/Mapping_and_QTL/Data"
 # Adding in the data sets
 
 # This first set of data is all the data corresponding to the first set of standards
@@ -22,8 +23,8 @@ all_g3p4_loc <- "/home/darrian/Desktop/UGA/QPCR_Data_Wrangler/QPCR_Data_Wrangler
 all_2x2_2_loc <- "/home/darrian/Desktop/UGA/QPCR_Data_Wrangler/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/1041-end-redoes_2x2.csv"
 all_g3p4_2_loc <- "/home/darrian/Desktop/UGA/QPCR_Data_Wrangler/QPCR_Data_Wrangler/Program/int_files/Data_for_Project/1041-end-redoes_g3p4.csv"  
 # This set of data is for parents and cross 305x320, will be added twords end
-all_315x320_2x2_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Raw_Data/CT_Values/315x320_2x2.csv"
-all_315x320_g3p4_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Raw_Data/CT_Values/315x320_G3P4.csv"
+all_315x320_2x2_loc <- paste0(data_folder,"/Phenotype_Data/Raw_Data/CT_Values/315x320_2x2.csv")
+all_315x320_g3p4_loc <- paste0(data_folder,"/Phenotype_Data/Raw_Data/CT_Values/315x320_G3P4.csv")
 
 all_2x2_1 <- read.csv(all_2x2_loc, header = TRUE, strip.white=TRUE)
 all_g3p4_1 <- read.csv(all_g3p4_loc, header = TRUE, strip.white=TRUE)
@@ -260,7 +261,7 @@ Data_to_export <- subset(all_Data, select = c("Treatment", "Delta_CT", "Data_Set
 write.table(Data_to_export, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Phenotype_Data_Delta_CT.txt', sep = '\t', row.names=FALSE)
 
 # Checking the amount of progeny each parent has
-parents_one_row_loc = "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/all_used_parents_one_row.csv"
+parents_one_row_loc = paste0(data_folder,"/Lists/all_used_parents_one_row.csv")
 parents_one_row <- read.csv(parents_one_row_loc, header = FALSE, strip.white=TRUE)
 parents_one_row %>% count(V1, sort = TRUE)
 
@@ -286,7 +287,7 @@ ggarrange(plot2, plot1, ncol = 1, nrow = 2)
 ################################################################################
 
 #Loading in data
-alklaoid_loc="/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Alkaloid_Data_Combined.csv"
+alklaoid_loc=paste0(data_folder,"/Phenotype_Data/Alkaloid_Data_Combined.csv")
 alklaoid <- read.csv(alklaoid_loc, header = TRUE, strip.white=TRUE)
 
 # Giving data parents
@@ -371,8 +372,8 @@ colnames(phenotype_Data)[colnames(phenotype_Data) == "Plate"] ="Alkaloid_Plate"
 phenotype_Data$Maternal_Parent <- as.character(phenotype_Data$Maternal_Parent)
 
 # adding the metadata and merging it with the phenotype data
-extraction_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Meta_Data/Extraction_info.csv"
-harvest_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Meta_Data/Harvest_Info.csv"
+extraction_loc <- paste0(data_folder,"/Phenotype_Data/Meta_Data/Extraction_info.csv")
+harvest_loc <- paste0(data_folder,"/Phenotype_Data/Meta_Data/Harvest_Info.csv")
 extraction <- read.csv(extraction_loc, header = TRUE, strip.white=TRUE)
 harvest <- read.csv(harvest_loc, header = TRUE, strip.white=TRUE)
 
@@ -382,7 +383,7 @@ phenotype_Data$Alkaloid_Plate <- as.character(phenotype_Data$Alkaloid_Plate)
 
 # Saving the data to make a phenotype file
 phenotype_Data$ng.g <- round(phenotype_Data$ng.g, 3)
-write.table(phenotype_Data, file = "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/All_Data_Filtered/phenotype_data.txt", row.names = FALSE)
+write.table(phenotype_Data, file = paste0(data_folder,"/Phenotype_Data/All_Data_Filtered/phenotype_data.txt"), row.names = FALSE)
 
 ################################################################################
 # Gathering Residual Data
@@ -618,7 +619,7 @@ ggarrange(plot7, plot8, ncol = 1, nrow = 2)
 ################################################################################
 # Making graphs more usefull for presentations, with residuals
 ################################################################################
-write.table(residual_data_M, file = "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/All_Data_Filtered/residual_data.txt", row.names = FALSE)
+write.table(residual_data_M, file = paste0(data_folder,"/Phenotype_Data/All_Data_Filtered/residual_data.txt"), row.names = FALSE)
 
 # is the residual data linearly related
 plot(residual_data$filtered_CT_model.residuals, residual_data$alkaloid_model.residuals) # fuck no
@@ -719,17 +720,17 @@ gvlma(alkaloid_model_raw)
 # Adding the 2024 phenotype data
 ################################################################################
 # Loading in the 2024 metadata
-mini_medata_2024_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Meta_Data_2024.csv"
+mini_medata_2024_loc <- paste0(data_folder,"/Phenotype_Data/2024_Data/Meta_Data_2024.csv")
 mini_medata_2024 <- read.csv(mini_medata_2024_loc, header = TRUE, strip.white=TRUE)
 
-Father_data_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Meta_Data/Mother_Father_Data.csv"
+Father_data_loc <- paste0(data_folder,"/Phenotype_Data/Meta_Data/Mother_Father_Data.csv")
 Father_data <- read.csv(Father_data_loc, header = TRUE, strip.white=TRUE)
 
 metadata_2024 <- merge(mini_medata_2024, Father_data, by.x = c("ID"), by.y = c("ID"), all = TRUE)
 
 # Loading in the biomass data
-all_2x2_2024_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/all_2x2_2024.csv"
-all_g3p4_2024_loc <-  "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/all_g3p4_2024.csv"
+all_2x2_2024_loc <- paste0(data_folder,"/Phenotype_Data/2024_Data/all_2x2_2024.csv")
+all_g3p4_2024_loc <-  paste0(data_folder,"/Phenotype_Data/2024_Data/all_g3p4_2024.csv")
 
 all_2x2_2024 <- read.csv(all_2x2_2024_loc, header = TRUE, strip.white=TRUE)
 all_g3p4_2024 <- read.csv(all_g3p4_2024_loc, header = TRUE, strip.white=TRUE)
@@ -774,7 +775,7 @@ all_Data_2024$Delta_CT_OG <- all_Data_2024$MeanCP.Fescue - all_Data_2024$MeanCP.
 
 # all_data_2024 now contains the proper biomass data
 #### adding the alkaloid data ####
-alkaloid_2024_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/alkaloids_2024_Rready.csv"
+alkaloid_2024_loc <- paste0(data_folder,"/Phenotype_Data/alkaloids_2024_Rready.csv")
 alkaloid_2024 <- read.csv(alkaloid_2024_loc, header = TRUE, strip.white=TRUE)
 colnames(alkaloid_2024)[colnames(alkaloid_2024) == "ID"] <- "Treatment"
 
@@ -788,7 +789,7 @@ all_Data_2024 <- subset(all_Data_2024, !is.na(ng.g) & !is.na(Delta_CT_adj))
 all_Data_2024$Mother <- as.character(all_Data_2024$Mother)
 all_Data_2024$Father <- as.character(all_Data_2024$Father)
 
-write.csv(all_Data_2024, "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv", row.names = FALSE)
+write.csv(all_Data_2024, paste0(data_folder,"/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv", row.names = FALSE))
 
 #all_Data_2024 is the final data set. We can take this and do analysis on it.
 # CP values, efficiency adjusted cp values and alkaloid values
@@ -877,8 +878,9 @@ ggplot(all_data_2023_2024, aes(x = ng.g.2023, y = ng.g.2024)) +
 ################################################################################
 ## Combining 2023 and 2024 data
 ################################################################################
+
 # The two data sets you need are all_Data_2024 and phenotype_Data_2023
-phenotype_Data <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/All_Data_Filtered/phenotype_data.txt", header = TRUE)
+phenotype_Data <- read.table(paste0(data_folder, "/Phenotype_Data/All_Data_Filtered/phenotype_data.txt"), header = TRUE)
 phenotype_Data$Delta_CT[phenotype_Data$ID == "306-3-8"] <- NA
 phenotype_Data$Delta_CT[phenotype_Data$ID == "320-5-26"] <- NA
 phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "306-3-8"] <- NA
@@ -887,7 +889,7 @@ phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "314" & phenotype_Data$D
 phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Data_Set == "315x320"),]
 phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Extraction_Date == "03/16/23"),]
 
-all_Data_2024 <- read.csv("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv", header = TRUE)
+all_Data_2024 <- read.csv(paste0(data_folder,"/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv") , header = TRUE)
 # Delta_CT is actually the adjusted value
 phenotype_Data <- phenotype_Data %>%
   rename(Delta_CT_adj = Delta_CT)
@@ -897,7 +899,7 @@ all_Data_2024 <- all_Data_2024 %>%
 # Get only 2024 data ready for tassel (preliminary analysis)
 colnames(all_Data_2024)
 tassel_2024_data <- all_Data_2024[, c("ID", "Delta_CT_adj", "Delta_CT_OG", "ng.g")]
-write.table(tassel_2024_data, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/tassel_2024_data.txt', sep = '\t', row.names=FALSE)
+write.table(tassel_2024_data, file = paste0(data_folder,"/Phenotype_Data/2024_Data/tassel_2024_data.txt"), sep = '\t', row.names=FALSE)
 
 
 # Get all data ready for Blup analysis 
@@ -935,188 +937,7 @@ head(phenotypes23_24)
 pheotype_avraged <- subset(phenotypes23_24, select = c("ID", "Delta_CT_adj_avg", "Delta_CT_OG_avg", "ng.g_avg"))
 
 
-write.table(pheotype_avraged, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Phenotypes_avg.txt', sep = '\t', row.names=FALSE)
-
-##############################################
-# Making  data with batch effects removed 10/22/24
-##############################################
-# Loading in the data
-# The two data sets you need are all_Data_2024 and phenotype_Data_2023
-phenotype_Data <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/All_Data_Filtered/phenotype_data.txt", header = TRUE)
-phenotype_Data$Delta_CT[phenotype_Data$ID == "306-3-8"] <- NA
-phenotype_Data$Delta_CT[phenotype_Data$ID == "320-5-26"] <- NA
-phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "306-3-8"] <- NA
-phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "320-5-26"] <- NA
-phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "314" & phenotype_Data$Data_Set != "315x320"), ]
-phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Data_Set == "315x320"),]
-phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Extraction_Date == "03/16/23"),]
-
-all_Data_2024 <- read.csv("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv", header = TRUE)
-
-# Fixing naming conventions
-phenotype_Data <- phenotype_Data %>%
-  rename(Delta_CT_adj = Delta_CT)
-phenotype_Data_2023 <- phenotype_Data
-all_Data_2024 <- all_Data_2024 %>%
-  rename(ID = Treatment)
-
-# Removing data thats not star cross
-list_314x310 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/Parental_Lists/310x314_list.txt")  
-list_314x312 <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Lists/Parental_Lists/312x314_list.txt")
-new_rows <- data.frame(V1 = c(301, 302, 303, 304, 305, 306, 307, 308, 310, 312, 313, 314, 315, 316, 318, 319, 320))
-list_star <- rbind(list_314x310, list_314x312, new_rows)
-list_star$V1 <- sub("_dupped.bam", "", list_star$V1)
-phenotype_Data <- phenotype_Data[phenotype_Data$ID %in% list_star$V1, ]
-
-# Subsetting the data into separate chunks
-allpehnotype_data_export_23 <- subset(phenotype_Data, select = c(ID,Delta_CT_adj,Delta_CT_OG,ng.g,Data_Set))
-allpehnotype_data_export_23$Year <- "2023"
-allpehnotype_data_export_24 <- subset(all_Data_2024, select = c(ID,Delta_CT_adj,Delta_CT_OG,ng.g,Data_Set))
-allpehnotype_data_export_24$Year <- "2024"
-
-head(allpehnotype_data_export_23)
-head(allpehnotype_data_export_24)
-
-#Recombining the data into one large table
-phenotypes23_24 <- rbind(allpehnotype_data_export_23,allpehnotype_data_export_24)
-phenotypes23_24$ID <- gsub("-", "_", phenotypes23_24$ID)
-head(phenotypes23_24,15)
-
-#Removing batch effects and leaving only residuals.
-lm_model_alk <- lm(ng.g ~ Year, data = phenotypes23_24, na.action = na.exclude)
-phenotypes23_24$Alkaloids_Res <- resid(lm_model_alk)
-
-lm_model_CT_OG <- lm(Delta_CT_OG ~ Data_Set + Year, data = phenotypes23_24, na.action = na.exclude)
-phenotypes23_24$Delta_CT_OG_Res <- resid(lm_model_CT_OG)
-
-lm_model_CT_adj <- lm(Delta_CT_adj ~ Data_Set + Year, data = phenotypes23_24, na.action = na.exclude)
-phenotypes23_24$Delta_CT_adj_Res <- resid(lm_model_CT_adj)
-
-head(phenotypes23_24,15)
-
-# Now that we have residuals we have to get avarages and export the data
-Alkaloid_residuals_avaraged <- phenotypes23_24 %>%
-  group_by(ID) %>%
-  summarise(Alkaloids_Res_avg = mean(Alkaloids_Res, na.rm = TRUE)) %>%
-  filter(!is.na(Alkaloids_Res_avg))
-
-DeltaCT_adj_residuals_avaraged <- phenotypes23_24 %>%
-  group_by(ID) %>%
-  summarise(DeltaCT_adj_Res_avg = mean(Delta_CT_adj_Res, na.rm = TRUE)) %>%
-  filter(!is.na(DeltaCT_adj_Res_avg))
-
-DeltaCT_OG_residuals_avaraged <- phenotypes23_24 %>%
-  group_by(ID) %>%
-  summarise(DeltaCT_OG_Res_avg = mean(Delta_CT_OG_Res, na.rm = TRUE)) %>%
-  filter(!is.na(DeltaCT_OG_Res_avg))
-
-Residual_data_avg <- merge(Alkaloid_residuals_avaraged, 
-                     DeltaCT_adj_residuals_avaraged, 
-                     by = "ID")
-
-Residual_data_avg <- merge(Residual_data_avg, 
-                     DeltaCT_OG_residuals_avaraged, 
-                     by = "ID")
-
-write.table(Residual_data_avg, file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_data_avg.txt', sep = '\t', row.names=FALSE)
-
-# Graphs to look at the avraged residual data
-p1 <- ggplot(Residual_data_avg, aes(x = Alkaloids_Res_avg)) + 
-  geom_histogram(binwidth = 1000, fill = "blue", color = "black", alpha = 0.7) +
-  labs(title = "Values for Residuals of Alkaloids", x = "Value", y = "Frequency") +
-  theme_bw()
-
-p2 <- ggplot(Residual_data_avg, aes(x = DeltaCT_adj_Res_avg)) + 
-  geom_histogram(binwidth = .25, fill = "yellow", color = "black", alpha = 0.7) +
-  labs(title = "Values for Residuals of Delta CT adj", x = "Value", y = "Frequency") +
-  theme_bw()
-
-p3 <- ggplot(Residual_data_avg, aes(x = DeltaCT_OG_Res_avg)) + 
-  geom_histogram(binwidth = .25, fill = "yellow", color = "black", alpha = 0.7) +
-  labs(title = "Values for Residuals of Delta CT OG", x = "Value", y = "Frequency") +
-  theme_bw()
-
-grid.arrange(p1, p2, p3, ncol = 2, nrow = 2)
-
-phenotype_residuals_outliars_rm <- read.table("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/Residual_data_avg_tassel_outliars_Removed.csv", skip = 2, header = TRUE )  
-
-
-# Graphs to look at the avraged residual data with outliars removed
-p1 <- ggplot(phenotype_residuals_outliars_rm, aes(x = Alkaloids_Res_avg)) + 
-  geom_histogram(binwidth = 1000, fill = "blue", color = "black", alpha = 0.7) +
-  labs(title = "Values for Residuals of Alkaloids \n Outliars Removed", x = "Value", y = "Frequency") +
-  theme_bw()
-
-p2 <- ggplot(phenotype_residuals_outliars_rm, aes(x = DeltaCT_adj_Res_avg)) + 
-  geom_histogram(binwidth = .25, fill = "yellow", color = "black", alpha = 0.7) +
-  labs(title = "Values for Residuals of Delta CT adj \n Outliars Removed", x = "Value", y = "Frequency") +
-  theme_bw()
-
-p3 <- ggplot(phenotype_residuals_outliars_rm, aes(x = DeltaCT_OG_Res_avg)) + 
-  geom_histogram(binwidth = .25, fill = "yellow", color = "black", alpha = 0.7) +
-  labs(title = "Values for Residuals of Delta CT OG \n Outliars Removed", x = "Value", y = "Frequency") +
-  theme_bw()
-
-grid.arrange(p1, p2, p3, ncol = 2, nrow = 2)
-
-###
-### Subsetting data for other heritability
-###
-
-phenotypes23_24 <- rbind(allpehnotype_data_export_23,allpehnotype_data_export_24)
-phenotypes23_24$ID <- gsub("-", "_", phenotypes23_24$ID)
-head(phenotypes23_24,15)
-
-# Here we have to subset the data in 8 different ways.
-
-#Removing batch effects and leaving only residuals.
-
-#I suggest making this into a function that we can use many times.
-lm_model_alk <- lm(ng.g ~ Year, data = phenotypes23_24, na.action = na.exclude)
-phenotypes23_24$Alkaloids_Res <- resid(lm_model_alk)
-
-lm_model_CT_OG <- lm(Delta_CT_OG ~ Data_Set + Year, data = phenotypes23_24, na.action = na.exclude)
-phenotypes23_24$Delta_CT_OG_Res <- resid(lm_model_CT_OG)
-
-lm_model_CT_adj <- lm(Delta_CT_adj ~ Data_Set + Year, data = phenotypes23_24, na.action = na.exclude)
-phenotypes23_24$Delta_CT_adj_Res <- resid(lm_model_CT_adj)
-
-head(phenotypes23_24,15)
-
-
-##########################################
-# Graphs to explore the 2023 vs 2024 data 
-#########################################
-
-
-
-
-
-
-################################################################################
-###### Making graphs to explore the pehnotypic data
-################################################################################
-tassel_2024_data <- read.table(file = '/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/tassel_2024_data.txt', sep = '\t', header = TRUE)
-all_Data_2024 <- read.csv("/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Phenotype_Data/2024_Data/Final_2024_phenotype_data.csv", header = TRUE)
-parents_2024 <- all_Data_2024[, c("Treatment", "Mother", "Father")]
-parents_2024 <- parents_2024 %>% rename(ID = Treatment)
-merged_2024 <- merge(tassel_2024_data, parents_2024, by = "ID")
-merged_2024$Parent_Combination <- apply(merged_2024[, c("Mother", "Father")], 1, function(x) paste(sort(x), collapse = " x "))
-
-head(merged_2024)
-
-
-
-ggplot(merged_2024, aes(x = Delta_CT_adj, fill = Parent_Combination)) +
-  geom_histogram(position = "stack", binwidth = .5, color = "black") +
-  labs(title = "Histogram of Delta_CT_adj Colored by Parent Combination", x = "Delta_CT_adj Values", y = "Count") +
-  theme_minimal()
-
-ggplot(merged_2024, aes(x = ng.g, fill = Parent_Combination)) +
-  geom_histogram(position = "stack", binwidth = 5000, color = "black") +
-  labs(title = "Histogram of Alkaloids Colored by Parent Combination", x = "Delta_CT_adj Values", y = "Count") +
-  theme_minimal()
-
+write.table(pheotype_avraged, file = paste0(data_folder,"/Phenotype_Data/Phenotypes_avg.txt"), sep = '\t', row.names=FALSE)
 
 
 

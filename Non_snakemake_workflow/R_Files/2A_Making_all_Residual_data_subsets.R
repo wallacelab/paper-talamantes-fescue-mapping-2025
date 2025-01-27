@@ -1,5 +1,6 @@
 # Objective: Make phenotype data into residual data and then subset all data 
 # into all three data sets, 23, 24, avg all
+# Uses PCA plots on tassel data to identify and remove genetic outliars
 
 library(tidyverse)
 library(multcompView)

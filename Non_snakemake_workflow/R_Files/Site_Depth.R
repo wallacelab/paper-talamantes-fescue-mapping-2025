@@ -17,10 +17,26 @@ if (!file.exists(file_path)) {
 }
 
 # Load the SNP depth file into a data frame
-snp_depth <- read.table(file_path, header = FALSE)
+snp_depth <- read.table(file_path, header = FALSE, stringsAsFactors = FALSE)
 
 # Select the depth columns (ignoring the first two columns)
 depth_data <- snp_depth[, -c(1:2)]
+
+# Ensure all columns are numeric
+depth_data <- as.data.frame(lapply(depth_data, function(col) as.numeric(as.character(col))))
+
+# Check for non-numeric values and report
+if (anyNA(depth_data)) {
+  cat("Warning: Non-numeric values detected. Rows with NA values will be removed.\n")
+}
+
+# Remove rows with NA values
+depth_data <- na.omit(depth_data)
+
+# Check if the dataset is empty after cleaning
+if (nrow(depth_data) == 0) {
+  stop("Error: No valid numeric data found after cleaning. Check your input file.")
+}
 
 # Calculate the average depth per site (row)
 row_averages <- rowMeans(depth_data)
@@ -30,6 +46,3 @@ overall_average <- mean(row_averages)
 
 # Print the result
 cat("The overall average site depth is:", overall_average, "\n")
-
-
-

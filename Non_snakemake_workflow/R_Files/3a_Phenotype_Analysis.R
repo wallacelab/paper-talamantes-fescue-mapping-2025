@@ -14,7 +14,7 @@ library(gridExtra)
 
 
 ##############################################
-# Making  data with batch effects removed 10/22/24
+# Removing all outliars
 ##############################################
 # Loading in the data
 data_folder = "/home/darrian/Documents/Mapping_and_QTL/Data"
@@ -169,35 +169,60 @@ p3 <- ggplot(pg_Residual_data_avg, aes(x = DeltaCT_OG_Res_avg)) +
 
 grid.arrange(p1, p2, p3, ncol = 2, nrow = 2)
 
-# Scatter plot
+############### Scatter plots #######################
+head(pg_Residual_data_avg)
+phenotypes_23 <- subset(phenotypes23_24, Year == 2023)  
+phenotypes_24 <- subset(phenotypes23_24, Year == 2024)  
+
+# linear model
 model <- lm(Alkaloids_Res_avg ~ DeltaCT_adj_Res_avg, data = pg_Residual_data_avg)
-
-# Calculate R-squared
 rsq <- summary(model)$r.squared #This is low so I think I should use spearman.
-spearmodel <- cor.test(pg_Residual_data_avg$Alkaloids_Res_avg, pg_Residual_data_avg$DeltaCT_adj_Res_avg, method = "spearman")
-rho <- spearmodel$estimate
-rsq <- rho^2
-p <- spearmodel$p.value
-
-# Create the scatter plot with the R-squared value
-ggplot(pg_Residual_data_avg, aes(x = DeltaCT_adj_Res_avg, y = Alkaloids_Res_avg)) +
-  geom_point() +  # Scatter plot points
-  geom_smooth(method = "lm", se = FALSE, color = "blue") +  # Add linear regression line
-  annotate("text", x = min(pg_Residual_data_avg$DeltaCT_adj_Res_avg), y = max(pg_Residual_data_avg$Alkaloids_Res_avg), 
-           label = paste("Spearman R-squared = ", round(rsq, 3)), 
-           hjust = 0, vjust = .6, size = 5, color = "red") +  # Display R-squared value
-  annotate("text", x = min(pg_Residual_data_avg$DeltaCT_adj_Res_avg), y = max(pg_Residual_data_avg$Alkaloids_Res_avg), 
-           label = paste("Spearman R-squared = ", format(p, digits = 3)), 
-           hjust = 0, vjust = -1, size = 5, color = "red") +  # Display P value
-  labs(title = "Residual Alkaloids vs Efficiency Adjusted CT Ratio", x = "Alkaloids", y = "Efficiency Adjusted CT Ratio") + 
-  theme_bw() +
-  theme(text = element_text(size = 20))
 
 
+# Function to calculate r squared and make scatter plot
+scatterplot_phenos <- function(dataset, Alkaloidcol, DeltaCTcol, Title) {
+  # Perform Spearman correlation
+  spearmodel <- cor.test(dataset[[Alkaloidcol]], 
+                         dataset[[DeltaCTcol]], 
+                         method = "spearman", 
+                         use = "complete.obs")  # Ignore NAs
+  rho <- spearmodel$estimate
+  rsq <- rho^2
+  p <- spearmodel$p.value
+  
+  # Create the scatter plot
+  plot1 <- ggplot(dataset, aes(x = .data[[DeltaCTcol]], y = .data[[Alkaloidcol]])) +
+    geom_point() +  # Scatter plot points
+    geom_smooth(method = "lm", se = FALSE, color = "blue") +  # Linear regression line
+    annotate("text", 
+             x = min(dataset[[DeltaCTcol]], na.rm = TRUE), 
+             y = max(dataset[[Alkaloidcol]], na.rm = TRUE), 
+             label = paste("Spearman R-squared = ", round(rsq, 3)), 
+             hjust = 0, vjust = -1, size = 5, color = "red") +
+    annotate("text", 
+             x = min(dataset[[DeltaCTcol]], na.rm = TRUE), 
+             y = max(dataset[[Alkaloidcol]], na.rm = TRUE) - 
+               0.05 * (max(dataset[[Alkaloidcol]], na.rm = TRUE) - 
+                         min(dataset[[Alkaloidcol]], na.rm = TRUE)), 
+             label = paste("P-value = ", format(p, digits = 3, scientific = TRUE)), 
+             hjust = 0, vjust = -1, size = 5, color = "red") +
+    labs(title = Title, 
+         x = "Efficiency Adjusted CT Ratio", 
+         y = "Residual Alkaloids") + 
+    theme_bw() +
+    theme(text = element_text(size = 20))
+  
+  return(plot1)
+}
 
 
+scatterplot_phenos(pg_Residual_data_avg,"Alkaloids_Res_avg","DeltaCT_adj_Res_avg", "Residual Alkaloids vs Efficiency Adjusted CT Ratio")
+scatterplot_phenos(phenotypes_23,"Alkaloids_Res","Delta_CT_adj_Res", "2023")
+scatterplot_phenos(phenotypes_24,"Alkaloids_Res","Delta_CT_adj_Res", "2024")
 
-head(phenotype_residuals_outliars_rm)
+IDs <- pg_Residual_data_avg$ID
+write.table(IDs, file = paste0(data_folder,"/Lists/3a_Geno_List_Outliars_Removed.txt"), row.names = FALSE)
+
 
 
 

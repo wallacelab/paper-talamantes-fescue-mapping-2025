@@ -1,9 +1,8 @@
 # Purpose: This takes the 23 and 24 phenotype data and anlysses them for the paper
 
-
 library(tidyverse)
 library(multcompView)
-library(gvlma)
+library(gvlma) # Dont think I used this either
 library(mbQTL) #does not work? WHat did I use this for?
 library(ggpubr)
 library(car)
@@ -37,6 +36,7 @@ phenotype_Data <- phenotype_Data %>%
 phenotype_Data_2023 <- phenotype_Data
 all_Data_2024 <- all_Data_2024 %>%
   rename(ID = Treatment)
+
 
 # Removing data thats not star cross
 list_314x310 <- read.table(paste0(data_folder,"/Lists/Parental_Lists/310x314_list.txt"))  
@@ -128,6 +128,7 @@ for (col_name in colnames(gg_Residual_data_avg)[-1]) {  # Exclude the first colu
 # Remove not important parents
 abscent_parents <- data.frame(ID = c("301", "302", "304", "305", "307", "308", "313", "315", "316", "318", "319", "320"))
 pg_Residual_data_avg <- pg_Residual_data_avg[!pg_Residual_data_avg$ID %in% abscent_parents$ID,]
+
 
 #Save the phenotype data sets
 write.table(Residual_data_avg, file = paste0(data_folder,"/Phenotype_Data/Residual_data_avg.txt"), sep = '\t', row.names=FALSE)

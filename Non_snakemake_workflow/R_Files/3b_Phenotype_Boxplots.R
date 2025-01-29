@@ -1,4 +1,5 @@
 # Purpose: This will make boxplots of the phenotypes 
+# It also saves filtered phenotypes for other analysis
 
 
 library(tidyverse)
@@ -30,6 +31,14 @@ head(parent_list)
 
 pg_Residual_data_avg <- merge(pg_Residual_data_avg, parent_list, by = "ID")
 head(pg_Residual_data_avg)
+
+#Create 314x312 and 314x310 datasets
+# Ill prep these for tassel after this
+pg_Residual_data_314x310 <- pg_Residual_data_avg %>% filter(Cross == "314x310" | ID == "314" | ID == "310")
+pg_Residual_data_314x312 <- pg_Residual_data_avg %>% filter(Cross == "314x312" | ID == "314" | ID == "312")
+write.table(pg_Residual_data_314x310, file = paste0(data_folder,"/Phenotype_Data/pg_Residual_data_314x310.txt"), sep = '\t', row.names=FALSE)
+write.table(pg_Residual_data_314x312, file = paste0(data_folder,"/Phenotype_Data/pg_Residual_data_314x312.txt"), sep = '\t', row.names=FALSE)
+
 
 # Setting Mother and Father
 data_with_parents <- data.frame()

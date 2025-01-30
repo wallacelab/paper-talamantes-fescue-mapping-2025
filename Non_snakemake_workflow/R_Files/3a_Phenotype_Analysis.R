@@ -2,8 +2,8 @@
 
 library(tidyverse)
 library(multcompView)
-library(gvlma) # Dont think I used this either
-library(mbQTL) #does not work? WHat did I use this for?
+#library(gvlma) # Dont think I used this either
+#library(mbQTL) #does not work? WHat did I use this for?
 library(ggpubr)
 library(car)
 library(reshape2)

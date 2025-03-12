@@ -1,4 +1,4 @@
-# Purpose: This takes the 23 and 24 phenotype data and anlysses them for the paper
+# Purpose: This takes the 23 and 24 phenotype data and analyses them for the paper
 
 library(tidyverse)
 library(multcompView)
@@ -223,6 +223,77 @@ scatterplot_phenos(phenotypes_24,"Alkaloids_Res","Delta_CT_adj_Res", "2024")
 
 IDs <- pg_Residual_data_avg$ID
 write.table(IDs, file = paste0(data_folder,"/Lists/3a_Geno_List_Outliars_Removed.txt"), row.names = FALSE)
+
+
+
+
+##############################################
+# Creating Residual Data for only the 2023 data set
+##############################################
+# Loading in the data
+data_folder = "/home/darrian/Documents/Mapping_and_QTL/Data"
+
+# The two data sets you need are all_Data_2024 and phenotype_Data_2023
+phenotype_Data <- read.table(paste0(data_folder,"/Phenotype_Data/All_Data_Filtered/phenotype_data.txt") , header = TRUE)
+phenotype_Data$Delta_CT[phenotype_Data$ID == "306-3-8"] <- NA
+phenotype_Data$Delta_CT[phenotype_Data$ID == "320-5-26"] <- NA
+phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "306-3-8"] <- NA
+phenotype_Data$Delta_CT_OG[phenotype_Data$ID == "320-5-26"] <- NA
+phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "314" & phenotype_Data$Data_Set != "315x320"), ]
+phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Data_Set == "315x320"),]
+phenotype_Data <- phenotype_Data[!(phenotype_Data$ID == "315-1-8" & phenotype_Data$Extraction_Date == "03/16/23"),]
+
+# Fixing naming conventions
+phenotype_Data <- phenotype_Data %>%
+  rename(Delta_CT_adj = Delta_CT)
+phenotype_Data_2023 <- phenotype_Data
+
+
+#Removing batch effects and leaving only residuals.
+lm_model_alk <- lm(ng.g ~ Harvest_Date + Alkaloid_Plate, data = phenotype_Data_2023, na.action = na.exclude)
+phenotype_Data_2023$Alkaloids_Res <- resid(lm_model_alk)
+
+lm_model_CT_OG <- lm(Delta_CT_OG ~ Data_Set  + Standard  + Extraction_Date + Extractor + Harvest_Date, data = phenotype_Data_2023, na.action = na.exclude)
+phenotype_Data_2023$Delta_CT_OG_Res <- resid(lm_model_CT_OG)
+
+lm_model_CT_adj <- lm(Delta_CT_adj ~  Data_Set  + Standard  + Extraction_Date + Extractor + Harvest_Date, data = phenotype_Data_2023, na.action = na.exclude)
+phenotype_Data_2023$Delta_CT_adj_Res <- resid(lm_model_CT_adj)
+
+# Saves table with MetaData
+write.table(phenotype_Data_2023, file = paste0(data_folder,"/Phenotype_Data/2023_Data/3a_all_2023_residual_data_and_metadata.txt"), sep = '\t', row.names=FALSE)
+
+# Only keeping phenotype data
+phenotype_Data_2023 <- phenotype_Data_2023[, c(1, 13:15)]
+# Remove phenotype outliars
+pg_phenotype_Data_2023 <- phenotype_Data_2023  # Start with the original data frame
+for (col_name in colnames(phenotype_Data_2023)[-1]) {  # Exclude the first column (ID)
+  # Calculate the mean and standard deviation for the column
+  mean_value <- mean(phenotype_Data_2023[[col_name]], na.rm = TRUE)
+  sd_value <- sd(phenotype_Data_2023[[col_name]], na.rm = TRUE)
+  
+  # Define the threshold for removal (mean ± 2.5 * standard deviation)
+  threshold_lower <- mean_value - 2.5 * sd_value
+  threshold_upper <- mean_value + 2.5 * sd_value
+  
+  # Remove rows where the value is outside of the defined range for this column
+  pg_phenotype_Data_2023 <- pg_phenotype_Data_2023[pg_phenotype_Data_2023[[col_name]] >= threshold_lower & pg_phenotype_Data_2023[[col_name]] <= threshold_upper, ]
+}
+pg_phenotype_Data_2023 <- pg_phenotype_Data_2023[rowSums(is.na(pg_phenotype_Data_2023)) != ncol(pg_phenotype_Data_2023), ]
+nrow(pg_phenotype_Data_2023)
+
+#Save the phenotype data sets
+write.table(pg_phenotype_Data_2023, file = paste0(data_folder,"/Phenotype_Data/2023_Data/3a_all_2023_residual_only.txt"), sep = '\t', row.names=FALSE)
+
+
+
+
+
+
+
+
+
+
+
 
 
 

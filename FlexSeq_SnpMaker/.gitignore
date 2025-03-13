@@ -1,0 +1,7 @@
+
+Data/
+.snakemake*
+.snakemake/
+.vscode*
+.vscode/
+Workflow/logs/

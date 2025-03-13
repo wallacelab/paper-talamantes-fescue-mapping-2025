@@ -1,0 +1,88 @@
+# Author: Darrian Talamantes
+# Affiliation: University of Georgia
+# How to Run: 
+# 1: ensure the rule all has the target output
+# 2: input this code in the terminal
+# snakemake --cores 2 --use-conda
+
+# This file will have all the rules to 
+
+# 1 align my data to the genome
+# 2 find snps
+
+
+# Reads were quality checked before this and none have to be removed
+
+
+
+# =========================================================================================================
+#     Load config file
+# =========================================================================================================
+configfile: "config.yaml"
+
+# Config importing paths to directories 
+samples_path = config["paths"]["samples_path"]
+mapped_reads = config["paths"]["mapped_reads"]
+vcfs = config["paths"]["vcfs"]
+mpileup = config["paths"]["mpileup"]
+
+
+
+
+# config importing files
+genome = config["genome"]
+output = config["output"]
+
+# =================================================================================================
+#   List Variables
+# =================================================================================================
+
+# Listing Sample Files
+(SAMPLES,) = glob_wildcards(samples_path + "{sample}.fasta")
+
+# =================================================================================================
+#    Rules
+# =================================================================================================
+
+rule all:
+    input:
+        multiext(genome, ".amb", ".ann", ".bwt", ".pac", ".sa"),
+        genome + ".fai",
+        expand(vcfs + "{sample}.vcf", sample=SAMPLES)
+        # expand(vcfs + "{sample}.bcf.csi", samples=SAMPLES)
+        # output  # activate this if you can get merge to work
+
+# Align genome file
+rule index_genome:
+    params:
+        algo=config["bwa"]["index"]
+    input:
+        genome=config["genome"]
+    output:
+        idx = multiext(genome, ".amb", ".ann", ".bwt", ".pac", ".sa"),
+    conda:
+        "Conda_Envs/BWA.yaml"
+    shell:
+        "bwa index -a {params.algo} {input}"
+
+# Index the genome for sam tools
+rule samtools_index:
+    input:
+        genome
+    output:
+        genome + ".fai",
+    wrapper:
+        "v2.6.0/bio/samtools/faidx"
+
+
+#Rules to be included
+
+include: "rules/01_alignment.smk"		    # step 1 - Aligning, sorting, removing duplicates from samples
+include: "rules/02_snp_call.smk"                      # Calls SNPS
+# include: "rules/03_merge_vcf.smk"               # THis merges all my bcf files
+
+
+
+    
+# conda env export -n BWA > BWA.yaml
+# snakemake --dag | dot -Tsvg > dag.svg

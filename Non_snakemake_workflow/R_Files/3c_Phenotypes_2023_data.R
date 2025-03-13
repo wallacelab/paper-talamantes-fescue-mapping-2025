@@ -4,6 +4,8 @@
 library(tidyverse)
 library(gridExtra)
 library(lme4)
+library(qqman)
+
 ################################################################################
 # Load Data
 ################################################################################
@@ -12,6 +14,9 @@ data_folder = "/home/darrian/Documents/Mapping_and_QTL/Data"
 
 phenotype_Data_2023 <- read.table(paste0(data_folder,"/Phenotype_Data/2023_Data/3a_all_2023_residual_only.txt") , header = TRUE,sep = '\t')
 Meta_Data_2023 <- read.table(paste0(data_folder,"/Phenotype_Data/2023_Data/3a_all_2023_residual_data_and_metadata.txt") , header = TRUE,sep = '\t')
+PCA_FlexSeq <- read.table(paste0(data_folder,"/Tassel_Outputs/FlexSeq_Genos/PCA_flexseq_genotypes.txt") , header = TRUE,sep = '\t')
+
+
 
 # Merge the Data
 phenotype_Data_2023 <- merge(phenotype_Data_2023, Meta_Data_2023, by = "ID")
@@ -21,8 +26,9 @@ colnames(phenotype_Data_2023) <- sub("\\.x$", "", colnames(phenotype_Data_2023))
 
 
 
-############### Scatter plots #######################
-head(phenotype_Data_2023)
+################################################################################
+# Scatter Plot
+################################################################################head(phenotype_Data_2023)
 nrow(phenotype_Data_2023)
 
 # linear model
@@ -150,3 +156,51 @@ ggplot(phenotype_Data_2023, aes(x=Maternal_Parent, y=Delta_CT_adj_Res, fill = Ma
   scale_fill_discrete(name = "Plant Lines") +
   geom_text(data = Tk, aes(label = cld, x = Maternal_Parent, y = quant), 
             vjust = -1.3, hjust = 1.1, size = 5)
+
+
+
+
+################################################################################
+# Making PCA plot 
+################################################################################
+
+#Subsetting maternal parent
+Mothers <- subset(Meta_Data_2023, select = c(ID, Maternal_Parent))
+PCA_FlexSeq <- PCA_FlexSeq %>%
+  rename(ID = Taxa)
+PCA_FlexSeq <- merge(PCA_FlexSeq, Mothers, by = "ID")
+PCA_FlexSeq$Maternal_Parent <- as.factor(PCA_FlexSeq$Maternal_Parent)
+
+# The plot
+ggplot(PCA_FlexSeq, aes(x = PC1, y = PC2, color = Maternal_Parent)) +
+  geom_point(alpha = 0.5) +
+  theme_minimal()
+
+
+################################################################################
+# Hapmat plot
+################################################################################
+
+########### Example 
+MLM_DRT_Filters_residuals <- read.table(paste0(data_folder,"/Tassel_Outputs/FlexSeq_Genos/MLM_2023_phenotypes_FlexSeq_Genos.txt") , header = TRUE,sep = '\t')
+MLM_DRT_Filters_residuals <- MLM_DRT_Filters_residuals[MLM_DRT_Filters_residuals$Trait == "Alkaloids_Res", ]
+MLM_DRT_Filters_residuals$Chr <- as.numeric(factor(MLM_DRT_Filters_residuals$Chr))
+MLM_DRT_Filters_residuals <- MLM_DRT_Filters_residuals[-c(1), ]
+# BOnferonii line
+alpha <- 0.05
+num_tests <- nrow(MLM_DRT_Filters_residuals)  # Number of SNPs or tests
+bonferroni_threshold <- alpha / num_tests
+# Making FDR threshold
+MLM_DRT_Filters_residuals$padj <- p.adjust(MLM_DRT_Filters_residuals$p, method = "BH")
+FDR_threshold <- max(MLM_DRT_Filters_residuals$p[MLM_DRT_Filters_residuals$padj <= alpha], na.rm = TRUE)
+if (!is.numeric(FDR_threshold) || is.na(FDR_threshold) || FDR_threshold == -Inf) {
+  FDR_threshold <- 1e-5
+}
+print(FDR_threshold)
+Alkaloids <- manhattan(MLM_DRT_Filters_residuals, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", 
+                       ylim = c(0, 6), main = "MLM on Alkaloid Residuals in FlexSeq Genotypes",
+                       genomewideline = -log10(bonferroni_threshold),
+                       suggestiveline = -log10(FDR_threshold),
+                       col = c("blue", "red", "darkgrey", "purple"))
+
+

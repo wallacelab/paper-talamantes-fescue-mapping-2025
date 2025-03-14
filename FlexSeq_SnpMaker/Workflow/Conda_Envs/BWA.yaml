@@ -2,6 +2,8 @@ name: BWA
 channels:
   - bioconda
   - conda-forge
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
 dependencies:
   - _libgcc_mutex=0.1=conda_forge
   - _openmp_mutex=4.5=2_gnu
@@ -12,4 +14,4 @@ dependencies:
   - libzlib=1.2.13=hd590300_5
   - perl=5.32.1=7_hd590300_perl5
   - zlib=1.2.13=hd590300_5
-prefix: /home/darrian/Applications/miniforge/envs/BWA
+prefix: /home/darrian/anaconda3/envs/BWA

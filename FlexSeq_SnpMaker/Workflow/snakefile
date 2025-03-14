@@ -13,6 +13,7 @@
 
 # Reads were quality checked before this and none have to be removed
 
+import os
 
 
 # =========================================================================================================
@@ -31,14 +32,23 @@ mpileup = config["paths"]["mpileup"]
 
 # config importing files
 genome = config["genome"]
-output = config["output"]
+
+# =================================================================================================
+#   Making all Directories
+# =================================================================================================
+
+# Ensure all directories exist before Snakemake starts
+for path in config["paths"].values():
+    os.makedirs(path, exist_ok=True)
 
 # =================================================================================================
 #   List Variables
 # =================================================================================================
 
 # Listing Sample Files
-(SAMPLES,) = glob_wildcards(samples_path + "{sample}.fasta")
+(SAMPLES,) = glob_wildcards(samples_path + "{sample}_R1.fastq.gz")
+SAMPLES = [os.path.basename(s) for s in SAMPLES]  # Remove any leading paths
+print("Samples:", SAMPLES)
 
 # =================================================================================================
 #    Rules
@@ -46,11 +56,13 @@ output = config["output"]
 
 rule all:
     input:
+        expand("{dir}", dir=config["paths"].values()), # Ensures all directories are made
         multiext(genome, ".amb", ".ann", ".bwt", ".pac", ".sa"),
         genome + ".fai",
-        expand(vcfs + "{sample}.vcf", sample=SAMPLES)
-        # expand(vcfs + "{sample}.bcf.csi", samples=SAMPLES)
-        # output  # activate this if you can get merge to work
+        expand(mapped_reads + "/{sample}_sorted.bam", sample=SAMPLES),
+        vcf= vcfs + "/all_Flexseq.vcf.gz"
+
+
 
 # Align genome file
 rule index_genome:

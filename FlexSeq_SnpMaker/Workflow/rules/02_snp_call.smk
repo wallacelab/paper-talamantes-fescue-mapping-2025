@@ -1,35 +1,21 @@
 # This rule should put all files into one huge bcf file
-rule bcftools_mpileup_all:
+rule call_snps:
     input:
-        alignments = mapped_reads + "{sample}.sorted.bam",
+        sorted = expand(mapped_reads + "/{sample}_sorted.bam", sample=SAMPLES),
         ref=genome,
-        index=genome + ".fai",
+        index=genome + ".fai"
     output:
-        pileup= mpileup + "{sample}_pileup.bcf",
-    params:
-        uncompressed_bcf=False,
-        extra="--max-depth 100 --min-BQ 10",
+        vcf= vcfs + "/all_Flexseq.vcf.gz"
     log:
-        "logs{sample}_mpileup_call.log",
-    wrapper:
-        "v2.6.0/bio/bcftools/mpileup"
-
-
-rule bcftools_call:
-    input:
-        pileup = mpileup + "{sample}_pileup.bcf"
-    output:
-        vcf = vcfs + "{sample}.vcf"
-    log:
-        "logs/bcftools_call{sample}.log"
+        "logs/call_snps.log"
+    threads: 2
     conda:
         "../Conda_Envs/bcftools.yaml"
     shell:
         """
-        bcftools call -mv {input.pileup} -o {output}
+        bcftools mpileup -Ou -f {input.ref} {input.sorted} | bcftools call -mv -Oz -o {output.vcf} 2>> {log}
+        bcftools index {output.vcf}
         """
-
-
 
 
 

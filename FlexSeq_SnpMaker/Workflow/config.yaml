@@ -2,19 +2,18 @@
 #     Reference Genome
 # =================================================================================================
 
-genome: ../Data/Real_Data/Genome/tall_fescue_pv1.1.fasta
+genome: ../../Data/Flex_Data/Refrence/Test_Genome.fasta
 idx: 
 
 # =================================================================================================
 #     Directory Paths
 # =================================================================================================
 paths:
-  genomepath: ../Data/Refrence
-  samples_path: ../Data/Flex_Data/Sequences
-  mapped_reads: ../Data/Flex_Data/Mapped_Reads
-  vcfs: ../Data/Flex_Data/VCFs
-  output: ../Data/Flex_Data/output
-  mpileup: ../Data/Flex_Data/mpileup
+  genomepath: ../../Data/Refrence
+  samples_path: ../../Data/Flex_Data/Sequences
+  mapped_reads: ../../Data/Flex_Data/Mapped_Reads
+  vcfs: ../../Data/Flex_Data/VCFs
+  mpileup: ../../Data/Flex_Data/mpileup
 
 # =================================================================================================
 #     Indexing params
@@ -26,7 +25,6 @@ bwa:
 #     samtools options 
 # =================================================================================================
 
-output: ../Data/output/merged.bcf
 
 # =================================================================================================
 #     samtools options 

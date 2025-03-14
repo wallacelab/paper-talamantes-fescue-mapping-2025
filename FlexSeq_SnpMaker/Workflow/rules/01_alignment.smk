@@ -1,26 +1,26 @@
-# aligns the files to the genome
-rule bwa_map:
+rule align_reads:
     input:
-        sample=samples_path + "{sample}fasta",
-        genome=config["genome"],
-        idx = multiext(genome, ".amb", ".ann", ".bwt", ".pac", ".sa") 
+        ref = config["genome"],  # Reference genome
+        fq1 = samples_path + "/{sample}_R1.fastq.gz",
+        fq2 = samples_path + "/{sample}_R2.fastq.gz"
     output:
-        bams=temp(mapped_reads + "{sample}.bam")
-    threads:
-        2
+        bam = temp(mapped_reads + "/{sample}.bam")
+    log:
+        "logs/{sample}_align.log"
+    threads: 4
     conda:
         "../Conda_Envs/BWA.yaml"
     shell:
-       "bwa mem {input.genome} {input.sample} -t {threads} > {output}"
-
-
+        """
+        bwa mem -t {threads} {input.ref} {input.fq1} {input.fq2} -o {output.bam} 2>> {log}
+        """
 
 # Sorts the alignment file 
 rule samtools_sort:
     input:
-        bams = mapped_reads + "{sample}.bam"   
+        bams = mapped_reads + "/{sample}.bam"   
     output:
-        sorted = mapped_reads + "{sample}sorted.bam"
+        sorted = mapped_reads + "/{sample}_sorted.bam"
     log:
         "logs/samtools{sample}_sorted.log",
     params:

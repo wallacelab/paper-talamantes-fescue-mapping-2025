@@ -1,10 +1,16 @@
 # Author: Darrian Talamantes
 # Affiliation: University of Georgia
 # How to Run: 
-# 1: ensure the rule all has the target output
-# 2: input this code in the terminal
-# snakemake --cores 2 --use-conda
-
+""""
+    1: Ensure that the "Data" Directory is created with "Sequences" and "Refrence" subdirectories
+    2: Look at the SAMPLES list. Ensure Suffix looks like "_R1.fastq.gz" change to what you need
+    3: Run FastQC and MultiQC on all your samples and do a manual inspection before running this
+    4: This snakefile should make all other needed directories
+    5: Run with 
+        snakemake --cores X --use-conda -s snakefile 
+ input this code in the terminal
+ snakemake --cores 2 --use-conda
+""""
 # This file will have all the rules to 
 
 # 1 align my data to the genome
@@ -90,11 +96,5 @@ rule samtools_index:
 #Rules to be included
 
 include: "rules/01_alignment.smk"		    # step 1 - Aligning, sorting, removing duplicates from samples
-include: "rules/02_snp_call.smk"                      # Calls SNPS
-# include: "rules/03_merge_vcf.smk"               # THis merges all my bcf files
+include: "rules/02_snp_call.smk"            # Calls SNPS
 
-
-
-    
-# conda env export -n BWA > BWA.yaml
-# snakemake --dag | dot -Tsvg > dag.svg

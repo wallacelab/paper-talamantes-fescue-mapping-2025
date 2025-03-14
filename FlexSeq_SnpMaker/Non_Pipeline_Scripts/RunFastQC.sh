@@ -18,7 +18,7 @@ mkdir -p $OUTPUT_DIR
 
 # Run FastQC on all fastq files in the specified directory
 >commands.txt
-for file in "$DIR"/*.fq.gz; do
+for file in "$DIR"/*.fastq.gz; do
   if [ -f "$file" ]; then
     echo "Running FastQC on $file"
     echo "fastqc -o $OUTPUT_DIR $file" >> commands.txt 

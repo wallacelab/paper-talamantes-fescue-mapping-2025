@@ -1,6 +1,8 @@
 rule align_reads:
     input:
         ref = config["genome"],  # Reference genome
+        refidx1 = multiext(genome, ".amb", ".ann", ".bwt", ".pac", ".sa"),
+        refidx2 = genome + ".fai",
         fq1 = samples_path + "/{sample}_R1.fastq.gz",
         fq2 = samples_path + "/{sample}_R2.fastq.gz"
     output:

@@ -62,7 +62,6 @@ print("Samples:", SAMPLES)
 
 rule all:
     input:
-        expand("{dir}", dir=config["paths"].values()), # Ensures all directories are made
         multiext(genome, ".amb", ".ann", ".bwt", ".pac", ".sa"),
         genome + ".fai",
         expand(mapped_reads + "/{sample}_sorted.bam", sample=SAMPLES),

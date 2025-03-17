@@ -89,7 +89,7 @@ rule samtools_index:
     output:
         genome + ".fai",
     wrapper:
-        "v2.6.0/bio/samtools/faidx"
+        "v1.4.0/bio/samtools/faidx"
 
 
 #Rules to be included

@@ -9,7 +9,7 @@ rule align_reads:
         bam = temp(mapped_reads + "/{sample}.bam")
     log:
         "logs/{sample}_align.log"
-    threads: 4
+    threads: 16
     conda:
         "../Conda_Envs/BWA.yaml"
     shell:
@@ -27,7 +27,7 @@ rule samtools_sort:
         "logs/samtools{sample}_sorted.log",
     params:
         extra= "-m 2G",
-    threads: 2
+    threads: 16
     wrapper:
         "v2.6.0/bio/samtools/sort"
 

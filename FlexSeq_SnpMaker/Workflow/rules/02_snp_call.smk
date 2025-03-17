@@ -8,7 +8,7 @@ rule call_snps:
         vcf= vcfs + "/all_Flexseq.vcf.gz"
     log:
         "logs/call_snps.log"
-    threads: 2
+    threads: 16
     conda:
         "../Conda_Envs/bcftools.yaml"
     shell:

@@ -2,7 +2,7 @@
 #     Reference Genome
 # =================================================================================================
 
-genome: ../../Data/Flex_Data/Test/Refrence/Test_genome.fasta
+genome: ../../Data/Flex_Data/Refrence/tall_fescue_pv1.1.fasta
 idx: 
 
 # =================================================================================================
@@ -10,10 +10,10 @@ idx:
 # =================================================================================================
 paths:
   genomepath: ../../Data/Refrence
-  samples_path: ../../Data/Flex_Data/Test/Sequences
-  mapped_reads: ../../Data/Flex_Data/Test/Mapped_Reads
-  vcfs: ../../Data/Flex_Data/Test/VCFs
-  mpileup: ../../Data/Flex_Data/Test/mpileup
+  samples_path: ../../Data/Flex_Data/Sequences
+  mapped_reads: ../../Data/Flex_Data/Mapped_Reads
+  vcfs: ../../Data/Flex_Data/VCFs
+  mpileup: ../../Data/Flex_Data/mpileup
 
 # =================================================================================================
 #     Indexing params

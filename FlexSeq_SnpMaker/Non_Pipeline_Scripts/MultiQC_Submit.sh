@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH -J MultiQC
 #SBATCH -p batch
-#SBATCH --ntasks=12
-#SBATCH --mem 50gb
+#SBATCH --ntasks=32
+#SBATCH --mem 120gb
 #SBATCH -t 140:00:00
 #SBATCH --output=/scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Outfiles/MultiQC.%j.out
 #SBATCH -e /scratch/drt83172/Wallace_lab/Mapping_and_QTL/Mapping_and_QTL/Outfiles/MultiQC.%j.err

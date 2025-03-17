@@ -2,7 +2,7 @@
 #     Reference Genome
 # =================================================================================================
 
-genome: ../../Data/Flex_Data/Test/Refrence/tall_fescue_pv1.1.fasta
+genome: ../../Data/Flex_Data/Test/Refrence/Test_genome.fasta
 idx: 
 
 # =================================================================================================

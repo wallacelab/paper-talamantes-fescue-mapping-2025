@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -J FlexSeqSNPMaker
-#SBATCH -p highmem-p
+#SBATCH -p highmem_p
 #SBATCH --ntasks=16
 #SBATCH --mem 300gb
 #SBATCH -t 160:00:00

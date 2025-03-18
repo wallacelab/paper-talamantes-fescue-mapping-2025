@@ -8,13 +8,15 @@ rule call_snps:
         vcf= vcfs + "/all_Flexseq.vcf.gz"
     log:
         "logs/call_snps.log"
-    threads: 16
+    threads: 8
     conda:
         "../Conda_Envs/bcftools.yaml"
     shell:
         """
-        bcftools mpileup -Ou -f {input.ref} {input.sorted} | bcftools call -mv -Oz -o {output.vcf} 2>> {log}
+        bcftools mpileup -Ou -f {input.ref} {input.sorted} | bcftools call -mv -Oz -o {output.vcf}
+        if [[ $? -ne 0 ]]; then echo "bcftools call failed" >&2; exit 1; fi
         bcftools index {output.vcf}
+
         """
 
 

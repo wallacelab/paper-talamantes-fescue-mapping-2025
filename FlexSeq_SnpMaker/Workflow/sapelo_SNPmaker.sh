@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH -J FlesSeqSNPMaker
-#SBATCH -p batch
-#SBATCH --ntasks=32
-#SBATCH --mem 120gb
+#SBATCH -J FlexSeqSNPMaker
+#SBATCH -p highmem-p
+#SBATCH --ntasks=16
+#SBATCH --mem 300gb
 #SBATCH -t 160:00:00
-#SBATCH --output=OutFiles/FlesSeqSNPMaker.%j.out
-#SBATCH -e OutFiles/FlesSeqSNPMaker.%j.err
+#SBATCH --output=OutFiles/FlexSeqSNPMaker.%j.out
+#SBATCH -e OutFiles/FlexSeqSNPMaker.%j.err
 #SBATCH --mail-type=FAIL,END
 #SBATCH --mail-user drt83172@uga.edu
 

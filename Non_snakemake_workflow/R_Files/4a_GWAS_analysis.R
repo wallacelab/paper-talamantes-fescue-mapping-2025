@@ -79,11 +79,153 @@ Alkaloids <- manhattan(MLM_all_snps_no_outliars, chr = "Chr", bp = "Pos", p = "p
 
 
 
+########### 2024 Phenos with 3000 OG Genotypes Alkaloids  ######################
+MLM_DRT_Filters_residuals_loc <- "/home/darrian/Documents/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/MLM_all3000_genos_residual_phenos_stats.txt"
+MLM_DRT_Filters_residuals <- read.table(MLM_DRT_Filters_residuals_loc, header = TRUE, sep = '\t')
+# Changing the chr to numbers
+generate_id <- function(x) {
+  if (grepl("^FACHR\\d+[A-Za-z]\\d+$", x)) {
+    # Extract Number, Letter, Number
+    num_letter_num <- gsub("FACHR(\\d+)([A-Za-z])(\\d+)", "\\1-\\2-\\3", x)
+    
+    # Convert Letter to a Number (A=1, B=2, ..., Z=26, a=27, b=28, ..., z=52)
+    parts <- unlist(strsplit(num_letter_num, "-"))
+    num1 <- as.numeric(parts[1])
+    letter_val <- match(parts[2], c(LETTERS, letters))  # Convert letter to number
+    num2 <- as.numeric(parts[3])
+    
+    # Create a unique numeric ID
+    unique_id <- num1 * 1000 + letter_val * 100 + num2  # Ensures uniqueness
+    
+    return(paste0("1.", unique_id))
+    
+  } else if (grepl("^FACHR\\d+[A-Za-z]$", x)) {
+    # Case: FACHR#X (Number, Letter) → Assign "9" as default last digit
+    num_letter <- gsub("FACHR(\\d+)([A-Za-z])", "\\1-\\2", x)
+    
+    parts <- unlist(strsplit(num_letter, "-"))
+    num1 <- as.numeric(parts[1])
+    letter_val <- match(parts[2], c(LETTERS, letters))  # Convert letter to number
+    
+    # Create a unique numeric ID
+    unique_id <- num1 * 1000 + letter_val * 100 + 9  # Default last digit as 9
+    
+    return(paste0("1.", unique_id))
+    
+  } else if (grepl("^SCAFFOLD\\d+$", x)) {
+    # Case: SCAFFOLDX (Number only)
+    scaffold_num <- as.numeric(gsub("SCAFFOLD", "", x))
+    return(paste0("2.", scaffold_num))
+    
+  } else {
+    return(NA)  # If it doesn't match any pattern
+  }
+}
+
+# Apply function to the column
+MLM_DRT_Filters_residuals$unique_id <- sapply(MLM_DRT_Filters_residuals$Chr, generate_id)
+MLM_DRT_Filters_residuals$Chr <- MLM_DRT_Filters_residuals$unique_id
+MLM_DRT_Filters_residuals$unique_id <- NULL
+MLM_DRT_Filters_residuals$Chr <- as.numeric(MLM_DRT_Filters_residuals$Chr)
+#Chosing the phenotype
+MLM_DRT_Filters_residuals <- MLM_DRT_Filters_residuals[MLM_DRT_Filters_residuals$Trait == "Alkaloids_Res", ] #Delta_CT_adj_Res or Alkaloids_Res
+MLM_DRT_Filters_residuals <- MLM_DRT_Filters_residuals[-c(1), ]
+# BOnferonii line
+alpha <- 0.05
+num_tests <- nrow(MLM_DRT_Filters_residuals)  # Number of SNPs or tests
+bonferroni_threshold <- alpha / num_tests
+# Making FDR threshold
+MLM_DRT_Filters_residuals$padj <- p.adjust(MLM_DRT_Filters_residuals$p, method = "BH")
+FDR_threshold <- max(MLM_DRT_Filters_residuals$p[MLM_DRT_Filters_residuals$padj <= alpha], na.rm = TRUE)
+if (!is.numeric(FDR_threshold) || is.na(FDR_threshold) || FDR_threshold == -Inf) {
+  FDR_threshold <- 1e-5
+}
+print(FDR_threshold)
+Alkaloids <- manhattan(MLM_DRT_Filters_residuals, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", 
+                       ylim = c(0, 6), main = "MLM on First Genotypes with 2023 Alkaloid Concentration",
+                       genomewideline = -log10(bonferroni_threshold),
+                       suggestiveline = -log10(FDR_threshold),
+                       col = c("blue", "red", "darkgrey", "purple"))
+
+
+
+################ 2024 Phenos with 3000 OG Genotypes Biomass ####################
+MLM_DRT_Filters_residuals_loc <- "/home/darrian/Documents/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/MLM_all3000_genos_residual_phenos_stats.txt"
+MLM_DRT_Filters_residuals <- read.table(MLM_DRT_Filters_residuals_loc, header = TRUE, sep = '\t')
+# Changing the chr to numbers
+generate_id <- function(x) {
+  if (grepl("^FACHR\\d+[A-Za-z]\\d+$", x)) {
+    # Extract Number, Letter, Number
+    num_letter_num <- gsub("FACHR(\\d+)([A-Za-z])(\\d+)", "\\1-\\2-\\3", x)
+    
+    # Convert Letter to a Number (A=1, B=2, ..., Z=26, a=27, b=28, ..., z=52)
+    parts <- unlist(strsplit(num_letter_num, "-"))
+    num1 <- as.numeric(parts[1])
+    letter_val <- match(parts[2], c(LETTERS, letters))  # Convert letter to number
+    num2 <- as.numeric(parts[3])
+    
+    # Create a unique numeric ID
+    unique_id <- num1 * 1000 + letter_val * 100 + num2  # Ensures uniqueness
+    
+    return(paste0("1.", unique_id))
+    
+  } else if (grepl("^FACHR\\d+[A-Za-z]$", x)) {
+    # Case: FACHR#X (Number, Letter) → Assign "9" as default last digit
+    num_letter <- gsub("FACHR(\\d+)([A-Za-z])", "\\1-\\2", x)
+    
+    parts <- unlist(strsplit(num_letter, "-"))
+    num1 <- as.numeric(parts[1])
+    letter_val <- match(parts[2], c(LETTERS, letters))  # Convert letter to number
+    
+    # Create a unique numeric ID
+    unique_id <- num1 * 1000 + letter_val * 100 + 9  # Default last digit as 9
+    
+    return(paste0("1.", unique_id))
+    
+  } else if (grepl("^SCAFFOLD\\d+$", x)) {
+    # Case: SCAFFOLDX (Number only)
+    scaffold_num <- as.numeric(gsub("SCAFFOLD", "", x))
+    return(paste0("2.", scaffold_num))
+    
+  } else {
+    return(NA)  # If it doesn't match any pattern
+  }
+}
+
+# Apply function to the column
+MLM_DRT_Filters_residuals$unique_id <- sapply(MLM_DRT_Filters_residuals$Chr, generate_id)
+MLM_DRT_Filters_residuals$Og_Chr <- MLM_DRT_Filters_residuals$Chr
+MLM_DRT_Filters_residuals$Chr <- MLM_DRT_Filters_residuals$unique_id
+MLM_DRT_Filters_residuals$Chr <- as.numeric(MLM_DRT_Filters_residuals$Chr)
+MLM_DRT_Filters_residuals$unique_id <- NULL
+#Chosing the phenotype
+MLM_DRT_Filters_residuals <- MLM_DRT_Filters_residuals[MLM_DRT_Filters_residuals$Trait == "Delta_CT_adj_Res", ] #Delta_CT_adj_Res or Alkaloids_Res
+MLM_DRT_Filters_residuals <- MLM_DRT_Filters_residuals[-c(1), ]
+# BOnferonii line
+alpha <- 0.05
+num_tests <- nrow(MLM_DRT_Filters_residuals)  # Number of SNPs or tests
+bonferroni_threshold <- alpha / num_tests
+# Making FDR threshold
+MLM_DRT_Filters_residuals$padj <- p.adjust(MLM_DRT_Filters_residuals$p, method = "BH")
+FDR_threshold <- max(MLM_DRT_Filters_residuals$p[MLM_DRT_Filters_residuals$padj <= alpha], na.rm = TRUE)
+if (!is.numeric(FDR_threshold) || is.na(FDR_threshold) || FDR_threshold == -Inf) {
+  FDR_threshold <- 1e-5
+}
+print(FDR_threshold)
+Alkaloids <- manhattan(MLM_DRT_Filters_residuals, chr = "Chr", bp = "Pos", p = "p", snp = "Marker", 
+                       ylim = c(0, 10), main = "MLM on First Genotypes with 2023 Fungal to Plant Ratio",
+                       genomewideline = -log10(bonferroni_threshold),
+                       suggestiveline = -log10(FDR_threshold),
+                       col = c("blue", "red", "darkgrey", "purple"))
+
+sig_snps <- subset(MLM_DRT_Filters_residuals, padj <= .05) 
+write.table(sig_snps, paste0(data_folder , "/Significant_Snps/MLM_3000_genos_biomass.tsv"), row.names = FALSE)
 
 
 
 
-########### Example 
+
+################################### Example ####################################
 MLM_DRT_Filters_residuals_loc <- "/home/darrian/Desktop/UGA/Wallace_Lab/Mapping_and_QTL/Data/Tassel_Outputs/2024_only/MLM_DRT_filters_Phenotype_residuals_avaraged.txt"
 MLM_DRT_Filters_residuals <- read.table(MLM_DRT_Filters_residuals_loc, header = TRUE, sep = '\t')
 MLM_DRT_Filters_residuals$Chr<-gsub("SCAFFOLD_","",as.character(MLM_DRT_Filters_residuals$Chr))

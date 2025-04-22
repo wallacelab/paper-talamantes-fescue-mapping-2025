@@ -10,6 +10,7 @@ data_folder = "/home/darrian/Documents/Mapping_and_QTL/Data"
 
 parental_alk <- read.csv(paste0(data_folder,"/Phenotype_Data/Preliminary_Phenotype_Data/Cleaned/Parent_Alkaloids_R.csv"), header = TRUE)
 parental_CT <- read.csv(paste0(data_folder,"/Phenotype_Data/Preliminary_Phenotype_Data/Cleaned/Clone_Parent_Biomass_Data.csv"), header = TRUE)
+parental_phenos <- read.csv(paste0(data_folder,"/Phenotype_Data/Preliminary_Phenotype_Data/Cleaned/Parental_Phenotypes_Clean.csv"), header = TRUE)
 
 # Clean up data
 parental_alk$Parent <- as.character(parental_alk$Parent)
@@ -85,6 +86,55 @@ combined_plot <- grid.arrange(
 
 
 
+################################################################################
+# Scatter Plots and Correlation
+################################################################################
+# Removing Outliars
+parental_phenos <- parental_phenos[parental_phenos$Treatment != "314C1R1", ]
+
+model <- lm(Ng.g ~ CP_Ratio, data = parental_phenos)
+rsq <- summary(model)$r.squared #This is low so I think I should use spearman.
+
+
+
+# Function to calculate r squared and make scatter plot
+scatterplot_phenos <- function(dataset, Alkaloidcol, DeltaCTcol, Title) {
+  # Perform Spearman correlation
+  spearmodel <- cor.test(dataset[[Alkaloidcol]], 
+                         dataset[[DeltaCTcol]], 
+                         method = "spearman", 
+                         use = "complete.obs")  # Ignore NAs
+  rho <- spearmodel$estimate
+  rsq <- rho^2
+  p <- spearmodel$p.value
+  
+  # Create the scatter plot
+  plot1 <- ggplot(dataset, aes(x = .data[[DeltaCTcol]], y = .data[[Alkaloidcol]])) +
+    geom_point() +  # Scatter plot points
+    geom_smooth(method = "lm", se = FALSE, color = "blue") +  # Linear regression line
+    annotate("text", 
+             x = min(dataset[[DeltaCTcol]], na.rm = TRUE), 
+             y = max(dataset[[Alkaloidcol]], na.rm = TRUE), 
+             label = paste("Spearman R-squared = ", round(rsq, 3)), 
+             hjust = 0, vjust = 0, size = 5, color = "red") +
+    annotate("text", 
+             x = min(dataset[[DeltaCTcol]], na.rm = TRUE), 
+             y = max(dataset[[Alkaloidcol]], na.rm = TRUE) - 
+               0.05 * (max(dataset[[Alkaloidcol]], na.rm = TRUE) - 
+                         min(dataset[[Alkaloidcol]], na.rm = TRUE)), 
+             label = paste("P-value = ", format(p, digits = 3, scientific = TRUE)), 
+             hjust = 0, vjust = .5, size = 5, color = "red") +
+    labs(title = Title, 
+         x = "Efficiency Adjusted CT Ratio", 
+         y = "Residual Alkaloids") + 
+    theme_bw() +
+    theme(text = element_text(size = 20))
+  
+  return(plot1)
+}
+
+
+scatterplot_phenos(parental_phenos,"Ng.g","CP_Ratio", "Alkaloid vs Relative Biomass \n of Progenitors")
 
 
 

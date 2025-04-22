@@ -63,6 +63,8 @@ pg_Residual_data_avg$Father <- as.character(pg_Residual_data_avg$Father)
 # Making Boxplots
 ################################################################################
 
+
+### Boxplots by cross. Alkaloids
 pg_Residual_data_avg <- pg_Residual_data_avg %>%
   filter(!ID %in% c(310, 312, 314))
 
@@ -82,15 +84,13 @@ ggplot(pg_Residual_data_avg, aes(x=Cross, y=Alkaloids_Res_avg, fill = Cross, gro
   geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4) +
   theme_bw() +
   xlab("Plant Lines") +
-  ylab("ALkaloid Residuals") +
+  ylab("Alkaloid Residuals") +
   scale_fill_discrete(name = "Plant Lines") +
   geom_text(data = Tk, aes(label = cld, x = Cross, y = quant), 
             vjust = -1.3, hjust = 1.1, size = 5)
 
 
-
-
-
+### Boxplots by cross. Delta CT
 anova <- aov(DeltaCT_adj_Res_avg ~ Cross, data = pg_Residual_data_avg)
 summary(anova)
 tukey <- TukeyHSD(anova)

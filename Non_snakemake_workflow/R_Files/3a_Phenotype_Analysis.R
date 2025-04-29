@@ -77,7 +77,9 @@ colnames(good_genetics)[1] <- "ID"
 gg_phenotypes23_24 <- merge(phenotypes23_24, good_genetics, by = "ID")
 head(gg_phenotypes23_24,15)
 
-
+# Saving the seperate years part 1
+data_2023 <- gg_phenotypes23_24 %>% filter(Year == 2023)
+data_2024 <- gg_phenotypes23_24 %>% filter(Year == 2024)
 
 
 # Now that we have residuals we have to get avarages and export the data
@@ -125,14 +127,45 @@ for (col_name in colnames(gg_Residual_data_avg)[-1]) {  # Exclude the first colu
   pg_Residual_data_avg <- pg_Residual_data_avg[pg_Residual_data_avg[[col_name]] >= threshold_lower & pg_Residual_data_avg[[col_name]] <= threshold_upper, ]
 }
 
+remove_outliers_by_column <- function(df, stds) {
+  filtered_df <- df  # Start with the original data frame
+  
+  for (col_name in colnames(df)[-1]) {  # Exclude the first column (assuming it's an ID)
+    # Calculate mean and standard deviation
+    mean_value <- mean(df[[col_name]], na.rm = TRUE)
+    sd_value <- sd(df[[col_name]], na.rm = TRUE)
+    
+    # Define threshold
+    threshold_lower <- mean_value - (stds * sd_value)
+    threshold_upper <- mean_value + (stds * sd_value)
+    
+    # Filter rows within thresholds
+    filtered_df <- filtered_df[
+      filtered_df[[col_name]] >= threshold_lower & 
+        filtered_df[[col_name]] <= threshold_upper, 
+    ]
+  }
+  
+  return(filtered_df)
+}
+data_2023 <- data_2023[, c(1,7,9)]
+data_2024 <- data_2024[, c(1,7,9)]
+
+data_2023_noOut <- remove_outliers_by_column(data_2023, 2.5)
+data_2024_noOut <- remove_outliers_by_column(data_2024, 2.5)
+
 # Remove not important parents
 abscent_parents <- data.frame(ID = c("301", "302", "304", "305", "307", "308", "313", "315", "316", "318", "319", "320"))
 pg_Residual_data_avg <- pg_Residual_data_avg[!pg_Residual_data_avg$ID %in% abscent_parents$ID,]
+data_2023_noOut <- data_2023_noOut[!data_2023_noOut$ID %in% abscent_parents$ID,]
+data_2024_noOut <- data_2024_noOut[!data_2024_noOut$ID %in% abscent_parents$ID,]
 
 
 #Save the phenotype data sets
 write.table(Residual_data_avg, file = paste0(data_folder,"/Phenotype_Data/Residual_data_avg.txt"), sep = '\t', row.names=FALSE)
 write.table(pg_Residual_data_avg, file = paste0(data_folder,"/Phenotype_Data/pg_Residual_data_avg"), sep = '\t', row.names=FALSE)
+write.table(data_2023_noOut, file = paste0(data_folder,"/Phenotype_Data/3a_data_2023_noOut.txt"), sep = '\t', row.names=FALSE)
+write.table(data_2024_noOut, file = paste0(data_folder,"/Phenotype_Data/3a_data_2024_noOut.txt"), sep = '\t', row.names=FALSE)
 
 # Graphs to look at the avraged residual data with outliars
 p1 <- ggplot(Residual_data_avg, aes(x = Alkaloids_Res_avg)) + 
@@ -199,14 +232,14 @@ scatterplot_phenos <- function(dataset, Alkaloidcol, DeltaCTcol, Title) {
              x = min(dataset[[DeltaCTcol]], na.rm = TRUE), 
              y = max(dataset[[Alkaloidcol]], na.rm = TRUE), 
              label = paste("Spearman R-squared = ", round(rsq, 3)), 
-             hjust = 0, vjust = -1, size = 5, color = "red") +
+             hjust = 0, vjust = 1, size = 5, color = "red") +
     annotate("text", 
              x = min(dataset[[DeltaCTcol]], na.rm = TRUE), 
              y = max(dataset[[Alkaloidcol]], na.rm = TRUE) - 
                0.05 * (max(dataset[[Alkaloidcol]], na.rm = TRUE) - 
                          min(dataset[[Alkaloidcol]], na.rm = TRUE)), 
              label = paste("P-value = ", format(p, digits = 3, scientific = TRUE)), 
-             hjust = 0, vjust = -1, size = 5, color = "red") +
+             hjust = 0, vjust = 1, size = 5, color = "red") +
     labs(title = Title, 
          x = "Efficiency Adjusted CT Ratio", 
          y = "Residual Alkaloids") + 
@@ -217,9 +250,11 @@ scatterplot_phenos <- function(dataset, Alkaloidcol, DeltaCTcol, Title) {
 }
 
 
-scatterplot_phenos(pg_Residual_data_avg,"Alkaloids_Res_avg","DeltaCT_adj_Res_avg", "Residual Alkaloids vs Efficiency Adjusted CT Ratio")
-scatterplot_phenos(phenotypes_23,"Alkaloids_Res","Delta_CT_adj_Res", "2023")
-scatterplot_phenos(phenotypes_24,"Alkaloids_Res","Delta_CT_adj_Res", "2024")
+scatterplot_phenos(pg_Residual_data_avg,"Alkaloids_Res_avg","DeltaCT_adj_Res_avg", "Alkaloids vs Delta CT Ratio: Half-Sib")
+HS_23 <- scatterplot_phenos(phenotypes_23,"Alkaloids_Res","Delta_CT_adj_Res", "Half-Sib 2023 Phenotypes")
+HS_24 <- scatterplot_phenos(phenotypes_24,"Alkaloids_Res","Delta_CT_adj_Res", "Half-Sib 2023 Phenotypes")
+
+grid.arrange(HS_23, HS_24, ncol = 2)  # side by side
 
 IDs <- pg_Residual_data_avg$ID
 write.table(IDs, file = paste0(data_folder,"/Lists/3a_Geno_List_Outliars_Removed.txt"), row.names = FALSE)

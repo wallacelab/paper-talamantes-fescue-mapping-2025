@@ -2,8 +2,9 @@
 
 
 library(tidyverse)
-
-
+library(grid)
+library(multcompView)
+library(gridExtra)
 
 # Load in data
 data_folder = "/home/darrian/Documents/Mapping_and_QTL/Data"
@@ -84,6 +85,63 @@ combined_plot <- grid.arrange(
   top = textGrob("Differences in Maternal Parent Clones", 
                  gp = gpar(fontsize = 25, fontface = "bold")))
 
+#### Seperate plots ######
+#Alkaloid
+anova <- aov(ng.g ~ Parent, data = parental_alk)
+summary(anova)
+tukey <- TukeyHSD(anova)
+print(tukey)
+Tk <- group_by(parental_alk, Parent) %>%
+  summarise(mean=mean(ng.g), quant = quantile(ng.g, probs = .75, na.rm = TRUE)) %>%
+  arrange(desc(mean))
+cld <- multcompLetters4(anova, tukey) #forgot why we do this
+print(cld)
+cld <- as.data.frame.list(cld$Parent)
+Tk$cld <- cld$Letters
+print(Tk)
+ggplot(parental_alk, aes(x=Parent, y=ng.g, fill = Parent, group=Parent)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4) +
+  theme_bw() +
+  theme(
+    text = element_text(size = 20)) +
+  xlab("Parent") +
+  ylab("Ergot Alkaloid Amount") +
+  scale_fill_discrete(name = "Parent") +
+  ggtitle("Progenitor Alkaloid Differences") +
+  geom_text(data = Tk, aes(label = cld, x = Parent, y = quant), 
+            vjust = -1.3, hjust = 1.1, size = 5)
+
+
+anova <- aov(CP_Ratio ~ Parent, data = parental_CT)
+summary(anova)
+tukey <- TukeyHSD(anova)
+print(tukey)
+Tk <- group_by(parental_CT, Parent) %>%
+  summarise(mean=mean(CP_Ratio), quant = quantile(CP_Ratio, probs = .75, na.rm = TRUE)) %>%
+  arrange(desc(mean))
+cld <- multcompLetters4(anova, tukey) #forgot why we do this
+print(cld)
+cld <- as.data.frame.list(cld$Parent)
+Tk$cld <- cld$Letters
+print(Tk)
+ggplot(parental_CT, aes(x=Parent, y=CP_Ratio, fill = Parent, group=Parent)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4) +
+  theme_bw() +
+  theme(
+    text = element_text(size = 20)) +
+  xlab("Parent") +
+  ylab("Delta CT") +
+  ylim(.7,1.4) +
+  scale_fill_discrete(name = "Parent") +
+  ggtitle("Progenitor Fungal Biomass Differences") +
+  geom_text(data = Tk, aes(label = cld, x = Parent, y = quant), 
+            vjust = -1.3, hjust = 1.1, size = 5)
+
+
+
+
+
+
 
 
 ################################################################################
@@ -125,8 +183,8 @@ scatterplot_phenos <- function(dataset, Alkaloidcol, DeltaCTcol, Title) {
              label = paste("P-value = ", format(p, digits = 3, scientific = TRUE)), 
              hjust = 0, vjust = .5, size = 5, color = "red") +
     labs(title = Title, 
-         x = "Efficiency Adjusted CT Ratio", 
-         y = "Residual Alkaloids") + 
+         x = "CT Ratio", 
+         y = "Alkaloid Amounts") + 
     theme_bw() +
     theme(text = element_text(size = 20))
   

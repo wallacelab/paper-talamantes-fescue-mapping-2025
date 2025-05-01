@@ -162,8 +162,7 @@ data_2024_noOut <- data_2024_noOut[!data_2024_noOut$ID %in% abscent_parents$ID,]
 
 
 #Save the phenotype data sets
-write.table(Residual_data_avg, file = paste0(data_folder,"/Phenotype_Data/Residual_data_avg.txt"), sep = '\t', row.names=FALSE)
-write.table(pg_Residual_data_avg, file = paste0(data_folder,"/Phenotype_Data/pg_Residual_data_avg"), sep = '\t', row.names=FALSE)
+write.table(pg_Residual_data_avg, file = paste0(data_folder,"/Phenotype_Data/3a_half_sib_Residual_data_avg.txt"), sep = '\t', row.names=FALSE)
 write.table(data_2023_noOut, file = paste0(data_folder,"/Phenotype_Data/3a_data_2023_noOut.txt"), sep = '\t', row.names=FALSE)
 write.table(data_2024_noOut, file = paste0(data_folder,"/Phenotype_Data/3a_data_2024_noOut.txt"), sep = '\t', row.names=FALSE)
 

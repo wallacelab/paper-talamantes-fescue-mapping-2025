@@ -128,26 +128,27 @@ for (col_name in colnames(gg_Residual_data_avg)[-1]) {  # Exclude the first colu
 }
 
 remove_outliers_by_column <- function(df, stds) {
-  filtered_df <- df  # Start with the original data frame
+  filtered_df <- df  # Copy original dataframe
   
-  for (col_name in colnames(df)[-1]) {  # Exclude the first column (assuming it's an ID)
+  for (col_name in colnames(df)[-1]) {  # Exclude first column (e.g., ID)
     # Calculate mean and standard deviation
     mean_value <- mean(df[[col_name]], na.rm = TRUE)
     sd_value <- sd(df[[col_name]], na.rm = TRUE)
     
-    # Define threshold
+    # Define thresholds
     threshold_lower <- mean_value - (stds * sd_value)
     threshold_upper <- mean_value + (stds * sd_value)
     
-    # Filter rows within thresholds
-    filtered_df <- filtered_df[
-      filtered_df[[col_name]] >= threshold_lower & 
-        filtered_df[[col_name]] <= threshold_upper, 
-    ]
+    # Replace outliers with NA
+    filtered_df[[col_name]][
+      filtered_df[[col_name]] < threshold_lower | 
+        filtered_df[[col_name]] > threshold_upper
+    ] <- NA
   }
   
   return(filtered_df)
 }
+  
 data_2023 <- data_2023[, c(1,7,9)]
 data_2024 <- data_2024[, c(1,7,9)]
 

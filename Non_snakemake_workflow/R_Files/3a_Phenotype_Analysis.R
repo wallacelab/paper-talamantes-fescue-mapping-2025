@@ -119,7 +119,7 @@ for (col_name in colnames(gg_Residual_data_avg)[-1]) {  # Exclude the first colu
   mean_value <- mean(gg_Residual_data_avg[[col_name]], na.rm = TRUE)
   sd_value <- sd(gg_Residual_data_avg[[col_name]], na.rm = TRUE)
   
-  # Define the threshold for removal (mean ± 2.5 * standard deviation)
+  # Define the threshold for removal (mean B1 2.5 * standard deviation)
   threshold_lower <- mean_value - 2.5 * sd_value
   threshold_upper <- mean_value + 2.5 * sd_value
   
@@ -214,7 +214,7 @@ rsq <- summary(model)$r.squared #This is low so I think I should use spearman.
 
 
 # Function to calculate r squared and make scatter plot
-scatterplot_phenos <- function(dataset, Alkaloidcol, DeltaCTcol, Title) {
+scatterplot_phenos <- function(dataset, Alkaloidcol, DeltaCTcol, Title, Xtitle = "Efficiency Adjusted CT Ratio", Ytitle = "Residual Alkaloids") {
   # Perform Spearman correlation
   spearmodel <- cor.test(dataset[[Alkaloidcol]], 
                          dataset[[DeltaCTcol]], 
@@ -241,8 +241,8 @@ scatterplot_phenos <- function(dataset, Alkaloidcol, DeltaCTcol, Title) {
              label = paste("P-value = ", format(p, digits = 3, scientific = TRUE)), 
              hjust = 0, vjust = 1, size = 5, color = "red") +
     labs(title = Title, 
-         x = "Efficiency Adjusted CT Ratio", 
-         y = "Residual Alkaloids") + 
+         x = Xtitle, 
+         y = Ytitle) + 
     theme_bw() +
     theme(text = element_text(size = 20))
   
@@ -252,14 +252,61 @@ scatterplot_phenos <- function(dataset, Alkaloidcol, DeltaCTcol, Title) {
 
 scatterplot_phenos(pg_Residual_data_avg,"Alkaloids_Res_avg","DeltaCT_adj_Res_avg", "Alkaloids vs Delta CT Ratio: Half-Sib")
 HS_23 <- scatterplot_phenos(phenotypes_23,"Alkaloids_Res","Delta_CT_adj_Res", "Half-Sib 2023 Phenotypes")
-HS_24 <- scatterplot_phenos(phenotypes_24,"Alkaloids_Res","Delta_CT_adj_Res", "Half-Sib 2023 Phenotypes")
+HS_24 <- scatterplot_phenos(phenotypes_24,"Alkaloids_Res","Delta_CT_adj_Res", "Half-Sib 2024 Phenotypes")
 
 grid.arrange(HS_23, HS_24, ncol = 2)  # side by side
+
+a23 <- subset(phenotypes_23, select = c(ID, Alkaloids_Res, Delta_CT_adj_Res))
+colnames(a23)[2:3] <- paste0(colnames(a23)[2:3], "23")
+b24 <- subset(phenotypes_24, select = c(ID, Alkaloids_Res, Delta_CT_adj_Res))
+colnames(b24)[2:3] <- paste0(colnames(b24)[2:3], "24")
+combined23_24 <- merge(a23,b24, by = "ID")
+
+scatterplot_phenos(combined23_24,"Alkaloids_Res23", "Alkaloids_Res24", "Alkaloids 2023 vs 2024", "2023 Alkaloid Residuals", "2024 ALkaloid Residuals")
+scatterplot_phenos(combined23_24,"Delta_CT_adj_Res23", "Delta_CT_adj_Res24", "Fungal Biomass 2023 vs 2024", "Biomass Residuals 2023", "Biomass Residuals 2024")
 
 IDs <- pg_Residual_data_avg$ID
 write.table(IDs, file = paste0(data_folder,"/Lists/3a_Geno_List_Outliars_Removed.txt"), row.names = FALSE)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+################## I dont think I use this stuff to much #######################
 
 
 ##############################################
@@ -306,7 +353,7 @@ for (col_name in colnames(phenotype_Data_2023)[-1]) {  # Exclude the first colum
   mean_value <- mean(phenotype_Data_2023[[col_name]], na.rm = TRUE)
   sd_value <- sd(phenotype_Data_2023[[col_name]], na.rm = TRUE)
   
-  # Define the threshold for removal (mean ± 2.5 * standard deviation)
+  # Define the threshold for removal (mean B1 2.5 * standard deviation)
   threshold_lower <- mean_value - 2.5 * sd_value
   threshold_upper <- mean_value + 2.5 * sd_value
   

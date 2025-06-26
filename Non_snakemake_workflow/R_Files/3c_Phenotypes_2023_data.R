@@ -5,7 +5,7 @@ library(tidyverse)
 library(gridExtra)
 library(lme4)
 library(qqman)
-
+library(multcompView)   
 ################################################################################
 # Load Data
 ################################################################################
@@ -202,5 +202,79 @@ Alkaloids <- manhattan(MLM_DRT_Filters_residuals, chr = "Chr", bp = "Pos", p = "
                        genomewideline = -log10(bonferroni_threshold),
                        suggestiveline = -log10(FDR_threshold),
                        col = c("blue", "red", "darkgrey", "purple"))
+
+
+################################################################################
+# Box plots but for paternal parents
+################################################################################
+
+
+# Makes a graph from the Crosses from ALkaloid Data
+anova <- aov(Alkaloids_Res ~ Cross, data = phenotype_Data_2023)
+summary(anova)
+tukey <- TukeyHSD(anova)
+print(tukey)
+Tk <- group_by(phenotype_Data_2023, Cross) %>%
+  summarise(mean=mean(Alkaloids_Res), quant = quantile(Alkaloids_Res, probs = .75, na.rm = TRUE)) %>%
+  arrange(desc(mean))
+cld <- multcompLetters4(anova, tukey) #forgot why we do this
+print(cld)
+cld <- as.data.frame.list(cld$Cross)
+Tk$cld <- cld$Letters
+print(Tk)
+ggplot(phenotype_Data_2023, aes(x=Cross, y=Alkaloids_Res, fill = Cross, group=Cross)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4) +
+  theme_bw() +
+  xlab("Paternal Lines") +
+  ylab("ALkaloid Residuals") +
+  scale_fill_discrete(name = "Paternal Lines") +
+  geom_text(data = Tk, aes(label = cld, x = Cross, y = quant), 
+            vjust = -1.3, hjust = 1.1, size = 5)
+
+# Makes a graph from the Maternal Parents and alkaloids
+phenotype_Data_2023$Paternal_Parent <- as.factor(phenotype_Data_2023$Paternal_Parent)
+anova <- aov(Alkaloids_Res ~ Paternal_Parent, data = phenotype_Data_2023)
+summary(anova)
+tukey <- TukeyHSD(anova)
+print(tukey)
+Tk <- group_by(phenotype_Data_2023, Paternal_Parent) %>%
+  summarise(mean=mean(Alkaloids_Res), quant = quantile(Alkaloids_Res, probs = .75, na.rm = TRUE)) %>%
+  arrange(desc(mean))
+cld <- multcompLetters4(anova, tukey) #forgot why we do this
+print(cld)
+cld <- as.data.frame.list(cld$Paternal_Parent)
+Tk$cld <- cld$Letters
+print(Tk)
+ggplot(phenotype_Data_2023, aes(x=Paternal_Parent, y=Alkaloids_Res, fill = Paternal_Parent, group=Paternal_Parent)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4) +
+  theme_bw() +
+  xlab("Plant Lines") +
+  ylab("ALkaloid Residuals") +
+  scale_fill_discrete(name = "Plant Lines") +
+  geom_text(data = Tk, aes(label = cld, x = Paternal_Parent, y = quant), 
+            vjust = -1.3, hjust = 1.1, size = 5)
+
+# Makes a graph from the Maternal Parents and ADJ delta CT Ratios
+phenotype_Data_2023$Paternal_Parent <- as.factor(phenotype_Data_2023$Paternal_Parent)
+anova <- aov(Delta_CT_adj_Res ~ Paternal_Parent, data = phenotype_Data_2023)
+summary(anova)
+tukey <- TukeyHSD(anova)
+print(tukey)
+Tk <- group_by(phenotype_Data_2023, Paternal_Parent) %>%
+  summarise(mean=mean(Delta_CT_adj_Res), quant = quantile(Delta_CT_adj_Res, probs = .75, na.rm = TRUE)) %>%
+  arrange(desc(mean))
+cld <- multcompLetters4(anova, tukey) #forgot why we do this
+print(cld)
+cld <- as.data.frame.list(cld$Paternal_Parent)
+Tk$cld <- cld$Letters
+print(Tk)
+ggplot(phenotype_Data_2023, aes(x=Paternal_Parent, y=Delta_CT_adj_Res, fill = Paternal_Parent, group=Paternal_Parent)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4) +
+  theme_bw() +
+  xlab("Paternal Lines") +
+  ylab("Relative Biomass") +
+  scale_fill_discrete(name = "Paternal Lines") +
+  geom_text(data = Tk, aes(label = cld, x = Paternal_Parent, y = quant), 
+            vjust = -1.3, hjust = 1.1, size = 5)
 
 

@@ -6,6 +6,8 @@ library(gridExtra)
 library(lme4)
 library(qqman)
 library(multcompView)   
+library(gridExtra)
+
 ################################################################################
 # Load Data
 ################################################################################
@@ -245,12 +247,14 @@ print(cld)
 cld <- as.data.frame.list(cld$Paternal_Parent)
 Tk$cld <- cld$Letters
 print(Tk)
-ggplot(phenotype_Data_2023, aes(x=Paternal_Parent, y=Alkaloids_Res, fill = Paternal_Parent, group=Paternal_Parent)) + 
+alk <- ggplot(phenotype_Data_2023, aes(x=Paternal_Parent, y=Alkaloids_Res, fill = Paternal_Parent, group=Paternal_Parent)) + 
   geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4) +
   theme_bw() +
-  xlab("Plant Lines") +
-  ylab("ALkaloid Residuals") +
+  xlab("Paternal Lines") +
+  ylab("Alkaloid Residuals") +
   scale_fill_discrete(name = "Plant Lines") +
+  ggtitle("A") + 
+  theme(legend.position = "none") + 
   geom_text(data = Tk, aes(label = cld, x = Paternal_Parent, y = quant), 
             vjust = -1.3, hjust = 1.1, size = 5)
 
@@ -268,13 +272,15 @@ print(cld)
 cld <- as.data.frame.list(cld$Paternal_Parent)
 Tk$cld <- cld$Letters
 print(Tk)
-ggplot(phenotype_Data_2023, aes(x=Paternal_Parent, y=Delta_CT_adj_Res, fill = Paternal_Parent, group=Paternal_Parent)) + 
+bio <- ggplot(phenotype_Data_2023, aes(x=Paternal_Parent, y=Delta_CT_adj_Res, fill = Paternal_Parent, group=Paternal_Parent)) + 
   geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4) +
   theme_bw() +
   xlab("Paternal Lines") +
   ylab("Relative Biomass") +
   scale_fill_discrete(name = "Paternal Lines") +
+  ggtitle("B") + 
   geom_text(data = Tk, aes(label = cld, x = Paternal_Parent, y = quant), 
             vjust = -1.3, hjust = 1.1, size = 5)
 
 
+grid.arrange(alk, bio, ncol = 2, widths = c(1.6, 1.9))
